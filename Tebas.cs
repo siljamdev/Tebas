@@ -407,6 +407,8 @@ class Tebas{
 		}
 		
 		consoleOutput("Template in use: " + tn);
+		
+		TemplateHandler.runScript("info");
 	}
 	
 	public static void localGit(){
