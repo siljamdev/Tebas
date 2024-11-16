@@ -1,0 +1,18 @@
+print "Welcome to the script!"
+
+:ask
+table.empty
+
+ask "What is your favourite food? " //Will load into position 0
+
+branch [0] {"pineapple", "beans"} :ew
+goto :end
+
+:ew
+print "That is so ewwwwwwwww"
+print "Please choose again"
+goto :ask
+
+:end
+set.upper [0] //loads the answer in UPPERCASE in position 1
+print "That is nice! I also like [1] a lot"

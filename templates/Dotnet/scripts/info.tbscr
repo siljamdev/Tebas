@@ -1,0 +1,3 @@
+print "Info dotnet project"
+project.read "dateCreated" //0
+print "This is a dotnet project created on the [0]"

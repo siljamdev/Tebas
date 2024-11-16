@@ -1,0 +1,4 @@
+print "Debug dotnet project"
+
+template.run "run"
+pause

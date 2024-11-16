@@ -1,0 +1,3 @@
+print "Stats dotnet project"
+project.read "timesCompiled" //0
+print "This project has been compiled [0] times"
