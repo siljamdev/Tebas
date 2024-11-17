@@ -202,17 +202,19 @@ class Tebas{
 			project.SetCamp("git.use", false);
 		}
 		
-		string readme = "";
-		if(config.CanGetCampAsString("defaultReadme", out string s)){
-			readme = s;
-		}
-		
-		if(template.CanGetCampAsString("readme", out s)){
-			readme += s;
-		}
-		
-		if(readme.Length > 0 && !File.Exists(workingDirectory + "/README.md")){
-			File.WriteAllText(workingDirectory + "/README.md", readme);
+		if(!(template.CanGetCampAsBool("addReadme", out b) && !b)){
+			string readme = "";
+			if(config.CanGetCampAsString("defaultReadme", out string s)){
+				readme = s;
+			}
+			
+			if(template.CanGetCampAsString("readme", out s)){
+				readme += s;
+			}
+			
+			if(readme.Length > 0 && !File.Exists(workingDirectory + "/README.md")){
+				File.WriteAllText(workingDirectory + "/README.md", readme);
+			}
 		}
 		
 		project.Save(workingDirectory + "/project.tebas");
@@ -417,9 +419,6 @@ class Tebas{
 		}
 		
 		if(project.CanGetCampAsBool("git.use", out bool b) && b){
-			if(project.CanGetCampAsBool("git.initialized", out b) && !b){
-				GitHelper.init();
-			}
 			GitHelper.status();
 			TemplateHandler.runScript("git");
 		}else{
@@ -457,9 +456,6 @@ class Tebas{
 		}
 		
 		if(project.CanGetCampAsBool("git.use", out bool b) && b){
-			if(project.CanGetCampAsBool("git.initialized", out b) && !b){
-				GitHelper.init();
-			}
 			GitHelper.add();
 			
 			TemplateHandler.runScript("add");
@@ -474,9 +470,6 @@ class Tebas{
 		}
 		
 		if(project.CanGetCampAsBool("git.use", out bool b) && b){
-			if(project.CanGetCampAsBool("git.initialized", out b) && !b){
-				GitHelper.init();
-			}
 			GitHelper.commit(m);
 			
 			TemplateHandler.runScript("commit");
@@ -505,12 +498,75 @@ class Tebas{
 		}
 		
 		if(project.CanGetCampAsBool("git.use", out bool b) && b){
-			GitHelper.push(r);
+			GitHelper.pull(r);
 			
 			TemplateHandler.runScript("pull");
 		}else{
 			consoleOutput("Git is not used in this project");
 		}
+	}
+	
+	public static void localInitNew(string templateName){
+		initializeConfig();
+		
+		string folderPath = workingDirectory;
+		
+		if(!setContextTemplate(templateName)){
+			return;
+		}
+		
+		if(File.Exists("project.tebas")){
+			consoleOutput("There is a project already here");
+			return;
+		}
+		
+		pn = Path.GetFileName(folderPath);
+		
+		project = new AshFile();
+		
+		project.SetCamp("template", templateName);
+		
+		if(template.CanGetCampAsBool("git.defaultUse", out bool b) && b){
+			project.SetCamp("git.use", true);
+			
+			GitHelper.init();
+			
+			string gitIgnore = "";
+			if(config.CanGetCampAsString("git.defaultGitignore", out string k)){
+				gitIgnore = k;
+			}
+			
+			if(template.CanGetCampAsString("git.gitignore", out k)){
+				gitIgnore += "\n" + k;
+			}
+			
+			if(gitIgnore.Length > 0 && !File.Exists(workingDirectory + "/.gitignore")){
+				File.WriteAllText(workingDirectory + "/.gitignore", gitIgnore);
+			}
+		}else{
+			project.SetCamp("git.use", false);
+		}
+		
+		if(!(template.CanGetCampAsBool("addReadme", out b) && !b)){
+			string readme = "";
+			if(config.CanGetCampAsString("defaultReadme", out string s)){
+				readme = s;
+			}
+			
+			if(template.CanGetCampAsString("readme", out s)){
+				readme += s;
+			}
+			
+			if(readme.Length > 0 && !File.Exists(workingDirectory + "/README.md")){
+				File.WriteAllText(workingDirectory + "/README.md", readme);
+			}
+		}
+		
+		project.Save(workingDirectory + "/project.tebas");
+		
+		TemplateHandler.runScript("new");
+		
+		consoleOutput("Project succesfully initiallized locally");
 	}
 	
 	//local config remote

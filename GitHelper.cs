@@ -3,21 +3,34 @@ using AshLib;
 
 public static class GitHelper{
 	public static void init(){
-		ProcessExecuter.runProcess("GIT", getGitPath(), "init -b " + getBranch(), Tebas.workingDirectory);
+		if(!Directory.Exists(".git")){
+			ProcessExecuter.runProcess("GIT", getGitPath(), "init -b " + getBranch(), Tebas.workingDirectory);
+		}else{
+			Tebas.consoleOutput("Git has already been initilized here");
+		}
 		
 		Tebas.project.SetCamp("git.initialized", true);
 	}
 	
+	static void tryInit(){
+		if(Tebas.project.CanGetCampAsBool("git.initialized", out bool b) && !b){
+			init();
+		}
+	}
+	
 	public static void status(){
+		tryInit();
 		ProcessExecuter.runProcess("GIT", getGitPath(), "status", Tebas.workingDirectory);
 	}
 	
 	public static void add(){
+		tryInit();
 		ProcessExecuter.runProcess("GIT", getGitPath(), "add .", Tebas.workingDirectory);
 	}
 	
 	public static void commit(string m){
 		Tebas.initializeConfig();
+		tryInit();
 		if(Tebas.config.CanGetCampAsBool("git.autoAddOnCommit", out bool b) && b){
 			add();
 		}
@@ -26,6 +39,10 @@ public static class GitHelper{
 	}
 	
 	public static void push(string r){
+		if(getNumberOfRemotes() < 1){
+			Tebas.consoleOutput("There are no remotes in this project");
+			return;
+		}
 		if(getNumberOfRemotes() == 1){
 			r = getSingleRemote();
 		}else if(r == null){
@@ -38,10 +55,15 @@ public static class GitHelper{
 			return;
 		}
 		
+		tryInit();
 		ProcessExecuter.runProcess("GIT", getGitPath(), "push " + r + " " + getBranch(), Tebas.workingDirectory);
 	}
 	
 	public static void pull(string r){
+		if(getNumberOfRemotes() < 1){
+			Tebas.consoleOutput("There are no remotes in this project");
+			return;
+		}
 		if(getNumberOfRemotes() == 1){
 			r = getSingleRemote();
 		}else if(r == null){
@@ -54,11 +76,11 @@ public static class GitHelper{
 			return;
 		}
 		
+		tryInit();
 		ProcessExecuter.runProcess("GIT", getGitPath(), "pull " + r + " " + getBranch(), Tebas.workingDirectory);
 	}
 	
 	static string getGitPath(){
-		
 		Tebas.initializeConfig();
 		
 		string gitPath = "git";
@@ -69,7 +91,6 @@ public static class GitHelper{
 	}
 	
 	static string getBranch(){
-		
 		Tebas.initializeConfig();
 		
 		string branch = "main";
@@ -96,6 +117,7 @@ public static class GitHelper{
 		Tebas.project.SetCamp("git.remote." + name, url);
 		Tebas.project.Save();
 		
+		tryInit();
 		if(h){
 			ProcessExecuter.runProcess("GIT", getGitPath(), "remote set-url " + name + " \"" + url + "\"", Tebas.workingDirectory);
 		}
@@ -119,6 +141,7 @@ public static class GitHelper{
 			return;
 		}
 		
+		tryInit();
 		Tebas.project.DeleteCamp("git.remote." + name);
 		Tebas.project.Save();
 		
@@ -137,6 +160,7 @@ public static class GitHelper{
 			return;
 		}
 		
+		tryInit();
 		Tebas.project.RenameCamp("git.remote." + oldname, "git.remote." + newname);
 		Tebas.project.Save();
 		

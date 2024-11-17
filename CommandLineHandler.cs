@@ -9,6 +9,7 @@ public static class CommandLineHandler{
 		clp = 0;
 		
 		if(args.Length < 1){
+			commandHelp(args);
 			return;
 		}
 		
@@ -23,18 +24,18 @@ public static class CommandLineHandler{
 		
 		string[] t = args[0].Split(".");
 		if(t.Length > 0 && t[t.Length - 1] == "tbtem"){
-			string[] a = {"template", "install", args[0]};
-			commands(a);
+			TemplateHandler.install(args[0]);
 			Console.WriteLine("Press any key to close");
 			Console.ReadKey();
+			return;
 		}
 		
 		else if(t.Length > 0 && t[t.Length - 1] == "tebas"){
 			Tebas.workingDirectory = Path.GetDirectoryName(args[0]);
-			string[] a = {"local", "info"};
-			commands(a);
+			Tebas.localInfo();
 			Console.WriteLine("Press any key to close");
 			Console.ReadKey();
+			return;
 		}
 		
 		commands(args);
@@ -162,9 +163,9 @@ public static class CommandLineHandler{
 			commandTemplateInstall(args);
 			break;
 			
-			case "delete":
+			case "uninstall":
 			clp++;
-			commandTemplateDelete(args);
+			commandTemplateUninstall(args);
 			break;
 			
 			case "list":
@@ -253,6 +254,11 @@ public static class CommandLineHandler{
 			commandLocalPull(args);
 			break;
 			
+			case "init":
+			clp++;
+			commandLocalInit(args);
+			break;
+			
 			default:
 			commandTryScript(args);
 			break;
@@ -319,6 +325,11 @@ public static class CommandLineHandler{
 			case "pull":
 			clp++;
 			commandLocalPull(args);
+			break;
+			
+			case "init":
+			clp++;
+			commandLocalInit(args);
 			break;
 			
 			default:
@@ -535,7 +546,7 @@ public static class CommandLineHandler{
 		TemplateHandler.install(path);
 	}
 	
-	static void commandTemplateDelete(string[] args){
+	static void commandTemplateUninstall(string[] args){
 		string name;
 		
 		if(!determineIfEnoughLength(1, args.Length)){
@@ -546,7 +557,7 @@ public static class CommandLineHandler{
 		name = args[clp];
 		clp++;
 		
-		TemplateHandler.delete(name);
+		TemplateHandler.uninstall(name);
 	}
 	
 	static void commandTemplateList(string[] args){
@@ -655,6 +666,18 @@ public static class CommandLineHandler{
 		Tebas.localPull(null);
 	}
 	
+	static void commandLocalInit(string[] args){
+		if(!determineIfEnoughLength(1, args.Length)){
+			Tebas.consoleOutput("Not enough arguments");
+			return;
+		}
+		
+		string t = args[clp];
+		clp++;
+		
+		Tebas.localInitNew(t);
+	}
+	
 	static void commandTryScript(string[] args){
 		string v;
 		
@@ -739,10 +762,10 @@ public static class CommandLineHandler{
 		Tebas.consoleOutput("");
 		Tebas.consoleOutput("template");
 		Tebas.consoleOutput(" Manages the templates (templates for projects). This section can be executed anywhere");
-		Tebas.consoleOutput("         install [path]  installs the template from a file (.tbtem)");
-		Tebas.consoleOutput("         delete [name]   deletes that template");
-		Tebas.consoleOutput("         list            shows list of all templates installed");
-		Tebas.consoleOutput("         info [name]     shows info on a specific template");
+		Tebas.consoleOutput("         install [path]    installs the template from a file (.tbtem)");
+		Tebas.consoleOutput("         uninstall [name]  deletes that template");
+		Tebas.consoleOutput("         list              shows list of all templates installed");
+		Tebas.consoleOutput("         info [name]       shows info on a specific template");
 		Tebas.consoleOutput("");
 		Tebas.consoleOutput("global");
 		Tebas.consoleOutput(" Manages global things. This section can be executed anywhere");
@@ -768,6 +791,7 @@ public static class CommandLineHandler{
 		Tebas.consoleOutput("             rename [name] [newname]  Deletes that remote");
 		Tebas.consoleOutput("             list                     Shows a list of all remotes");
 		Tebas.consoleOutput("");
+		Tebas.consoleOutput("      init [template]   Creates a new project directly in the local folder. Useful for creating projects outside of channels");
 		Tebas.consoleOutput("      info              Shows info on the current project");
 		Tebas.consoleOutput("      stats             Shows stats on the current project");
 		Tebas.consoleOutput("      [script]          Attempts to run a script of the current template");

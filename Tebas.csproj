@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <PackageReference Include="AshLib" Version="2.1.0" />
+	<Compile Remove="templates\**" />
   </ItemGroup>
 
 </Project>

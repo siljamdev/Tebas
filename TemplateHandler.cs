@@ -47,8 +47,12 @@ public static class TemplateHandler{
 		}
 		
 		if(TemplateHandler.exists(name)){
-			Tebas.consoleOutput("A template with that name is already installed");
-			return;
+			Console.WriteLine("A template with that name is already installed, do you want to update it?");
+			string ans = Console.ReadLine();
+			
+			if(ans.ToLower() != "y"){
+				return;
+			}
 		}
 		
 		Tebas.tn = name;
@@ -70,7 +74,7 @@ public static class TemplateHandler{
 		Tebas.consoleOutput("Template succesfully installed: " + Tebas.tn);
 	}
 	
-	public static void delete(string name){		
+	public static void uninstall(string name){		
 		if(!exists(name)){
 			Tebas.consoleOutput("That template is not installed");
 			return;
@@ -88,7 +92,7 @@ public static class TemplateHandler{
 		
 		if(Tebas.askDeletionConfirmation()){
 			Directory.Delete(Tebas.templateDirectory, true);
-			Tebas.consoleOutput("Template deleted succesfully");
+			Tebas.consoleOutput("Template uninstalled succesfully");
 		}else{
 			Tebas.consoleOutput("Deletion cancelled");
 		}
