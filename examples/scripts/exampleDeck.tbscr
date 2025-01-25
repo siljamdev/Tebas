@@ -1,0 +1,21 @@
+console.print "Welcome to the script!"
+
+do! answ.1 { //Repeat until the answer is a positive number
+	console.ask answ.0 "Enter number of elements: " //Stored in answ.0
+	math.isNumber answ.1 answ.0
+	math.greater answ.2 answ.0 "0"
+	bool.and answ.1 answ.1 answ.2 //And operation
+}
+
+string.set control.0 "0"
+
+do control.1 { //Repeat for answ.0 times
+	table.add deck control.0 //Populate the deck 
+	math.sumUp control.0 control.0
+	math.less control.1 control.0 answ.0
+}
+
+table.shuffle deck deck //Shuffle the deck
+table.join out.0 deck ", " //Join the deck, separated by commas
+
+console.print out.0 //Print it out

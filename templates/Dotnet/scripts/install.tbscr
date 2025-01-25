@@ -1,4 +1,0 @@
-print "Installation of dotnet template"
-
-ask "What is your author name?: " //0
-template.write "author" [0]

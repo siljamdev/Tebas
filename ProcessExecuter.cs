@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using System.Diagnostics;
 
 public static class ProcessExecuter{
@@ -18,10 +19,7 @@ public static class ProcessExecuter{
         };
 
         using (Process process = new Process { StartInfo = processInfo })
-        {
-			// Start the process
-            process.Start();
-			
+        {			
 			process.ErrorDataReceived += (sender, args) => {
                 if(!string.IsNullOrEmpty(args.Data)){
                     // Display the standard error
@@ -36,6 +34,9 @@ public static class ProcessExecuter{
                     Console.WriteLine(getName(name) + args.Data);
                 }
             };
+			
+			// Start the process
+            process.Start();
 			
             // Begin asynchronous reading of the output and error streams
             process.BeginOutputReadLine();
@@ -59,4 +60,35 @@ public static class ProcessExecuter{
 		}
 		return "[ERROR]";
 	}
+	
+	public static void runProcessWithOutput(string name, string command, string arguments, string workingDirectory, List<string> output, List<string> error)
+    {		
+		ProcessStartInfo processInfo = new ProcessStartInfo
+        {
+            FileName = command,
+            Arguments = arguments,
+            WorkingDirectory = workingDirectory,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = false,
+			StandardOutputEncoding = Encoding.Default,
+			StandardErrorEncoding = Encoding.Default
+        };
+
+        using (Process process = new Process { StartInfo = processInfo })
+        {			
+			// Start the process
+            process.Start();
+			
+			string o = process.StandardOutput.ReadToEnd();
+			output.AddRange(o.Split(new string[]{"\r\n", "\n", "\r"}, StringSplitOptions.None));
+			
+			string e = process.StandardError.ReadToEnd();
+			error.AddRange(e.Split(new string[]{"\r\n", "\n", "\r"}, StringSplitOptions.None));
+
+            // Wait for the process to exit
+            process.WaitForExit();
+        }
+    }
 }

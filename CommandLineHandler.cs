@@ -22,17 +22,19 @@ public static class CommandLineHandler{
 			args[i] = StringHelper.removeQuotesSingle(args[i]);
 		}
 		
-		string[] t = args[0].Split(".");
-		if(t.Length > 0 && t[t.Length - 1] == "tbtem"){
+		if(Path.GetExtension(args[0]) == ".tbtem"){
 			TemplateHandler.install(args[0]);
 			Console.WriteLine("Press any key to close");
 			Console.ReadKey();
 			return;
-		}
-		
-		else if(t.Length > 0 && t[t.Length - 1] == "tebas"){
+		}else if(Path.GetExtension(args[0]) == ".tebas"){
 			Tebas.workingDirectory = Path.GetDirectoryName(args[0]);
 			Tebas.localInfo();
+			Console.WriteLine("Press any key to close");
+			Console.ReadKey();
+			return;
+		}else if(Path.GetExtension(args[0]) == ".tbplg"){
+			PluginHandler.install(args[0]);
 			Console.WriteLine("Press any key to close");
 			Console.ReadKey();
 			return;
@@ -64,6 +66,11 @@ public static class CommandLineHandler{
 			commandsTemplate(args);
 			break;
 			
+			case "plugin":
+			clp++;
+			commandsPlugin(args);
+			break;
+			
 			case "global":
 			clp++;
 			commandsGlobal(args);
@@ -77,6 +84,11 @@ public static class CommandLineHandler{
 			case "help":
 			clp++;
 			commandHelp(args);
+			break;
+			
+			case "version":
+			clp++;
+			commandVersion(args);
 			break;
 			
 			default:
@@ -115,7 +127,7 @@ public static class CommandLineHandler{
 	
 	static void commandsChannel(string[] args){
 		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleOutput("Not enough arguments");
+			commandChannelList(args);
 			return;
 		}
 		
@@ -153,7 +165,7 @@ public static class CommandLineHandler{
 	
 	static void commandsTemplate(string[] args){
 		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleOutput("Not enough arguments");
+			commandTemplateList(args);
 			return;
 		}
 		
@@ -178,8 +190,46 @@ public static class CommandLineHandler{
 			commandTemplateInfo(args);
 			break;
 			
+			case "create":
+			clp++;
+			commandTemplateCreate(args);
+			break;
+			
 			default:
 			Tebas.consoleOutput("Unknown command");
+			break;
+		}
+	}
+	
+	static void commandsPlugin(string[] args){
+		if(!determineIfEnoughLength(1, args.Length)){
+			commandPluginList(args);
+			return;
+		}
+		
+		switch(args[clp]){
+			case "install":
+			clp++;
+			commandPluginInstall(args);
+			break;
+			
+			case "uninstall":
+			clp++;
+			commandPluginUninstall(args);
+			break;
+			
+			case "list":
+			clp++;
+			commandPluginList(args);
+			break;
+			
+			case "create":
+			clp++;
+			commandPluginCreate(args);
+			break;
+			
+			default:
+			commandTryPluginScript(args);
 			break;
 		}
 	}
@@ -209,7 +259,7 @@ public static class CommandLineHandler{
 	
 	static void commandsLocal(string[] args){
 		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleOutput("Not enough arguments");
+			commandLocalInfo(args);
 			return;
 		}
 		
@@ -340,7 +390,7 @@ public static class CommandLineHandler{
 	
 	static void commandsLocalRemote(string[] args){
 		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleOutput("Not enough arguments");
+			commandLocalRemoteList(args);
 			return;
 		}
 		
@@ -578,6 +628,88 @@ public static class CommandLineHandler{
 		TemplateHandler.info(name);
 	}
 	
+	static void commandTemplateCreate(string[] args){
+		string path;
+		
+		if(!determineIfEnoughLength(1, args.Length)){
+			Tebas.consoleOutput("Not enough arguments");
+			return;
+		}
+		
+		path = args[clp];
+		clp++;
+		
+		CreatorUtility.template(path);
+	}
+	
+	//Plugin
+	static void commandPluginInstall(string[] args){
+		string path;
+		
+		if(!determineIfEnoughLength(1, args.Length)){
+			Tebas.consoleOutput("Not enough arguments");
+			return;
+		}
+		
+		path = args[clp];
+		clp++;
+		
+		PluginHandler.install(path);
+	}
+	
+	static void commandPluginUninstall(string[] args){
+		string name;
+		
+		if(!determineIfEnoughLength(1, args.Length)){
+			Tebas.consoleOutput("Not enough arguments");
+			return;
+		}
+		
+		name = args[clp];
+		clp++;
+		
+		PluginHandler.uninstall(name);
+	}
+	
+	static void commandPluginList(string[] args){
+		PluginHandler.list();
+	}
+	
+	static void commandTryPluginScript(string[] args){
+		string p;
+		string s;
+		
+		if(!determineIfEnoughLength(2, args.Length)){
+			Tebas.consoleOutput("Unknown command");
+			return;
+		}
+		
+		p = args[clp];
+		clp++;
+		
+		s = args[clp];
+		clp++;
+		
+		if(!PluginHandler.runScript(p, s, args.Skip(clp))){
+			Tebas.consoleOutput("Unknown command");
+			return;
+		}
+	}
+	
+	static void commandPluginCreate(string[] args){
+		string path;
+		
+		if(!determineIfEnoughLength(1, args.Length)){
+			Tebas.consoleOutput("Not enough arguments");
+			return;
+		}
+		
+		path = args[clp];
+		clp++;
+		
+		CreatorUtility.plugin(path);
+	}
+	
 	//Global
 	static void commandGlobalConfig(string[] args){
 		string key;
@@ -591,7 +723,7 @@ public static class CommandLineHandler{
 		key = args[clp];
 		clp++;
 		
-		if(key == "list"){
+		if(key == "list" || key == "see"){
 			Tebas.globalConfig(key, null);
 			return;
 		}
@@ -689,7 +821,7 @@ public static class CommandLineHandler{
 		v = args[clp];
 		clp++;
 		
-		Tebas.tryScript(v);
+		Tebas.tryScript(v, args.Skip(clp));
 	}
 	
 	//local config remote
@@ -748,28 +880,44 @@ public static class CommandLineHandler{
 		Tebas.localRemoteRename(n, u);
 	}
 	
+	static void commandVersion(string[] args){
+		Tebas.version();
+	}
+	
 	static void commandHelp(string[] args){
 		Tebas.consoleOutput("Help for command line arguments:");
 		Tebas.consoleOutput("");
 		Tebas.consoleOutput("Sections:");
+		Tebas.consoleOutput("");
+		Tebas.consoleOutput("version  Shows the current tebas version");
+		Tebas.consoleOutput("");
 		Tebas.consoleOutput("channel");
 		Tebas.consoleOutput(" Manages channels(folders where projects are). This section can be executed anywhere");
-		Tebas.consoleOutput("        [name] [path]            followed by any name and a folder path, will create or set that channel");
-		Tebas.consoleOutput("        delete [name]            deletes that channel");
-		Tebas.consoleOutput("        rename [name] [newname]  renames that channel");
-		Tebas.consoleOutput("        list                     shows a list of all channels");
-		Tebas.consoleOutput("        info [name]              shows info on a specific channel");
+		Tebas.consoleOutput("        [name] [path]            Followed by any name and a folder path, will create or set that channel");
+		Tebas.consoleOutput("        delete [name]            Deletes that channel");
+		Tebas.consoleOutput("        rename [name] [newname]  Renames that channel");
+		Tebas.consoleOutput("        list                     Shows a list of all channels");
+		Tebas.consoleOutput("        info [name]              Shows info on a specific channel");
 		Tebas.consoleOutput("");
 		Tebas.consoleOutput("template");
 		Tebas.consoleOutput(" Manages the templates (templates for projects). This section can be executed anywhere");
-		Tebas.consoleOutput("         install [path]    installs the template from a file (.tbtem)");
-		Tebas.consoleOutput("         uninstall [name]  deletes that template");
-		Tebas.consoleOutput("         list              shows list of all templates installed");
-		Tebas.consoleOutput("         info [name]       shows info on a specific template");
+		Tebas.consoleOutput("         install [path]    Installs the template from a file (.tbtem)");
+		Tebas.consoleOutput("         uninstall [name]  Deletes that template");
+		Tebas.consoleOutput("         list              Shows list of all templates installed");
+		Tebas.consoleOutput("         info [name]       Shows info on a specific template");
+		Tebas.consoleOutput("         create [path]     Create a template using the creator utility");
+		Tebas.consoleOutput("");
+		Tebas.consoleOutput("plugin");
+		Tebas.consoleOutput(" Manages the plugins. This section can be executed anywhere");
+		Tebas.consoleOutput("         install [path]          Installs the plugin from a file (.tbplg)");
+		Tebas.consoleOutput("         uninstall [name]        Deletes that plugin");
+		Tebas.consoleOutput("         list                    Shows list of all plugins installed");
+		Tebas.consoleOutput("         create [path]           Create a plugin using the creator utility");
+		Tebas.consoleOutput("         [name] [script] [args]  Attempts to run a script of that plugin");
 		Tebas.consoleOutput("");
 		Tebas.consoleOutput("global");
 		Tebas.consoleOutput(" Manages global things. This section can be executed anywhere");
-		Tebas.consoleOutput("       config [key] [value]  Changes the global config. You can also do config list for a list of all keys");
+		Tebas.consoleOutput("       config [key] [value]  Changes the global config. You can also do config list for a list of all keys, and config see for seeing the current values");
 		Tebas.consoleOutput("       list                  Shows list of all of the projects");
 		Tebas.consoleOutput("");
 		Tebas.consoleOutput("project");
@@ -785,7 +933,7 @@ public static class CommandLineHandler{
 		Tebas.consoleOutput("      pull [remote]     The equivalent of doing \'git pull\'. If there is only one remote, you dont need to specify it");
 		Tebas.consoleOutput("      add               The equivalent of doing \'git add .\'");
 		Tebas.consoleOutput("      commit [message]  The equivalent of doing \'git commit\'");
-		Tebas.consoleOutput("      remote            Maneges git remotes. This has more options:");
+		Tebas.consoleOutput("      remote            Manages git remotes. This has more options:");
 		Tebas.consoleOutput("             set [name] [URL]         Sets that remote");
 		Tebas.consoleOutput("             delete [name]            Deletes that remote");
 		Tebas.consoleOutput("             rename [name] [newname]  Deletes that remote");
@@ -794,7 +942,7 @@ public static class CommandLineHandler{
 		Tebas.consoleOutput("      init [template]   Creates a new project directly in the local folder. Useful for creating projects outside of channels");
 		Tebas.consoleOutput("      info              Shows info on the current project");
 		Tebas.consoleOutput("      stats             Shows stats on the current project");
-		Tebas.consoleOutput("      [script]          Attempts to run a script of the current template");
+		Tebas.consoleOutput("      [script] [args]   Attempts to run a script of the current template");
 	}
 	
 	//utilitie

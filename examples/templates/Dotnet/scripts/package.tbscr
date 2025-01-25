@@ -1,0 +1,8 @@
+console.print "Package dotnet project"
+
+console.ask def.0 "What nuget package you want to install? "
+
+string.set def.1 "add package "
+self.append def.1 def.0
+
+process.run "dotnet" def.1

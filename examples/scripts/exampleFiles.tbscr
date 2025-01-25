@@ -1,0 +1,25 @@
+folder.list show "W" "*.txt" //List all txt files in the current working directory (W)
+call showTable //Call the function
+
+function showTable { //Function
+	scope control //Scope declared, a table that will be used locally on this function only
+	
+	console.print "{show.length} files found:" //print the number of files found
+	
+	string.set control.0 "0" //Index of file
+	string.set control.4 "0" //Total bytes
+	
+	math.less control.1 control.0 show.length //Condition, stored in control.1
+	while control.1 {
+		table.access control.2 show control.0 //Acess elements of the table
+		file.size control.3 control.2 //Access file size
+		math.sum control.4 control.4 control.3 //Add the byte size to the total
+		console.print "{control.2} - {control.3} B"
+		
+		math.sumUp control.0 control.0 //Sum one to the index
+		math.less control.1 control.0 show.length //Condition, stored in control.1
+	}
+	
+	math.divide control.5 control.4 "1024" //Calculate kB
+	console.print "Total size: {control.4} B, {control.5} KB"
+}

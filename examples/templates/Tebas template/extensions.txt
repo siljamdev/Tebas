@@ -1,0 +1,4 @@
+.tbscr
+.gitignore
+.txt
+.md

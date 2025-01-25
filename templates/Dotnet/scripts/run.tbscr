@@ -1,7 +1,0 @@
-print "Run dotnet project"
-
-run "dotnet" "run"
-
-project.read "timesCompiled" //0
-set.sumup [0] //1
-project.write "timesCompiled" [1]

@@ -1,0 +1,7 @@
+console.print "Run dotnet project"
+
+process.run "dotnet" "run"
+
+project.read def.0 "timesCompiled"
+math.sumUp def.0 def.0
+project.write "timesCompiled" def.0

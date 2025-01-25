@@ -1,0 +1,20 @@
+console.print "Welcome to the script!"
+
+math.getRandom num.0 "0" "10" //sets the random number between 0 and 10
+string.set num.1 "1"
+
+string.set def.0 true.0 //Keeps the loop running forever
+while def.0 {
+	console.ask def.1 "Try to guess the number: " //Asks a question and stores it in def.1
+	string.equal def.2 num.0 def.1 //Store true in def.2 if num.0 and def.1 are equal
+	
+	if def.2 {
+		break
+	} else {
+		console.print "That is wrong!"
+	}
+	
+	math.sumUp num.1 num.1 //Sums 1 to num.1 and stores it in num.1
+}
+
+console.print "You guessed it! It took you {num.1} attempts" //display, with {} expansion

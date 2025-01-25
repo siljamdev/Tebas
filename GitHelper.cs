@@ -100,7 +100,7 @@ public static class GitHelper{
 		return branch;
 	}
 	
-	static bool remoteExists(string name){
+	public static bool remoteExists(string name){
 		if(Tebas.project.CanGetCampAsString("git.remote." + name, out string s)){
 			return true;
 		}
@@ -120,8 +120,9 @@ public static class GitHelper{
 		tryInit();
 		if(h){
 			ProcessExecuter.runProcess("GIT", getGitPath(), "remote set-url " + name + " \"" + url + "\"", Tebas.workingDirectory);
+		}else{
+			ProcessExecuter.runProcess("GIT", getGitPath(), "remote add " + name + " \"" + url + "\"", Tebas.workingDirectory);
 		}
-		ProcessExecuter.runProcess("GIT", getGitPath(), "remote add " + name + " \"" + url + "\"", Tebas.workingDirectory);
 		
 		Tebas.consoleOutput("Remote set successfully");
 	}
@@ -167,6 +168,22 @@ public static class GitHelper{
 		ProcessExecuter.runProcess("GIT", getGitPath(), "remote rename " + oldname + " " + newname, Tebas.workingDirectory);
 		
 		Tebas.consoleOutput("Remote renamed successfully");
+	}
+	
+	public static List<string> getAllRemotes(){
+		if(!Tebas.initializeLocal()){
+			return null;
+		}
+		
+		List<string> r = new List<string>();
+		
+		foreach(KeyValuePair<string, CampValue> kvp in Tebas.project.data){
+			if(kvp.Key.StartsWith("git.remote.") && kvp.Value.CanGetString(out string s)){
+				r.Add(kvp.Key.Substring(11));
+			}
+		}
+		
+		return r;
 	}
 	
 	public static void printAllRemotes(){

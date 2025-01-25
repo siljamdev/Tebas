@@ -1,5 +1,0 @@
-print "Package dotnet project"
-
-ask "What nuget package you want to install? " //0
-
-run "dotnet" "add package [0]"

@@ -1,0 +1,17 @@
+console.print "Welcome to the script!"
+
+string.set def.0 true.0 //Keeps the loop running forever
+while def.0 {
+	console.ask def.1 "What is your favourite food? " //Asks a question and stores it in def.1
+	self.lower def.1 //sets itself to lowercase
+	table.contains def.2 ["pineapple", "beans"] def.1 //if the table does not contain it, break out of the loop
+	if def.2 {
+		console.print "Ewwwww"
+		console.print "Please choose again"
+	} else {
+		break
+	}
+}
+
+self.upper def.1 //set itself to uppercase
+console.print "That is nice! I also like {def.1} a lot" //display, with {} expansion

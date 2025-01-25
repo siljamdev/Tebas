@@ -16,6 +16,19 @@ public static class TemplateHandler{
 		return new AshFile(Tebas.dep.path + "/templates/" + name + "/template.tbtem");
 	}
 	
+	public static bool runScript(string name, IEnumerable<string> args){
+		if(!(Tebas.template is null)){
+			string code = "";
+			if(!Tebas.template.CanGetCampAsString("script." + name, out code)){
+				return false;
+			}
+			Script s = new Script(Tebas.tn + " " + name, code);
+			s.run(args);
+			return true;
+		}
+		return false;
+	}
+	
 	public static bool runScript(string name){
 		if(!(Tebas.template is null)){
 			string code = "";
@@ -23,7 +36,7 @@ public static class TemplateHandler{
 				return false;
 			}
 			Script s = new Script(Tebas.tn + " " + name, code);
-			s.run();
+			s.run(null);
 			return true;
 		}
 		return false;
@@ -46,8 +59,8 @@ public static class TemplateHandler{
 			return;
 		}
 		
-		if(TemplateHandler.exists(name)){
-			Console.WriteLine("A template with that name is already installed, do you want to update it?");
+		if(exists(name)){
+			Console.WriteLine("A template with that name is already installed, do you want to update it? (Y/N)");
 			string ans = Console.ReadLine();
 			
 			if(ans.ToLower() != "y"){
@@ -88,14 +101,29 @@ public static class TemplateHandler{
 		
 		Tebas.workingDirectory = Tebas.templateDirectory;
 		
-		runScript("delete");
-		
 		if(Tebas.askDeletionConfirmation()){
+			runScript("uninstall");
 			Directory.Delete(Tebas.templateDirectory, true);
 			Tebas.consoleOutput("Template uninstalled succesfully");
 		}else{
 			Tebas.consoleOutput("Deletion cancelled");
 		}
+	}
+	
+	public static List<string> getList(){
+		string dir = Tebas.dep.path + "/templates";
+		
+		string[] directories = Directory.GetDirectories(dir);
+		
+		List<string> c = new List<string>();
+		
+		foreach(string s in directories){
+			if(File.Exists(s + "/template.tbtem")){
+				c.Add(Path.GetFileName(s));
+			}
+		}
+		
+		return c;
 	}
 	
 	public static void list(){
@@ -112,7 +140,10 @@ public static class TemplateHandler{
 		}
 		
 		if(c.Count > 0){
+			Tebas.consoleOutput("Number of templates installed: " + c.Count);
 			Tebas.consoleOutput("List of templates:");
+		}else{
+			Tebas.consoleOutput("No templates installed");
 		}
 		
 		foreach(string s in c){
@@ -145,6 +176,37 @@ public static class TemplateHandler{
 			
 			foreach(string h in p){
 				Tebas.consoleOutput("    " + h);
+			}
+		}
+	}
+	
+	public static string resourceRead(string n){
+		if(!(Tebas.template is null)){
+			if(Tebas.template.CanGetCampAsString("resources." + n, out string v)){
+				return v;
+			}else{
+				return "";
+			}
+		}else{
+			return "";
+		}
+	}
+	
+	public static void resourceWrite(string n, string c){
+		if(!(Tebas.template is null)){
+			Tebas.template.SetCamp("resources." + n, c);
+			Tebas.template.Save();
+		}
+	}
+	
+	public static void resourceAppend(string n, string c){
+		if(!(Tebas.template is null)){
+			if(Tebas.template.CanGetCampAsString("resources." + n, out string v)){
+				Tebas.template.SetCamp("resources." + n, v + c);
+				Tebas.template.Save();
+			}else{
+				Tebas.template.SetCamp("resources." + n, c);
+				Tebas.template.Save();
 			}
 		}
 	}

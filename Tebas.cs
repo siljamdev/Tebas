@@ -21,6 +21,8 @@ class Tebas{
 	private static bool configInit;
 	private static bool localInit;
 	
+	public const string currentVersion = "v0.3";
+	
 	public static void Main(string[] args){
 		workingDirectory = Directory.GetCurrentDirectory();
 		
@@ -53,7 +55,7 @@ class Tebas{
 		config = dep.config;
 		
 		config.InitializeCamp("deletionConfirmationNeeded", true);
-		config.InitializeCamp("scriptShowsName", true);
+		config.InitializeCamp("scriptShowsName", false);
 		config.InitializeCamp("processShowsName", true);
 		
 		config.InitializeCamp("git.autoAddOnCommit", false);
@@ -81,6 +83,23 @@ class Tebas{
 			setContextTemplate(ten);
 		}else{
 			consoleOutput("The local project has no referenced template: bad formatting of project.tebas");
+		}
+		
+		localInit = true;
+		return true;
+	}
+	
+	public static bool initializeLocalSilent(){
+		if(localInit){
+			return true;
+		}
+		
+		if(!setContextLocal()){
+			return false;
+		}
+		
+		if(project.CanGetCampAsString("template", out string ten)){
+			setContextTemplate(ten);
 		}
 		
 		localInit = true;
@@ -147,6 +166,10 @@ class Tebas{
 	
 	//Commands
 	
+	public static void version(){
+		consoleOutput("Current version: " + currentVersion);
+	}
+	
 	//Project
 	
 	public static void projectNew(string channelName, string templateName, string projectName){
@@ -180,6 +203,7 @@ class Tebas{
 		project = new AshFile();
 		
 		project.SetCamp("template", templateName);
+		project.SetCamp("creationDate", (Date) DateTime.Now);
 		
 		if(template.CanGetCampAsBool("git.defaultUse", out bool b) && b){
 			project.SetCamp("git.use", true);
@@ -293,13 +317,13 @@ class Tebas{
 		switch(key){
 			case "list":
 			consoleOutput("List of config options:");
-			consoleOutput("deleteConfirm   - If you have to confirm every deletion");
-			consoleOutput("scriptLogName   - If template scripts will show the name of the script");
-			consoleOutput("readme          - The default readme file for projects. Requires a file path");
-			consoleOutput("gitignore       - The default .gitignore file for projects that use git. Requires a file path");
-			consoleOutput("gitPath         - The path to the git executable");
-			consoleOutput("gitBranch       - The main branch that will be used for all git related stuff");
-			consoleOutput("gitAddOnCommit  - Automatically adds all changes when commiting");
+			consoleOutput("  deleteConfirm   - If you have to confirm every deletion");
+			consoleOutput("  scriptLogName   - If template scripts will show the name of the script");
+			consoleOutput("  readme          - The default readme file for projects. Requires a file path");
+			consoleOutput("  gitignore       - The default .gitignore file for projects that use git. Requires a file path");
+			consoleOutput("  gitPath         - The path to the git executable");
+			consoleOutput("  gitBranch       - The main branch that will be used for all git related stuff");
+			consoleOutput("  gitAddOnCommit  - Automatically adds all changes when commiting");
 			break;
 			
 			case "deleteConfirm":
@@ -348,6 +372,42 @@ class Tebas{
 			
 			case "gitAddOnCommit":
 			setConfigTrueFalse("git.autoAddOnCommit", val);
+			break;
+			
+			case "see":
+			consoleOutput("Current config values:");
+			
+			if (config.CanGetCampAsBool("deletionConfirmationNeeded", out bool deleteConfirm)){
+				consoleOutput("  deleteConfirm: " + deleteConfirm);
+			}
+			
+			if (config.CanGetCampAsBool("scriptShowsName", out bool scriptLogName)){
+				consoleOutput("  scriptLogName: " + scriptLogName);
+			}
+			
+			if (config.CanGetCampAsBool("processShowsName", out bool processLogName)){
+				consoleOutput("  processLogName: " + processLogName);
+			}
+			
+			if (config.CanGetCampAsString("defaultReadme", out string readme)){
+				consoleOutput("  readme: " + readme);
+			}
+			
+			if (config.CanGetCampAsString("git.defaultGitignore", out string gitignore)){
+				consoleOutput("  gitignore: " + gitignore);
+			}
+			
+			if (config.CanGetCampAsString("git.path", out string gitPath)){
+				consoleOutput("  gitPath: " + gitPath);
+			}
+			
+			if (config.CanGetCampAsString("git.defaultBranch", out string gitBranch)){
+				consoleOutput("  gitBranch: " + gitBranch);
+			}
+			
+			if (config.CanGetCampAsBool("git.autoAddOnCommit", out bool gitAddOnCommit)){
+				consoleOutput("  gitAddOnCommit: " + gitAddOnCommit);
+			}
 			break;
 			
 			default:
@@ -403,6 +463,10 @@ class Tebas{
 		
 		consoleOutput("Project name: " + pn);
 		consoleOutput("Project folder: " + workingDirectory);
+		if(project.CanGetCampAsDate("creationDate", out Date d)){
+			consoleOutput("Date of creation: " + d);
+		}
+		
 		
 		if(!TemplateHandler.exists(tn)){
 			return;
@@ -432,13 +496,25 @@ class Tebas{
 		}
 		
 		if(!template.CanGetCampAsString("codeExtensions", out string x)){
-			consoleOutput("The template does not have code file extensions.");
+			consoleOutput("The template does not have code file extensions");
+			TemplateHandler.runScript("stats");
+			return;
+		}
+		
+		if(!template.CanGetCampAsString("codeFilesFolderBlacklist", out string b)){
+			consoleOutput("The template does not have code file folder blacklist.");
+			TemplateHandler.runScript("stats");
 			return;
 		}
 		
 		string[] exs = x.Split(new string[]{"\r\n", "\n", "\r"}, StringSplitOptions.None);
+		string[] bs = b.Split(new string[]{"\r\n", "\n", "\r"}, StringSplitOptions.None);
 		
-		List<string> files = GetFilesWithExtensions(workingDirectory, exs);
+		for(int i = 0; i < bs.Length; i++){
+			bs[i] = workingDirectory + "/" + bs[i];
+		}
+		
+		List<string> files = GetFilesWithExtensions(workingDirectory, exs, bs);
 		
 		int l = 0;
 		foreach(string p in files){
@@ -525,6 +601,7 @@ class Tebas{
 		project = new AshFile();
 		
 		project.SetCamp("template", templateName);
+		project.SetCamp("creationDate", (Date) DateTime.Now);
 		
 		if(template.CanGetCampAsBool("git.defaultUse", out bool b) && b){
 			project.SetCamp("git.use", true);
@@ -605,14 +682,32 @@ class Tebas{
 	
 	//Template scripts
 	
-	public static void tryScript(string name){
-		if(!initializeLocal()){
-			return;
+	public static bool tryScript(string name){
+		if(!initializeLocalSilent()){
+			consoleOutput("Unknown command");
+			return false;
 		}
 		
 		if(!TemplateHandler.runScript(name)){
 			consoleOutput("Unknown command");
+			return false;
 		}
+		
+		return true;
+	}
+	
+	public static bool tryScript(string name, IEnumerable<string> args){
+		if(!initializeLocalSilent()){
+			consoleOutput("Unknown command");
+			return false;
+		}
+		
+		if(!TemplateHandler.runScript(name, args)){
+			consoleOutput("Unknown command");
+			return false;
+		}
+		
+		return true;
 	}
 	
 	//Other thingies
@@ -642,12 +737,13 @@ class Tebas{
 	}
 	
 	//maybe it works 
-	static List<string> GetFilesWithExtensions(string directoryPath, string[] extensions)
-    {
-        return Directory.GetFiles(directoryPath, "*.*", SearchOption.TopDirectoryOnly) // Use SearchOption.AllDirectories for recursion
-                        .Where(file => extensions.Contains(Path.GetExtension(file), StringComparer.OrdinalIgnoreCase))
-                        .ToList();
-    }
+	static List<string> GetFilesWithExtensions(string directoryPath, string[] extensions, string[] blacklistPaths)
+	{
+		return Directory.GetFiles(directoryPath, "*", SearchOption.AllDirectories) // Recursively get all files
+						.Where(file => extensions.Contains(Path.GetExtension(file), StringComparer.OrdinalIgnoreCase) &&
+						!blacklistPaths.Any(blacklisted => Path.GetFullPath(file).StartsWith(Path.GetFullPath(blacklisted), StringComparison.OrdinalIgnoreCase)))
+						.ToList();
+	}
 	
 	//output
 	public static void consoleOutput(string s){

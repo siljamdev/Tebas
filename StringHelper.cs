@@ -3,7 +3,7 @@ using System.Text;
 
 public static class StringHelper{
 	
-	static readonly char[] whitespace = {' ', '\n', '\r'};
+	static readonly char[] whitespace = {' ', '\n', '\r', '\t'};
 	
 	public static string removeQuotesSingle(string p){
 		p = p.Trim();
@@ -43,7 +43,7 @@ public static class StringHelper{
 				previousEscapeCode = false;
 			}
 			
-			if(l[i] == ' ' && !stringOpened){
+			if(l[i].isWhitespace() && !stringOpened){
 				if(!previousSpace){
 					previousSpace = true;
 					a.Add(l.Substring(startIndex, i - startIndex));
