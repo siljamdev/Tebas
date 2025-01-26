@@ -21,7 +21,7 @@ class Tebas{
 	private static bool configInit;
 	private static bool localInit;
 	
-	public const string currentVersion = "v0.3";
+	public const string currentVersion = "v0.3.1";
 	
 	public static void Main(string[] args){
 		workingDirectory = Directory.GetCurrentDirectory();
