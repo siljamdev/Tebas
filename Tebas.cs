@@ -138,9 +138,11 @@ class Tebas{
 			}
 		}
 		
-		project = new AshFile(f + "/project.tebas");
+		workingDirectory = f;
 		
-		pn = Path.GetFileName(f);
+		project = new AshFile(workingDirectory + "/project.tebas");
+		
+		pn = Path.GetFileName(workingDirectory);
 		
 		return true;
 	}
@@ -159,9 +161,11 @@ class Tebas{
 			}
 		}
 		
-		project = new AshFile(f + "/project.tebas");
+		workingDirectory = f;
 		
-		pn = Path.GetFileName(f);
+		project = new AshFile(workingDirectory + "/project.tebas");
+		
+		pn = Path.GetFileName(workingDirectory);
 		
 		if(project.CanGetCampAsString("template", out string t)){
 			if(!TemplateHandler.exists(t)){
