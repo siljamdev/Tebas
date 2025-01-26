@@ -13,6 +13,8 @@ public static class PluginHandler{
 			return;
 		}
 		
+		Tebas.initializeLocalSilent();
+		
 		plugins = new AshFile(Tebas.dep.path + "/plugins.ash");
 		init = true;
 	}

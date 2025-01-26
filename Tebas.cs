@@ -125,27 +125,43 @@ class Tebas{
 	}
 	
 	public static bool setContextLocal(){ //project
-		if(!File.Exists(workingDirectory + "/project.tebas")){
-			consoleOutput("There is no local project in this folder: " + workingDirectory);
-			return false;
+		string f = workingDirectory;
+		while(true){
+			if(File.Exists(f + "/project.tebas")){
+				break;
+			}
+			
+			f = Path.GetDirectoryName(f);
+			if(f == null){
+				consoleOutput("There is no local project in this folder: " + workingDirectory);
+				return false;
+			}
 		}
 		
-		project = new AshFile(workingDirectory + "/project.tebas");
+		project = new AshFile(f + "/project.tebas");
 		
-		pn = Path.GetFileName(workingDirectory);
+		pn = Path.GetFileName(f);
 		
 		return true;
 	}
 	
 	public static bool setContextFull(){ //project and template, from local source
-		if(!File.Exists(workingDirectory + "/project.tebas")){
-			consoleOutput("There is no local project in this folder: " + workingDirectory);
-			return false;
+		string f = workingDirectory;
+		while(true){
+			if(File.Exists(f + "/project.tebas")){
+				break;
+			}
+			
+			f = Path.GetDirectoryName(f);
+			if(f == null){
+				consoleOutput("There is no local project in this folder: " + workingDirectory);
+				return false;
+			}
 		}
 		
-		project = new AshFile(workingDirectory + "/project.tebas");
+		project = new AshFile(f + "/project.tebas");
 		
-		pn = Path.GetFileName(workingDirectory);
+		pn = Path.GetFileName(f);
 		
 		if(project.CanGetCampAsString("template", out string t)){
 			if(!TemplateHandler.exists(t)){
