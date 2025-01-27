@@ -79,7 +79,7 @@ string.set def.1 "add package "
 self.append def.1 args.0
 
 process.run "dotnet" def.1
-script.publishnconsole.print "Publish dotnet project"
+script.publishYconsole.print "Publish dotnet project"
 
 string.set def.0 args.0
 console.print "The version is {def.0}"
@@ -135,7 +135,7 @@ template.read zip.0 "use7zip"
 if zip.0 {
 	template.read zip.1 "7zipPath"
 	
-	string.set zip.2 "{%pn}_{def.0}_{con.1}.zip"
+	string.set zip.2 "releases/{%pn}_{def.0}_{con.1}.zip"
 	self.expand zip.2
 	
 	string.set zip.3 "./releases/{def.0}/*"
@@ -143,7 +143,6 @@ if zip.0 {
 	
 	string.set zip.4 "a -tzip \"{zip.2}\" \"{zip.3}\""
 	self.expand zip.4
-	console.printNoExpand zip.4
 	
 	process.run zip.1 zip.4
 }
