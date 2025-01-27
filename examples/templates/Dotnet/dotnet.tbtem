@@ -73,16 +73,18 @@ folder.create "W/releases"
 project.write "timesCompiled" "0"
 
 project.write "dateCreated" %d
-script.packageÀconsole.print "Package dotnet project"
-
-console.ask def.0 "What nuget package you want to install? "
+script.packageƒconsole.print "Package dotnet project"
 
 string.set def.1 "add package "
-self.append def.1 def.0
+self.append def.1 args.0
 
-process.run "dotnet" def.1script.publishconsole.print "Publish dotnet project"
+process.run "dotnet" def.1
+script.publishnconsole.print "Publish dotnet project"
 
-console.ask def.0 "What is the version(Ex: v1.0.0_winx64)?: "
+string.set def.0 args.0
+console.print "The version is {def.0}"
+
+//console.ask def.0 "What is the version(Ex: v1.0.0_winx64)?: "
 
 string.set def.1 "W/releases/"
 self.append def.1 def.0
@@ -112,23 +114,38 @@ self.expand dotnet.0
 
 process.run "dotnet" dotnet.0
 
-string.set dotnet.1 "W/releases/{def.0}/{%pn}.pdb"
-self.expand dotnet.1
+string.set pdb.0 "W/releases/{def.0}"
+self.expand pdb.0
 
-file.delete dotnet.1
+folder.list files pdb.0 "*.pdb"
+
+string.set pdb.1 "0"
+math.less pdb.2 pdb.1 files.length
+while pdb.2 {
+	table.access pdb.3 files pdb.1
+	file.delete pdb.3
+	
+	math.sumUp pdb.1 pdb.1
+	
+	math.less pdb.2 pdb.1 files.length
+}
 
 template.read zip.0 "use7zip"
 
 if zip.0 {
 	template.read zip.1 "7zipPath"
 	
-	string.set zip.2 "releases/{%pn}_{def.0}.zip"
+	string.set zip.2 "{%pn}_{def.0}_{con.1}.zip"
 	self.expand zip.2
 	
-	string.set zip.3 "releases/{def.0}"
+	string.set zip.3 "./releases/{def.0}/*"
 	self.expand zip.3
 	
-	process.run zip.1 "a -tzip \"{zip.2}\" \"{zip.3}\""
+	string.set zip.4 "a -tzip \"{zip.2}\" \"{zip.3}\""
+	self.expand zip.4
+	console.printNoExpand zip.4
+	
+	process.run zip.1 zip.4
 }
 
 console.print "Publishing finished!"

@@ -1,1 +1,1 @@
-These are the files used with the Creator Utility. The final product is 'dotnet.tbtem'
+These are the files used with the Creator Utility. The final product is 'dotnet.tbtem'. This template helps you with dotnet

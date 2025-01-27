@@ -1,0 +1,3 @@
+console.print "Compiling Tebas plugin"
+
+plugin.create %wd
