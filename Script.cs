@@ -102,7 +102,7 @@ public class Script{
 					
 					case "console.pause":
 					output(getString(1));
-					Console.ReadKey();
+					Console.ReadLine();
 					outputLine("");
 					break;
 					
@@ -129,7 +129,7 @@ public class Script{
 					break;
 					
 					case "string.substring":
-					setString(getStringRef(1), (int.TryParse(getString(3), out int u) && int.TryParse(getString(4), out int v) && u > 0 && u < getString(2).Length && v > 0 && u + v < getString(2).Length ? getString(2).Substring(u, v) : ""));
+					setString(getStringRef(1), (int.TryParse(getString(3), out int u) && int.TryParse(getString(4), out int v) && u >= 0 && u < getString(2).Length && v > 0 && u + v < getString(2).Length ? getString(2).Substring(u, v) : ""));
 					break;
 					
 					case "string.replace":
@@ -173,7 +173,7 @@ public class Script{
 					break;
 					
 					case "self.substring":
-					setString(getStringRef(1), (int.TryParse(getString(2), out u) && int.TryParse(getString(3), out v) && u > 0 && u < getString(2).Length && v > 0 && u + v < getString(2).Length ? getString(1).Substring(u, v) : ""));
+					setString(getStringRef(1), (int.TryParse(getString(2), out u) && int.TryParse(getString(3), out v) && u >= 0 && u < getString(2).Length && v > 0 && u + v < getString(2).Length ? getString(1).Substring(u, v) : ""));
 					break;
 					
 					case "self.replace":
@@ -211,19 +211,19 @@ public class Script{
 					break;
 					
 					case "table.delete":
-					if(tables.ContainsKey(getStringRef(1).table) && getIndex(getStringRef(1).index.ToString(), getStringRef(1).table, out u) && u > 0 && u < tables[getStringRef(1).table].Count){
+					if(tables.ContainsKey(getStringRef(1).table) && getIndex(getStringRef(1).index.ToString(), getStringRef(1).table, out u) && u >= 0 && u < tables[getStringRef(1).table].Count){
 						tables[getStringRef(1).table].RemoveAt(u);
 					}
 					break;
 					
 					case "table.deleteAt":
-					if(tables.ContainsKey(getTableRef(1)) && getIndex(getString(2), getTableRef(1), out u) && u > 0 && u < tables[getStringRef(1).table].Count){
+					if(tables.ContainsKey(getTableRef(1)) && getIndex(getString(2), getTableRef(1), out u) && u >= 0 && u < tables[getStringRef(1).table].Count){
 						tables[getTableRef(1)].RemoveAt(u);
 					}
 					break;
 					
 					case "table.insert":
-					if(tables.ContainsKey(getStringRef(1).table) && getIndex(getStringRef(1).index.ToString(), getStringRef(1).table, out u) && u > 0 && u < tables[getStringRef(1).table].Count){
+					if(tables.ContainsKey(getStringRef(1).table) && getIndex(getStringRef(1).index.ToString(), getStringRef(1).table, out u) && u >= 0 && u < tables[getStringRef(1).table].Count){
 						tables[getStringRef(1).table].Insert(u, getString(2));
 					}else{
 						setString(getStringRef(1), getString(2));
@@ -231,7 +231,7 @@ public class Script{
 					break;
 					
 					case "table.insertAt":
-					if(tables.ContainsKey(getTableRef(1)) && getIndex(getString(2), getTableRef(1), out u) && u > 0 && u < tables[getStringRef(1).table].Count){
+					if(tables.ContainsKey(getTableRef(1)) && getIndex(getString(2), getTableRef(1), out u) && u >= 0 && u < tables[getStringRef(1).table].Count){
 						tables[getTableRef(1)].Insert(u, getString(3));
 					}else if(getIndex(getString(2), getTableRef(1), out u)){
 						setString(new stringRef(getTableRef(1), u), getString(3));

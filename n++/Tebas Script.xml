@@ -27,7 +27,7 @@
             <Keywords name="Keywords1"></Keywords>
             <Keywords name="Keywords2">if elseif else function while do call break continue exit scope return</Keywords>
             <Keywords name="Keywords3">console string process table bool math time self file folder template project tebas plugin path</Keywords>
-            <Keywords name="Keywords4">add sumUp greater join shuffle print isNumber ask lower upper cmd run set expand append split substring equal access delete deleteAt contains clear add append negate sumDown sum subtract multiply divide modulus abs greater greaterEqual less lessEqual printNoExpand pause wait getRandom insert insertAt and or create read rename write exists runOutput list remoteSet remoteDelete remoteList remoteExists listChild extension filename filenameNoExtension directory size trim removeQuotes count isNegative replace</Keywords>
+            <Keywords name="Keywords4">add sumUp greater join shuffle print isNumber ask lower upper cmd run set expand append split substring equal access delete deleteAt contains clear add append negate sumDown sum subtract multiply divide modulus abs greater greaterEqual less lessEqual printNoExpand pause wait getRandom insert insertAt and or create read rename write exists runOutput list remoteSet remoteDelete remoteList remoteExists listChild extension filename filenameNoExtension directory size trim removeQuotes count isNegative replace setAt</Keywords>
             <Keywords name="Keywords5">length random center args error true false</Keywords>
             <Keywords name="Keywords6">%pn %tn %wd %td %d %pl</Keywords>
             <Keywords name="Keywords7"></Keywords>
