@@ -200,7 +200,6 @@ public static class PluginHandler{
 	
 	public static string readResource(string plugin, string name){
 		initialize();
-		
 		if(!exists(plugin)){
 			return "";
 		}

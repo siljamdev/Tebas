@@ -49,7 +49,7 @@ while pdb.2 {
 	math.less pdb.2 pdb.1 files.length
 }
 
-template.read zip.0 "use7zip"
+project.read zip.0 "use7zip"
 
 if zip.0 {
 	template.read zip.1 "7zipPath"

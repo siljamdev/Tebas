@@ -40,3 +40,13 @@ folder.create "W/releases"
 project.write "timesCompiled" "0"
 
 project.write "dateCreated" %d
+
+console.ask def.0 "Do you want to use 7zip on publish? (Y/N): "
+self.upper def.0
+
+string.equal def.1 def.0 "Y"
+if def.1 {
+	project.write "use7zip" true.0
+} else {
+	project.write "use7zip" false.0
+}

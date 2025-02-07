@@ -1,4 +1,4 @@
-console.print "Run dotnet project"
+console.print "Debug dotnet project"
 
 process.runOutput "dotnet" "build /nologo /clp:NoSummary" dot err
 
@@ -42,7 +42,7 @@ if def.0 {
 	console.pause "Console Paused"
 	exit
 } else {
-	process.cmd "start \"\" \"cmd /c dotnet run & exit\""
+	process.cmd "start \"\" \"cmd /c dotnet run & pause & exit\""
 }
 
 function orderWarning {
