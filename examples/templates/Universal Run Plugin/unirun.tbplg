@@ -1,0 +1,53 @@
+nameunirununirun.script.installëconsole.ask def.0 "What is the path to FragRoom? "
+self.removeQuotes def.0
+
+plugin.write %pl "fgromPath" def.0
+
+console.ask def.0 "What is the path to a browser? "
+self.removeQuotes def.0
+
+plugin.write %pl "browserPath" def.0
+unirun.script.runßstring.equal def.0 %tn "dotnet"
+if def.0 {
+	template.run "run" ""
+	exit
+}
+
+path.extension def.1 args.0
+
+string.equal def.0 def.1 ".html"
+if def.0 {
+	plugin.read def.2 %pl "browserPath"
+	string.set def.3 "\"{args.0}\""
+	self.expand def.3
+	console.print def.2
+	process.run def.2 def.3
+	exit
+}
+
+string.equal def.0 %tn "fgrom"
+if def.0 {
+	template.run "run" args.0
+	exit
+}
+
+string.equal def.0 %tn "tbtem"
+if def.0 {
+	template.run "compile" ""
+	exit
+}
+
+string.equal def.0 %tn "tbplg"
+if def.0 {
+	template.run "compile" ""
+	exit
+}
+
+string.equal def.0 def.1 ".fgrom"
+if def.0 {
+	plugin.read def.2 %pl "fgromPath"
+	string.set def.3 "\"{args.0}\""
+	self.expand def.3
+	process.run def.2 def.3
+	exit
+}
