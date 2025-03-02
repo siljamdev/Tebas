@@ -1,5 +1,5 @@
 using System;
-using AshLib;
+using AshLib.AshFiles;
 
 public static class PluginHandler{
 	static AshFile plugins;
@@ -22,8 +22,8 @@ public static class PluginHandler{
 	public static bool exists(string name){
 		initialize();
 		
-		foreach(KeyValuePair<string, CampValue> kvp in plugins.data){
-			if(kvp.Value.CanGetString(out string s)){
+		foreach(KeyValuePair<string, object> kvp in plugins.data){
+			if(kvp.Value is string){
 				if(kvp.Key.Split(".")[0] == name){
 					return true;
 				}
@@ -38,9 +38,9 @@ public static class PluginHandler{
 		
 		List<string> p = new List<string>();
 		
-		foreach(KeyValuePair<string, CampValue> kvp in plugins.data){
+		foreach(KeyValuePair<string, object> kvp in plugins.data){
 			string[] n = kvp.Key.Split(".");
-			if(kvp.Value.CanGetString(out string s) && n[1] != "resources"){
+			if(kvp.Value is string && n[1] != "resources"){
 				if(!p.Contains(n[0])){
 					p.Add(n[0]);
 				}
@@ -55,9 +55,9 @@ public static class PluginHandler{
 		
 		List<string> p = new List<string>();
 		
-		foreach(KeyValuePair<string, CampValue> kvp in plugins.data){
+		foreach(KeyValuePair<string, object> kvp in plugins.data){
 			string[] n = kvp.Key.Split(".");
-			if(kvp.Value.CanGetString(out string s) && n[1] != "resources"){
+			if(kvp is string && n[1] != "resources"){
 				if(!p.Contains(n[0])){
 					p.Add(n[0]);
 				}
@@ -80,7 +80,7 @@ public static class PluginHandler{
 		initialize();
 		
 		string code = "";
-		if(!plugins.CanGetCampAsString(plugin + ".script." + name, out code)){
+		if(!plugins.CanGetCamp(plugin + ".script." + name, out code)){
 			return false;
 		}
 		Script s = new Script(plugin + " " + name, code);
@@ -94,7 +94,7 @@ public static class PluginHandler{
 		initialize();
 		
 		string code = "";
-		if(!plugins.CanGetCampAsString(plugin + ".script." + name, out code)){
+		if(!plugins.CanGetCamp(plugin + ".script." + name, out code)){
 			return false;
 		}
 		Script s = new Script(plugin + " " + name, code);
@@ -117,7 +117,7 @@ public static class PluginHandler{
 		AshFile plugin = new AshFile(path);
 		
 		string name;
-		if(!plugin.CanGetCampAsString("name", out name)){
+		if(!plugin.CanGetCamp("name", out name)){
 			Tebas.consoleOutput("Plugin is incorrectly formatted: name missing");
 			return;
 		}
@@ -131,7 +131,7 @@ public static class PluginHandler{
 			}
 		}
 		
-		foreach(KeyValuePair<string, CampValue> kvp in plugins.data){
+		foreach(KeyValuePair<string, object> kvp in plugins.data){
 			if(kvp.Key.Split(".")[0] == name){
 				plugins.DeleteCamp(kvp.Key);
 			}
@@ -158,7 +158,7 @@ public static class PluginHandler{
 		
 		if(Tebas.askDeletionConfirmation()){
 			runScript(name, "uninstall");
-			foreach(KeyValuePair<string, CampValue> kvp in plugins.data){
+			foreach(KeyValuePair<string, object> kvp in plugins.data){
 				if(kvp.Key.Split(".")[0] == name){
 					plugins.DeleteCamp(kvp.Key);
 				}
@@ -189,7 +189,7 @@ public static class PluginHandler{
 			return;
 		}
 		
-		if(plugins.CanGetCampAsString(plugin + ".resources." + name, out string v)){
+		if(plugins.CanGetCamp(plugin + ".resources." + name, out string v)){
 			plugins.SetCamp(plugin + ".resources." + name, v + content);
 		}else{
 			plugins.SetCamp(plugin + ".resources." + name, content);
@@ -204,7 +204,7 @@ public static class PluginHandler{
 			return "";
 		}
 		
-		if(plugins.CanGetCampAsString(plugin + ".resources." + name, out string v)){
+		if(plugins.CanGetCamp(plugin + ".resources." + name, out string v)){
 			return v;
 		}else{
 			return "";

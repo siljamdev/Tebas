@@ -1,5 +1,5 @@
 using System;
-using AshLib;
+using AshLib.AshFiles;
 
 public static class ChannelHandler{
 	
@@ -16,7 +16,7 @@ public static class ChannelHandler{
 		
 		channels = Tebas.dep.ReadAshFile("channels.ash");
 		
-		if(!channels.CanGetCampAsString("default", out string s)){
+		if(!channels.CanGetCamp("default", out string s)){
 			channels.SetCamp("default", Tebas.dep.path + "/projects");
 		}
 		
@@ -30,8 +30,8 @@ public static class ChannelHandler{
 		
 		List<string> names = new List<string>();
 		
-		foreach(KeyValuePair<string, CampValue> kvp in channels.data){
-			if(kvp.Value.CanGetString(out string s)){
+		foreach(KeyValuePair<string, object> kvp in channels.data){
+			if(kvp.Value is string){
 				names.Add(kvp.Key);
 			}
 		}
@@ -42,7 +42,7 @@ public static class ChannelHandler{
 	public static bool canGetPath(string name, out string path){
 		initialize();
 		
-		if(channels.CanGetCampAsString(name, out path)){
+		if(channels.CanGetCamp(name, out path)){
 			return true;
 		}else{
 			path = null;
@@ -53,7 +53,7 @@ public static class ChannelHandler{
 	public static string getPath(string name){
 		initialize();
 		
-		if(channels.CanGetCampAsString(name, out string path)){
+		if(channels.CanGetCamp(name, out string path)){
 			return path;
 		}else{
 			return null;
@@ -119,8 +119,8 @@ public static class ChannelHandler{
 		
 		List<string> c = new List<string>();
 		
-		foreach(KeyValuePair<string, CampValue> kvp in channels.data){
-			if(kvp.Value.CanGetString(out string s)){
+		foreach(KeyValuePair<string, object> kvp in channels.data){
+			if(kvp.Value is string){
 				c.Add(kvp.Key);
 			}
 		}
@@ -137,7 +137,7 @@ public static class ChannelHandler{
 	public static void info(string name){
 		initialize();
 		
-		if(channels.CanGetCampAsString(name, out string path)){
+		if(channels.CanGetCamp(name, out string path)){
 			Tebas.consoleOutput("Channel name: " + name);
 			Tebas.consoleOutput("Channel path: " + path);
 			

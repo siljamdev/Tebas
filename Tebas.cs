@@ -1,5 +1,7 @@
 ﻿using System;
-using AshLib;
+using AshLib.AshFiles;
+using AshLib.Folders;
+using AshLib.Dates;
 
 class Tebas{
 	//Context variables
@@ -21,7 +23,7 @@ class Tebas{
 	private static bool configInit;
 	private static bool localInit;
 	
-	public const string currentVersion = "v0.3.2";
+	public const string currentVersion = "v0.3.3";
 	
 	public static void Main(string[] args){
 		workingDirectory = Directory.GetCurrentDirectory();
@@ -79,7 +81,7 @@ class Tebas{
 			return false;
 		}
 		
-		if(project.CanGetCampAsString("template", out string ten)){
+		if(project.CanGetCamp("template", out string ten)){
 			setContextTemplate(ten);
 		}else{
 			consoleOutput("The local project has no referenced template: bad formatting of project.tebas");
@@ -98,7 +100,7 @@ class Tebas{
 			return false;
 		}
 		
-		if(project.CanGetCampAsString("template", out string ten)){
+		if(project.CanGetCamp("template", out string ten)){
 			setContextTemplate(ten);
 		}
 		
@@ -167,7 +169,7 @@ class Tebas{
 		
 		pn = Path.GetFileName(workingDirectory);
 		
-		if(project.CanGetCampAsString("template", out string t)){
+		if(project.CanGetCamp("template", out string t)){
 			if(!TemplateHandler.exists(t)){
 				consoleOutput("The template referenced in this project is not installed: " + t);
 				return false;
@@ -225,17 +227,17 @@ class Tebas{
 		project.SetCamp("template", templateName);
 		project.SetCamp("creationDate", (Date) DateTime.Now);
 		
-		if(template.CanGetCampAsBool("git.defaultUse", out bool b) && b){
+		if(template.CanGetCamp("git.defaultUse", out bool b) && b){
 			project.SetCamp("git.use", true);
 			
 			GitHelper.init();
 			
 			string gitIgnore = "";
-			if(config.CanGetCampAsString("git.defaultGitignore", out string k)){
+			if(config.CanGetCamp("git.defaultGitignore", out string k)){
 				gitIgnore = k;
 			}
 			
-			if(template.CanGetCampAsString("git.gitignore", out k)){
+			if(template.CanGetCamp("git.gitignore", out k)){
 				gitIgnore += "\n" + k;
 			}
 			
@@ -246,13 +248,13 @@ class Tebas{
 			project.SetCamp("git.use", false);
 		}
 		
-		if(!(template.CanGetCampAsBool("addReadme", out b) && !b)){
+		if(!(template.CanGetCamp("addReadme", out b) && !b)){
 			string readme = "";
-			if(config.CanGetCampAsString("defaultReadme", out string s)){
+			if(config.CanGetCamp("defaultReadme", out string s)){
 				readme = s;
 			}
 			
-			if(template.CanGetCampAsString("readme", out s)){
+			if(template.CanGetCamp("readme", out s)){
 				readme += s;
 			}
 			
@@ -397,35 +399,35 @@ class Tebas{
 			case "see":
 			consoleOutput("Current config values:");
 			
-			if (config.CanGetCampAsBool("deletionConfirmationNeeded", out bool deleteConfirm)){
+			if (config.CanGetCamp("deletionConfirmationNeeded", out bool deleteConfirm)){
 				consoleOutput("  deleteConfirm: " + deleteConfirm);
 			}
 			
-			if (config.CanGetCampAsBool("scriptShowsName", out bool scriptLogName)){
+			if (config.CanGetCamp("scriptShowsName", out bool scriptLogName)){
 				consoleOutput("  scriptLogName: " + scriptLogName);
 			}
 			
-			if (config.CanGetCampAsBool("processShowsName", out bool processLogName)){
+			if (config.CanGetCamp("processShowsName", out bool processLogName)){
 				consoleOutput("  processLogName: " + processLogName);
 			}
 			
-			if (config.CanGetCampAsString("defaultReadme", out string readme)){
+			if (config.CanGetCamp("defaultReadme", out string readme)){
 				consoleOutput("  readme: " + readme);
 			}
 			
-			if (config.CanGetCampAsString("git.defaultGitignore", out string gitignore)){
+			if (config.CanGetCamp("git.defaultGitignore", out string gitignore)){
 				consoleOutput("  gitignore: " + gitignore);
 			}
 			
-			if (config.CanGetCampAsString("git.path", out string gitPath)){
+			if (config.CanGetCamp("git.path", out string gitPath)){
 				consoleOutput("  gitPath: " + gitPath);
 			}
 			
-			if (config.CanGetCampAsString("git.defaultBranch", out string gitBranch)){
+			if (config.CanGetCamp("git.defaultBranch", out string gitBranch)){
 				consoleOutput("  gitBranch: " + gitBranch);
 			}
 			
-			if (config.CanGetCampAsBool("git.autoAddOnCommit", out bool gitAddOnCommit)){
+			if (config.CanGetCamp("git.autoAddOnCommit", out bool gitAddOnCommit)){
 				consoleOutput("  gitAddOnCommit: " + gitAddOnCommit);
 			}
 			break;
@@ -483,7 +485,7 @@ class Tebas{
 		
 		consoleOutput("Project name: " + pn);
 		consoleOutput("Project folder: " + workingDirectory);
-		if(project.CanGetCampAsDate("creationDate", out Date d)){
+		if(project.CanGetCamp("creationDate", out Date d)){
 			consoleOutput("Date of creation: " + d);
 		}
 		
@@ -502,7 +504,7 @@ class Tebas{
 			return;
 		}
 		
-		if(project.CanGetCampAsBool("git.use", out bool b) && b){
+		if(project.CanGetCamp("git.use", out bool b) && b){
 			GitHelper.status();
 			TemplateHandler.runScript("git");
 		}else{
@@ -515,13 +517,13 @@ class Tebas{
 			return;
 		}
 		
-		if(!template.CanGetCampAsString("codeExtensions", out string x)){
+		if(!template.CanGetCamp("codeExtensions", out string x)){
 			consoleOutput("The template does not have code file extensions");
 			TemplateHandler.runScript("stats");
 			return;
 		}
 		
-		if(!template.CanGetCampAsString("codeFilesFolderBlacklist", out string b)){
+		if(!template.CanGetCamp("codeFilesFolderBlacklist", out string b)){
 			consoleOutput("The template does not have code file folder blacklist.");
 			TemplateHandler.runScript("stats");
 			return;
@@ -551,7 +553,7 @@ class Tebas{
 			return;
 		}
 		
-		if(project.CanGetCampAsBool("git.use", out bool b) && b){
+		if(project.CanGetCamp("git.use", out bool b) && b){
 			GitHelper.add();
 			
 			TemplateHandler.runScript("add");
@@ -565,7 +567,7 @@ class Tebas{
 			return;
 		}
 		
-		if(project.CanGetCampAsBool("git.use", out bool b) && b){
+		if(project.CanGetCamp("git.use", out bool b) && b){
 			GitHelper.commit(m);
 			
 			TemplateHandler.runScript("commit");
@@ -579,7 +581,7 @@ class Tebas{
 			return;
 		}
 		
-		if(project.CanGetCampAsBool("git.use", out bool b) && b){
+		if(project.CanGetCamp("git.use", out bool b) && b){
 			GitHelper.push(r);
 			
 			TemplateHandler.runScript("push");
@@ -593,7 +595,7 @@ class Tebas{
 			return;
 		}
 		
-		if(project.CanGetCampAsBool("git.use", out bool b) && b){
+		if(project.CanGetCamp("git.use", out bool b) && b){
 			GitHelper.pull(r);
 			
 			TemplateHandler.runScript("pull");
@@ -623,17 +625,17 @@ class Tebas{
 		project.SetCamp("template", templateName);
 		project.SetCamp("creationDate", (Date) DateTime.Now);
 		
-		if(template.CanGetCampAsBool("git.defaultUse", out bool b) && b){
+		if(template.CanGetCamp("git.defaultUse", out bool b) && b){
 			project.SetCamp("git.use", true);
 			
 			GitHelper.init();
 			
 			string gitIgnore = "";
-			if(config.CanGetCampAsString("git.defaultGitignore", out string k)){
+			if(config.CanGetCamp("git.defaultGitignore", out string k)){
 				gitIgnore = k;
 			}
 			
-			if(template.CanGetCampAsString("git.gitignore", out k)){
+			if(template.CanGetCamp("git.gitignore", out k)){
 				gitIgnore += "\n" + k;
 			}
 			
@@ -644,13 +646,13 @@ class Tebas{
 			project.SetCamp("git.use", false);
 		}
 		
-		if(!(template.CanGetCampAsBool("addReadme", out b) && !b)){
+		if(!(template.CanGetCamp("addReadme", out b) && !b)){
 			string readme = "";
-			if(config.CanGetCampAsString("defaultReadme", out string s)){
+			if(config.CanGetCamp("defaultReadme", out string s)){
 				readme = s;
 			}
 			
-			if(template.CanGetCampAsString("readme", out s)){
+			if(template.CanGetCamp("readme", out s)){
 				readme += s;
 			}
 			
@@ -744,7 +746,7 @@ class Tebas{
 	
 	public static bool askDeletionConfirmation(){
 		initializeConfig();
-		if(config.CanGetCampAsBool("deletionConfirmationNeeded", out bool b) && !b){
+		if(config.CanGetCamp("deletionConfirmationNeeded", out bool b) && !b){
 			return true;
 		}
 		Console.WriteLine("Are you sure you want to delete it? (Y/N)");

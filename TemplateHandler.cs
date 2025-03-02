@@ -1,5 +1,5 @@
 using System;
-using AshLib;
+using AshLib.AshFiles;
 
 public static class TemplateHandler{
 	public static bool exists(string name){
@@ -19,7 +19,7 @@ public static class TemplateHandler{
 	public static bool runScript(string name, IEnumerable<string> args){
 		if(!(Tebas.template is null)){
 			string code = "";
-			if(!Tebas.template.CanGetCampAsString("script." + name, out code)){
+			if(!Tebas.template.CanGetCamp("script." + name, out code)){
 				return false;
 			}
 			Script s = new Script(Tebas.tn + " " + name, code);
@@ -32,7 +32,7 @@ public static class TemplateHandler{
 	public static bool runScript(string name){
 		if(!(Tebas.template is null)){
 			string code = "";
-			if(!Tebas.template.CanGetCampAsString("script." + name, out code)){
+			if(!Tebas.template.CanGetCamp("script." + name, out code)){
 				return false;
 			}
 			Script s = new Script(Tebas.tn + " " + name, code);
@@ -54,7 +54,7 @@ public static class TemplateHandler{
 		AshFile template = new AshFile(path);
 		
 		string name;
-		if(!template.CanGetCampAsString("name", out name)){
+		if(!template.CanGetCamp("name", out name)){
 			Tebas.consoleOutput("Template is incorrectly formatted: name missing");
 			return;
 		}
@@ -166,11 +166,11 @@ public static class TemplateHandler{
 		Tebas.workingDirectory = Tebas.templateDirectory;
 		
 		Tebas.consoleOutput("Template name: " + Tebas.tn);
-		if(Tebas.template.CanGetCampAsBool("git.defaultUse", out bool b)){
+		if(Tebas.template.CanGetCamp("git.defaultUse", out bool b)){
 			Tebas.consoleOutput("Use git: " + b);
 		}
 		
-		if(Tebas.template.CanGetCampAsString("codeExtensions", out string s)){
+		if(Tebas.template.CanGetCamp("codeExtensions", out string s)){
 			Tebas.consoleOutput("Code files extensions:");
 			string[] p = s.Split(new string[]{"\r\n", "\n", "\r"}, StringSplitOptions.None);
 			
@@ -182,7 +182,7 @@ public static class TemplateHandler{
 	
 	public static string resourceRead(string n){
 		if(!(Tebas.template is null)){
-			if(Tebas.template.CanGetCampAsString("resources." + n, out string v)){
+			if(Tebas.template.CanGetCamp("resources." + n, out string v)){
 				return v;
 			}else{
 				return "";
@@ -201,7 +201,7 @@ public static class TemplateHandler{
 	
 	public static void resourceAppend(string n, string c){
 		if(!(Tebas.template is null)){
-			if(Tebas.template.CanGetCampAsString("resources." + n, out string v)){
+			if(Tebas.template.CanGetCamp("resources." + n, out string v)){
 				Tebas.template.SetCamp("resources." + n, v + c);
 				Tebas.template.Save();
 			}else{

@@ -13,7 +13,7 @@ public static class GitHelper{
 	}
 	
 	static void tryInit(){
-		if(Tebas.project.CanGetCampAsBool("git.initialized", out bool b) && !b){
+		if(Tebas.project.CanGetCamp("git.initialized", out bool b) && !b){
 			init();
 		}
 	}
@@ -31,7 +31,7 @@ public static class GitHelper{
 	public static void commit(string m){
 		Tebas.initializeConfig();
 		tryInit();
-		if(Tebas.config.CanGetCampAsBool("git.autoAddOnCommit", out bool b) && b){
+		if(Tebas.config.CanGetCamp("git.autoAddOnCommit", out bool b) && b){
 			add();
 		}
 		
@@ -84,7 +84,7 @@ public static class GitHelper{
 		Tebas.initializeConfig();
 		
 		string gitPath = "git";
-		if(Tebas.config.CanGetCampAsString("git.path", out string s)){
+		if(Tebas.config.CanGetCamp("git.path", out string s)){
 			gitPath = s;
 		}
 		return gitPath;
@@ -94,14 +94,14 @@ public static class GitHelper{
 		Tebas.initializeConfig();
 		
 		string branch = "main";
-		if(Tebas.config.CanGetCampAsString("git.defaultBranch", out string s)){
+		if(Tebas.config.CanGetCamp("git.defaultBranch", out string s)){
 			branch = s;
 		}
 		return branch;
 	}
 	
 	public static bool remoteExists(string name){
-		if(Tebas.project.CanGetCampAsString("git.remote." + name, out string s)){
+		if(Tebas.project.CanGetCamp("git.remote." + name, out string s)){
 			return true;
 		}
 		return false;
@@ -177,8 +177,8 @@ public static class GitHelper{
 		
 		List<string> r = new List<string>();
 		
-		foreach(KeyValuePair<string, CampValue> kvp in Tebas.project.data){
-			if(kvp.Key.StartsWith("git.remote.") && kvp.Value.CanGetString(out string s)){
+		foreach(KeyValuePair<string, object> kvp in Tebas.project.data){
+			if(kvp.Key.StartsWith("git.remote.") && kvp.Value is string){
 				r.Add(kvp.Key.Substring(11));
 			}
 		}
@@ -192,8 +192,8 @@ public static class GitHelper{
 		}
 		
 		Tebas.consoleOutput("Complete list of git remotes:");
-		foreach(KeyValuePair<string, CampValue> kvp in Tebas.project.data){
-			if(kvp.Key.StartsWith("git.remote.") && kvp.Value.CanGetString(out string s)){
+		foreach(KeyValuePair<string, object> kvp in Tebas.project.data){
+			if(kvp.Key.StartsWith("git.remote.") && kvp.Value is string s){
 				Tebas.consoleOutput(kvp.Key.Substring(11) + ": " + s);
 			}
 		}
@@ -204,8 +204,8 @@ public static class GitHelper{
 			return -1;
 		}
 		int i = 0;
-		foreach(KeyValuePair<string, CampValue> kvp in Tebas.project.data){
-			if(kvp.Key.StartsWith("git.remote.") && kvp.Value.CanGetString(out string s)){
+		foreach(KeyValuePair<string, object> kvp in Tebas.project.data){
+			if(kvp.Key.StartsWith("git.remote.") && kvp.Value is string){
 				i++;
 			}
 		}
@@ -217,8 +217,8 @@ public static class GitHelper{
 			return null;
 		}
 		
-		foreach(KeyValuePair<string, CampValue> kvp in Tebas.project.data){
-			if(kvp.Key.StartsWith("git.remote.") && kvp.Value.CanGetString(out string s)){
+		foreach(KeyValuePair<string, object> kvp in Tebas.project.data){
+			if(kvp.Key.StartsWith("git.remote.") && kvp.Value is string){
 				return kvp.Key.Substring(11);
 			}
 		}

@@ -1394,14 +1394,14 @@ public class Script{
 	}
 	
 	string getName(){
-		if(Tebas.config.CanGetCampAsBool("scriptShowsName", out bool b) && b){
+		if(Tebas.config.CanGetCamp("scriptShowsName", out bool b) && b){
 			return "[" + name + "] ";
 		}
 		return "";
 	}
 	
 	string getErrorName(){
-		if(Tebas.config.CanGetCampAsBool("scriptShowsName", out bool b) && b){
+		if(Tebas.config.CanGetCamp("scriptShowsName", out bool b) && b){
 			return "[" + name + " ERROR] ";
 		}
 		return "[ERROR]";
@@ -1436,7 +1436,7 @@ public class Script{
 	
 	string projectRead(string n){
 		if(!(Tebas.project is null)){
-			if(Tebas.project.CanGetCampAsString("resources." + n, out string v)){
+			if(Tebas.project.CanGetCamp("resources." + n, out string v)){
 				return v;
 			}else{
 				return "";
@@ -1455,7 +1455,7 @@ public class Script{
 	
 	void projectAppend(string n, string c){
 		if(!(Tebas.project is null)){
-			if(Tebas.project.CanGetCampAsString("resources." + n, out string v)){
+			if(Tebas.project.CanGetCamp("resources." + n, out string v)){
 				Tebas.project.SetCamp("resources." + n, v + c);
 				Tebas.project.Save();
 			}else{
@@ -1568,14 +1568,14 @@ public class Script{
 	
 	
 	string getName(){
-		if(Tebas.config.CanGetCampAsBool("scriptShowsName", out bool b) && b){
+		if(Tebas.config.CanGetCamp("scriptShowsName", out bool b) && b){
 			return "[" + name + "] ";
 		}
 		return "";
 	}
 	
 	string getErrorName(){
-		if(Tebas.config.CanGetCampAsBool("scriptShowsName", out bool b) && b){
+		if(Tebas.config.CanGetCamp("scriptShowsName", out bool b) && b){
 			return "[" + name + " ERROR] ";
 		}
 		return "[ERROR]";

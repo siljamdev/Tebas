@@ -48,14 +48,14 @@ public static class ProcessExecuter{
     }
 	
 	static string getName(string n){
-		if(Tebas.config.CanGetCampAsBool("processShowsName", out bool b) && b){
+		if(Tebas.config.CanGetCamp("processShowsName", out bool b) && b){
 			return "[" + n + "] ";
 		}
 		return "";
 	}
 	
 	static string getErrorName(string n){
-		if(Tebas.config.CanGetCampAsBool("processShowsName", out bool b) && b){
+		if(Tebas.config.CanGetCamp("processShowsName", out bool b) && b){
 			return "[" + n + " ERROR] ";
 		}
 		return "[ERROR]";
