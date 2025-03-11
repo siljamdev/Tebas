@@ -1,0 +1,11 @@
+console.print "Run python project"
+
+template.read py.0 "pythonPath"
+
+string.set cli.1 "start \"\" \"cmd /c python \"{args.0}\" \""
+
+process.cmd cli.1
+
+project.read def.0 "timesRun"
+math.sumUp def.0 def.0
+project.write "timesRun" def.0
