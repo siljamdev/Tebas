@@ -25,18 +25,18 @@ public static class CommandLineHandler{
 		if(Path.GetExtension(args[0]) == ".tbtem"){
 			TemplateHandler.install(args[0]);
 			Console.WriteLine("Press any key to close");
-			Console.ReadKey();
+			waitAnyKey
 			return;
 		}else if(Path.GetExtension(args[0]) == ".tebas"){
 			Tebas.workingDirectory = Path.GetDirectoryName(args[0]);
 			Tebas.localInfo();
 			Console.WriteLine("Press any key to close");
-			Console.ReadKey();
+			waitAnyKey
 			return;
 		}else if(Path.GetExtension(args[0]) == ".tbplg"){
 			PluginHandler.install(args[0]);
 			Console.WriteLine("Press any key to close");
-			Console.ReadKey();
+			waitAnyKey
 			return;
 		}
 		
@@ -951,5 +951,13 @@ public static class CommandLineHandler{
 			return false;
 		}
 		return true;
+	}
+	
+	static void waitAnyKey(){
+		if(Environment.UserInteractive && !Console.IsInputRedirected){
+			Console.ReadKey();
+		}else{
+			Console.Read();
+		}
 	}
 }
