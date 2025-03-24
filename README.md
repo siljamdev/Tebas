@@ -11,6 +11,10 @@ Each project is created with a template, which gives additional features.
 
 There is an extensive command line help menu.
 
+You can add -q before all your arguments to make it quiet
+
+**ALL DOCUMENTATION WAS MADE BY HAND**
+
 ## Templates
 These are user made. If you want to make a template, i suggest using the Creator Utility, looking into the structure of the [example templates](./documentation/example templates).
 They are [AshFiles](https://github.com/Dumbelfo08/AshLib) with the **.tbtem** extension. You can double click them to install them.

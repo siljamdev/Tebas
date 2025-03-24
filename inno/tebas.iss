@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Tebas"
-#define MyAppVersion "0.3.3"
+#define MyAppVersion "0.3.4"
 #define MyAppPublisher "AshProj"
 #define MyAppURL "https://github.com/siljamdev/Tebas"
 ; source executable
@@ -33,7 +33,7 @@ ChangesAssociations=yes
 DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
-OutputBaseFilename=Tebas
+OutputBaseFilename={#MyAppName}_installer_v{#MyAppVersion}_winx64
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
