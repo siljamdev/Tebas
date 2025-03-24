@@ -7,7 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	
-	<Version>0.3.3</Version>
+	<Version>0.3.4</Version>
     <Authors>siljam</Authors>
     <Company>AshProject</Company>
     <PackageDescription>Project managing made easy</PackageDescription>
@@ -19,6 +19,7 @@
   <ItemGroup>
     <PackageReference Include="AshLib" Version="3.2.2" />
 	<Compile Remove="documentation/**" />
+	<Compile Remove="DebugHelper.cs" />
   </ItemGroup>
 
 </Project>

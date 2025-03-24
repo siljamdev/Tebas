@@ -1,4 +1,5 @@
 # Tebas
+<img src="res/icon.png" width="200"/>
 
 Project manager with git support
 
@@ -19,5 +20,5 @@ These are user made. They are like templates, but instead of applying to a proje
 They are [AshFiles](https://github.com/Dumbelfo08/AshLib) with the **.tbplg** extension. You can double click them to install them.
 
 ## Scripting language
-The templates use a custom scripting language to provide functionality. You can look into [here](./documentation/scripts) for documentation and examples.
-Also, there is a Notepad++ Language file to provide syntax highlighting. You can find it [here](./n++).
+The templates use a custom scripting language to provide functionality. You can look into [here](./documentation/scripts) for documentation and examples.  
+Also, there is a Notepad++ Language file to provide syntax highlighting. You can find it [here](./n++). Note that this custom language is thought for the dark theme

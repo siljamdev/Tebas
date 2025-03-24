@@ -25,18 +25,18 @@ public static class CommandLineHandler{
 		if(Path.GetExtension(args[0]) == ".tbtem"){
 			TemplateHandler.install(args[0]);
 			Console.WriteLine("Press any key to close");
-			waitAnyKey
+			waitAnyKey();
 			return;
 		}else if(Path.GetExtension(args[0]) == ".tebas"){
 			Tebas.workingDirectory = Path.GetDirectoryName(args[0]);
 			Tebas.localInfo();
 			Console.WriteLine("Press any key to close");
-			waitAnyKey
+			waitAnyKey();
 			return;
 		}else if(Path.GetExtension(args[0]) == ".tbplg"){
 			PluginHandler.install(args[0]);
 			Console.WriteLine("Press any key to close");
-			waitAnyKey
+			waitAnyKey();
 			return;
 		}
 		
@@ -79,6 +79,16 @@ public static class CommandLineHandler{
 			case "local":
 			clp++;
 			commandsLocal(args);
+			break;
+			
+			case "script": //Standalone script
+			clp++;
+			commandScript(args);
+			break;
+			
+			case "loop": //Standalone script
+			clp++;
+			commandLoop(args);
 			break;
 			
 			case "help":
@@ -880,6 +890,23 @@ public static class CommandLineHandler{
 		Tebas.localRemoteRename(n, u);
 	}
 	
+	static void commandScript(string[] args){
+		string f;
+		if(!determineIfEnoughLength(1, args.Length)){
+			Tebas.consoleOutput("Not enough arguments");
+			return;
+		}
+		
+		f = args[clp];
+		clp++;
+		
+		Tebas.runStandaloneScript(f, args.Skip(clp));
+	}
+	
+	static void commandLoop(string[] args){
+		Tebas.loop();
+	}
+	
 	static void commandVersion(string[] args){
 		Tebas.version();
 	}
@@ -889,7 +916,9 @@ public static class CommandLineHandler{
 		Tebas.consoleOutput("");
 		Tebas.consoleOutput("Sections:");
 		Tebas.consoleOutput("");
-		Tebas.consoleOutput("version  Shows the current tebas version");
+		Tebas.consoleOutput("version  Shows the current Tebas version");
+		Tebas.consoleOutput("");
+		Tebas.consoleOutput("loop  Enters a state where you can write as many commands as wanted");
 		Tebas.consoleOutput("");
 		Tebas.consoleOutput("channel");
 		Tebas.consoleOutput(" Manages channels(folders where projects are). This section can be executed anywhere");
@@ -909,11 +938,15 @@ public static class CommandLineHandler{
 		Tebas.consoleOutput("");
 		Tebas.consoleOutput("plugin");
 		Tebas.consoleOutput(" Manages the plugins. This section can be executed anywhere");
-		Tebas.consoleOutput("         install [path]          Installs the plugin from a file (.tbplg)");
-		Tebas.consoleOutput("         uninstall [name]        Deletes that plugin");
-		Tebas.consoleOutput("         list                    Shows list of all plugins installed");
-		Tebas.consoleOutput("         create [path]           Create a plugin using the creator utility");
-		Tebas.consoleOutput("         [name] [script] [args]  Attempts to run a script of that plugin");
+		Tebas.consoleOutput("        install [path]          Installs the plugin from a file (.tbplg)");
+		Tebas.consoleOutput("        uninstall [name]        Deletes that plugin");
+		Tebas.consoleOutput("        list                    Shows list of all plugins installed");
+		Tebas.consoleOutput("        create [path]           Create a plugin using the creator utility");
+		Tebas.consoleOutput("        [name] [script] [args]  Attempts to run a script of that plugin");
+		Tebas.consoleOutput("");
+		Tebas.consoleOutput("script");
+		Tebas.consoleOutput(" Lets you run a plugin, just for the fun of it. All enviroment variables are empty but the working directory");
+		Tebas.consoleOutput("        [script file path] [args]   Attempts to run a script from a file");
 		Tebas.consoleOutput("");
 		Tebas.consoleOutput("global");
 		Tebas.consoleOutput(" Manages global things. This section can be executed anywhere");

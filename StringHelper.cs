@@ -5,6 +5,7 @@ public static class StringHelper{
 	
 	static readonly char[] whitespace = {' ', '\n', '\r', '\t'};
 	
+	//remove surrounding quotes
 	public static string removeQuotesSingle(string p){
 		p = p.Trim();
 		
@@ -21,6 +22,7 @@ public static class StringHelper{
 		return p;
 	}
 	
+	//split strinbg like cli does it
 	public static string[] splitSentence(string l){
 		bool stringOpened = false;
 		bool previousEscapeCode = false;

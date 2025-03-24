@@ -23,7 +23,7 @@ class Tebas{
 	private static bool configInit;
 	private static bool localInit;
 	
-	public const string currentVersion = "v0.3.3";
+	public const string currentVersion = "v0.3.4";
 	
 	public static void Main(string[] args){
 		workingDirectory = Directory.GetCurrentDirectory();
@@ -730,6 +730,68 @@ class Tebas{
 		}
 		
 		return true;
+	}
+	
+	//Standalone scripts
+	public static void runStandaloneScript(string filePath){
+		filePath = StringHelper.removeQuotesSingle(filePath);
+		
+		if(!File.Exists(filePath)){
+			consoleOutput("File not found");
+			return;
+		}
+		
+		template = null;
+		tn = "";
+		templateDirectory = "";
+		project = null;
+		pn = "";
+		
+		Script s = new Script(Path.GetFileNameWithoutExtension(filePath), File.ReadAllText(filePath));
+		s.run(null);
+	}
+	
+	public static void runStandaloneScript(string filePath, IEnumerable<string> args){
+		filePath = StringHelper.removeQuotesSingle(filePath);
+		
+		if(!File.Exists(filePath)){
+			consoleOutput("File not found");
+			return;
+		}
+		
+		template = null;
+		tn = "";
+		templateDirectory = "";
+		project = null;
+		pn = "";
+		
+		Script s = new Script(Path.GetFileNameWithoutExtension(filePath), File.ReadAllText(filePath));
+		s.run(args);
+	}
+	
+	//loop
+	public static void loop(){
+		Tebas.quiet = false;
+		consoleOutput(" Exit typing 'exit'");
+		string s;
+		while(true){
+			Console.Write(">");
+			s = Console.ReadLine();
+			
+			if(s.ToLower() == "exit"){
+				break;
+			}
+			
+			try{
+				CommandLineHandler.process(StringHelper.splitSentence(s));
+			}catch(TebasError te){
+				Console.WriteLine(te);
+			}catch(TebasCriticalError tce){
+				Console.WriteLine(tce);
+			}
+			
+			consoleOutput("");
+		}
 	}
 	
 	//Other thingies
