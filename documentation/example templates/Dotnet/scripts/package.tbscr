@@ -1,6 +1,18 @@
 console.print "Package dotnet project"
 
-string.set def.1 "add package "
-self.append def.1 args.0
+math.equal con.0 args.length "0"
+if con.0 {
+	console.print "You need to specify at least the package name"
+	exit
+}
+
+math.greater con.0 args.length "1"
+if con.0 {
+	string.set def.1 "add package {args.0} --version {args.1}"
+	self.expand def.1
+} else {
+	string.set def.1 "add package {args.0}"
+	self.expand def.1
+}
 
 process.run "dotnet" def.1

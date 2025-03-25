@@ -1,0 +1,17 @@
+console.print "New C project"
+
+//program
+file.exists pr.0 "W/*.c"
+if! pr.0 {
+	template.read pr.1 "program"
+	
+	file.create "W/main.c"
+	file.write "W/main.c" pr.1
+}
+
+folder.create "W/releases"
+folder.create "W/bin"
+
+project.write "timesCompiled" "0"
+
+project.write "dateCreated" %d

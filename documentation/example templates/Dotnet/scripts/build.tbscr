@@ -1,4 +1,4 @@
-console.print "Debug dotnet project"
+console.print "Build dotnet project"
 
 process.runOutput "dotnet" "build /nologo /clp:NoSummary" dot err
 
@@ -36,14 +36,6 @@ call showErrors
 project.read def.0 "timesCompiled"
 math.sumUp def.0 def.0
 project.write "timesCompiled" def.0
-
-math.greater def.0 errors.length "0"
-if def.0 {
-	//console.pause "Console Paused"
-	exit
-} else {
-	process.cmd "start \"\" \"cmd /c dotnet run & pause & exit\""
-}
 
 function orderWarning {
 	scope temp

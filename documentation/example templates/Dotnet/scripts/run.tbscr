@@ -39,7 +39,7 @@ project.write "timesCompiled" def.0
 
 math.greater def.0 errors.length "0"
 if def.0 {
-	console.pause "Console Paused"
+	//console.pause "Console Paused"
 	exit
 } else {
 	process.cmd "start \"\" \"cmd /c dotnet run & exit\""

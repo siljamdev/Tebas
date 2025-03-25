@@ -3,6 +3,7 @@ console.print "Run python project"
 template.read py.0 "pythonPath"
 
 string.set cli.1 "start \"\" \"cmd /c python \"{args.0}\" \""
+self.expand cli.1
 
 process.cmd cli.1
 

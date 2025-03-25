@@ -1,0 +1,8 @@
+console.print "Help C template"
+console.print ""
+console.print "This template is aimed to be used with gcc compiler to compile c projects. It will compile all c files to the bin folder on normal run, and will compile into the release folder when publishing"
+console.print "List of scripts:"
+console.print "run                    attempts to compile, and if succesful, runs the program"
+console.print "debug                  attempts to compile, and if succesful, runs the program with a pause at the end"
+console.print "build                  attempts to compile"
+console.print "publish [version]      attempts to compile into the release folder. Expects an argument, version"

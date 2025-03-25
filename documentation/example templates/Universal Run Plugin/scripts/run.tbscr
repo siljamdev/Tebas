@@ -4,8 +4,15 @@ if def.0 {
 	exit
 }
 
+string.equal def.0 %tn "c"
+if def.0 {
+	template.run "run" ""
+	exit
+}
+
 path.extension def.1 args.0
 
+//html file
 string.equal def.0 def.1 ".html"
 if def.0 {
 	plugin.read def.2 %pl "browserPath"
@@ -40,6 +47,7 @@ if def.0 {
 	exit
 }
 
+//fragroom file
 string.equal def.0 def.1 ".fgrom"
 if def.0 {
 	plugin.read def.2 %pl "fgromPath"

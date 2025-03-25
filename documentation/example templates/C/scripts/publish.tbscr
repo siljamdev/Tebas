@@ -1,0 +1,90 @@
+console.print "Publish C project"
+
+math.equal check.0 args.length "0"
+math.equal check.1 args.0 ""
+bool.or check.2 check.0 check.1
+
+if check.2 {
+	console.print "The script expects a version, and none was provided"
+	exit
+}
+
+string.set def.0 args.0
+console.print "The version is {def.0}"
+
+string.set def.1 "W/releases/"
+self.append def.1 def.0
+
+folder.exists check.0 def.1
+if check.0 {
+	console.ask anw.0 "That version already exists. Do you want to override it? (Y/N): "
+	self.upper anw.0
+	string.equal anw.1 anw.0 "Y"
+	
+	if! anw.1 {
+		exit
+	}
+}
+
+folder.create def.1
+
+template.read p.0 "gccPath"
+
+folder.listChild cFiles "W" "*.c" //Find all c files
+
+string.set lop.0 "0"
+math.less lop.1 lop.0 cFiles.length
+
+while lop.1 { //delete the starting "W/" part
+	//loop body
+	table.access lop.2 cFiles lop.0
+	string.count lop.3 lop.2
+	
+	self.append lop.2 "    " //Substring is broken :(
+	
+	math.subtract lop.3 lop.3 "2"
+	string.substring skibidi.0 lop.2 "2" lop.3
+	table.setAt cFiles lop.0 skibidi.0
+	
+	//for condition
+	math.sumUp lop.0 lop.0
+	math.less lop.1 lop.0 cFiles.length
+}
+
+table.join f.0 cFiles " " //Join all files
+
+string.set a.0 "{f.0} -o releases/{def.0}/{%pn}"
+self.expand a.0
+
+process.runOutput p.0 a.0 out err
+
+call showOutputs
+
+project.read def.0 "timesCompiled"
+math.sumUp def.0 def.0
+project.write "timesCompiled" def.0
+
+console.print "Publishing finished!"
+
+function showOutputs {
+	math.equal con.0 "0" out.length
+	string.equal con.1 out.0 ""
+	bool.or con.2 con.0 con.1
+	
+	if! con.2 {
+		console.print "GCC output:"
+		table.join b.0 out "\n"
+		console.print b.0
+	}
+	
+	math.equal con.0 "0" err.length
+	string.equal con.1 err.0 ""
+	bool.or con.2 con.0 con.1
+	
+	if! con.2 {
+		console.print "GCC errors:"
+		table.join b.0 err "\n"
+		console.print b.0
+		exit //if there is errors, dont try to run (obviously)
+	}
+}

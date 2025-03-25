@@ -1,0 +1,5 @@
+console.print "Help python template"
+console.print ""
+console.print "This template is aimed to be used with python"
+console.print "List of scripts:"
+console.print "run [file]                  attempts to run a file"
