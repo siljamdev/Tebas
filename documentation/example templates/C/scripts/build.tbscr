@@ -25,7 +25,7 @@ while lop.1 { //delete the starting "W/" part
 
 table.join f.0 cFiles " " //Join all files
 
-string.set a.0 "{f.0} -o bin/{%pn}" //GCC args
+string.set a.0 "{f.0} -o \"bin/{%pn}\"" //GCC args
 self.expand a.0
 
 process.runOutput p.0 a.0 out err //run gcc

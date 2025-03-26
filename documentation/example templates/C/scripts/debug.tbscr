@@ -25,8 +25,10 @@ while lop.1 { //delete the starting "W/" part
 
 table.join f.0 cFiles " " //Join all files
 
-string.set a.0 "{f.0} -o bin/{%pn}" //GCC args
+string.set a.0 "{f.0} -o \"bin/{%pn}\"" //GCC args
 self.expand a.0
+
+//console.print "Command run: {p.0} {a.0}"
 
 process.runOutput p.0 a.0 out err //run gcc
 
@@ -36,8 +38,10 @@ project.read def.0 "timesCompiled"
 math.sumUp def.0 def.0
 project.write "timesCompiled" def.0
 
-string.set a.0 "start \"\" \"cmd /c bin\\{%pn} & echo. & pause & exit\"" //start the executable
+string.set a.0 "start \"\" cmd /c \"\"bin/{%pn}.exe\" & echo. & pause & exit\"" //start the executable
 self.expand a.0
+
+//console.print a.0
 
 process.cmd a.0
 

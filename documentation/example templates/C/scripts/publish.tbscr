@@ -53,7 +53,7 @@ while lop.1 { //delete the starting "W/" part
 
 table.join f.0 cFiles " " //Join all files
 
-string.set a.0 "{f.0} -o releases/{def.0}/{%pn}"
+string.set a.0 "{f.0} -o \"releases/{def.0}/{%pn}\""
 self.expand a.0
 
 process.runOutput p.0 a.0 out err
