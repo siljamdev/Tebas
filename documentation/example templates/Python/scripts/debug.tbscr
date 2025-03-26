@@ -1,8 +1,8 @@
-console.print "Run python project"
+console.print "Debug python project"
 
 template.read py.0 "pythonPath"
 
-string.set cli.1 "start \"\" \"cmd /c {py.0} \"{args.0}\" & exit\""
+string.set cli.1 "start \"\" \"cmd /c {py.0} \"{args.0}\" & pause & exit\""
 self.expand cli.1
 
 process.cmd cli.1

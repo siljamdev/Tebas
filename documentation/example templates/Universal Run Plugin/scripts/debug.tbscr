@@ -9,3 +9,11 @@ if def.0 {
 	template.run "debug" ""
 	exit
 }
+
+string.equal def.0 %tn "python"
+if def.0 {
+	string.set def.1 "\"{args.0}\""
+	self.expand def.1
+	template.run "debug" def.1
+	exit
+}

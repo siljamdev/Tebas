@@ -18,7 +18,6 @@ if def.0 {
 	plugin.read def.2 %pl "browserPath"
 	string.set def.3 "\"{args.0}\""
 	self.expand def.3
-	console.print def.2
 	process.run def.2 def.3
 	exit
 }
