@@ -24,7 +24,9 @@ if def.0 {
 
 string.equal def.0 %tn "fgrom"
 if def.0 {
-	template.run "run" args.0
+	string.set def.4 "\"{args.0}\""
+	self.expand def.4
+	template.run "run" def.4
 	exit
 }
 
@@ -42,7 +44,9 @@ if def.0 {
 
 string.equal def.0 %tn "python"
 if def.0 {
-	template.run "run" args.0
+	string.set def.4 "\"{args.0}\""
+	self.expand def.4
+	template.run "run" def.4
 	exit
 }
 
