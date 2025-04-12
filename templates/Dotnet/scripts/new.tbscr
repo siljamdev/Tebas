@@ -1,0 +1,50 @@
+console.print "New dotnet project"
+
+//Csproj
+file.exists cp.0 "W/*.csproj"
+if! cp.0 {
+	template.read cp.1 "csproj"
+	
+	template.read cp.2 "author"
+	self.replace cp.1 "@author" cp.2
+	
+	template.read cp.2 "company"
+	self.replace cp.1 "@company" cp.2
+	
+	console.ask cp.2 "What is the description of the project?: "
+	self.replace cp.1 "@desc" cp.2
+	
+	string.set cp.3 f"W/{%pn}.csproj"
+	
+	file.create cp.3
+	file.write cp.3 cp.1
+}
+
+//program
+file.exists pr.0 "W/*.cs"
+if! pr.0 {
+	template.read pr.1 "program"
+	
+	self.replace pr.1 "@name" %pn
+	
+	string.set pr.3 f"W/{%pn}.cs"
+	
+	file.create pr.3
+	file.write pr.3 pr.1
+}
+
+folder.create "W/releases"
+
+project.write "timesCompiled" "0"
+
+project.write "dateCreated" %d
+
+console.ask def.0 "Do you want to use 7zip on publish? (Y/N): "
+self.upper def.0
+
+string.equal def.1 def.0 "Y"
+if def.1 {
+	project.write "use7zip" true.0
+} else {
+	project.write "use7zip" false.0
+}

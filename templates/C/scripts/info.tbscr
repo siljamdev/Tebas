@@ -1,0 +1,3 @@
+console.print "Info C project"
+project.read def.0 "dateCreated"
+console.print f"This is a C project created on the {def.0}"

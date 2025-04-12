@@ -1,0 +1,18 @@
+string.equal def.0 %tn "dotnet"
+if def.0 {
+	template.run "debug" ""
+	exit
+}
+
+string.equal def.0 %tn "c"
+if def.0 {
+	template.run "debug" ""
+	exit
+}
+
+string.equal def.0 %tn "python"
+if def.0 {
+	string.set def.1 f"\"{args.0}\""
+	template.run "debug" def.1
+	exit
+}

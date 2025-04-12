@@ -1,0 +1,4 @@
+console.ask def.0 "What is the path to FragRoom? "
+self.removeQuotes def.0
+
+template.write "path" def.0

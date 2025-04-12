@@ -1,0 +1,9 @@
+console.ask def.0 "What is the path to FragRoom? "
+self.removeQuotes def.0
+
+plugin.write %pl "fgromPath" def.0
+
+console.ask def.0 "What is the path to a browser? "
+self.removeQuotes def.0
+
+plugin.write %pl "browserPath" def.0

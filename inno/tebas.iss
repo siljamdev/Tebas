@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Tebas"
-#define MyAppVersion "0.3.4"
+#define MyAppVersion "0.4.0"
 #define MyAppPublisher "AshProj"
 #define MyAppURL "https://github.com/siljamdev/Tebas"
 ; source executable

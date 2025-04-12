@@ -1,0 +1,11 @@
+console.print "Installation of C template"
+
+do! con.0 {
+	console.ask def.2 "Enter the path to gcc.exe: "
+	self.removeQuotes def.2
+	file.exists con.0 def.2
+}
+
+template.write "gccPath" def.2
+
+console.print "Installation finished!"

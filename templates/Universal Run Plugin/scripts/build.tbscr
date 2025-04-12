@@ -1,0 +1,11 @@
+string.equal def.0 %tn "dotnet"
+if def.0 {
+	template.run "build" ""
+	exit
+}
+
+string.equal def.0 %tn "c"
+if def.0 {
+	template.run "build" ""
+	exit
+}

@@ -1,0 +1,7 @@
+template.read def.0 "path"
+
+self.removeQuotes args.0
+
+string.set def.1 f"web {args.0}"
+
+process.run def.0 def.1

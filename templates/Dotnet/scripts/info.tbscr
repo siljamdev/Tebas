@@ -1,0 +1,3 @@
+console.print "Info dotnet project"
+project.read def.0 "dateCreated"
+console.print f"This is a dotnet project created on the {def.0}"

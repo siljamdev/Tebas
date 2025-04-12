@@ -1,0 +1,17 @@
+console.print "Installation of dotnet template"
+
+console.ask def.0 "What is your author name?: "
+template.write "author" def.0
+
+console.ask def.0 "What is your company name?: "
+template.write "company" def.0
+
+do! con.0 {
+	console.ask def.2 "Enter the path to 7z.exe: "
+	self.removeQuotes def.2
+	file.exists con.0 def.2
+}
+
+template.write "7zipPath" def.2
+
+console.print "Installation finished!"

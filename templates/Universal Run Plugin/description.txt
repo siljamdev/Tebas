@@ -1,0 +1,1 @@
+Easily compile and run many different types of projects with a single command

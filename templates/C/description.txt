@@ -1,0 +1,1 @@
+This template is used with C project and GCC compiler

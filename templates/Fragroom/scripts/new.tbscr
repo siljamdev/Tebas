@@ -1,0 +1,6 @@
+template.read def.0 "program"
+
+string.set def.1 f"W/{%pn}.fgrom"
+
+file.create def.1
+file.write def.1 def.0
