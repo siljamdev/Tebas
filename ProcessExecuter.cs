@@ -47,6 +47,57 @@ public static class ProcessExecuter{
         }
     }
 	
+	public static void runProcessNewWindow(string command, string arguments, string workingDirectory)
+    {
+		ProcessStartInfo processInfo = new ProcessStartInfo
+        {
+            FileName = command,
+            Arguments = arguments,
+            WorkingDirectory = workingDirectory,
+            UseShellExecute = true
+        };
+
+        using (Process process = new Process { StartInfo = processInfo })
+        {
+			// Start the process
+            process.Start();
+        }
+    }
+	
+	public static bool isExecutableInPath(string exeName, out string p){
+		// If no extension is provided, add .exe on Windows
+		if(!exeName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)){
+			exeName += ".exe";
+		}
+		
+		// Get all PATH directories
+		string? pathEnv = Environment.GetEnvironmentVariable("PATH");
+		if(pathEnv == null){
+			p = "";
+			return false;
+		}
+		
+		string windowsAppsDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData", "Local", "Microsoft", "WindowsApps");
+		
+		foreach(string path in pathEnv.Split(Path.PathSeparator)){
+			string fullPath = path.Trim();
+			
+			if(fullPath.Equals(windowsAppsDir, StringComparison.OrdinalIgnoreCase)){
+				continue;
+			}
+			
+			fullPath = Path.Combine(fullPath, exeName);
+			
+			if(File.Exists(fullPath)){
+				p = fullPath;
+				return true;
+			}
+		}
+		
+		p = "";
+		return false;
+	}
+	
 	static string getName(string n){
 		if(Tebas.config.CanGetCamp("processShowsName", out bool b) && b){
 			return "[" + n + "] ";
@@ -59,6 +110,13 @@ public static class ProcessExecuter{
 			return "[" + n + " ERROR] ";
 		}
 		return "[ERROR]";
+	}
+	
+	public static void openLink(string url){
+		Process.Start(new ProcessStartInfo{
+			FileName = url,
+			UseShellExecute = true
+		});
 	}
 	
 	public static void runProcessWithOutput(string name, string command, string arguments, string workingDirectory, List<string> output, List<string> error)

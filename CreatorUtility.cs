@@ -16,7 +16,9 @@ static class CreatorUtility{
 		string name = ask("Name of the template:");
 		t.SetCamp("name", name);
 		
-		t.SetCamp("git.defaultUse", askTF("Uses git?:"));
+		t.SetCamp("version", Tebas.currentVersion);
+		
+		t.SetCamp("git.defaultUse", askTF("Uses git? (Y/N):"));
 		
 		loadFile("default.gitignore", "git.gitignore");
 		
@@ -24,9 +26,12 @@ static class CreatorUtility{
 			t.SetCamp("addReadme", true);
 			loadFile("readme.md", "readme");
 		}else{
-			t.SetCamp("addReadme", askTF("Add readme file?"));
+			t.SetCamp("addReadme", askTF("Add readme file? (Y/N):"));
 		}
 		
+		if(File.Exists(path + "/description.txt")){
+			loadFile("description.txt", "description");
+		}
 		
 		loadFile("extensions.txt", "codeExtensions");
 		loadFile("blacklist.txt", "codeFilesFolderBlacklist");
@@ -35,8 +40,13 @@ static class CreatorUtility{
 			string[] scripts = Directory.GetFiles(path + "/scripts", "*.tbscr", SearchOption.TopDirectoryOnly);
 			
 			foreach(string scr in scripts){
-				t.SetCamp("script." + Path.GetFileNameWithoutExtension(scr), File.ReadAllText(scr));
-				Console.WriteLine("Loaded script " + Path.GetFileNameWithoutExtension(scr));
+				string scrn = Path.GetFileNameWithoutExtension(scr);
+				if(scrn.Contains(' ') || scrn.StartsWith("*")){
+					Console.WriteLine("Error in the name of script " + scrn);
+					continue;
+				}
+				t.SetCamp("script." + scrn, File.ReadAllText(scr));
+				Console.WriteLine("Loaded script " + scrn);
 			}
 		}else{
 			Console.WriteLine("We could not find the scripts folder");
@@ -46,7 +56,12 @@ static class CreatorUtility{
 			string[] resources = Directory.GetFiles(path + "/resources", "*", SearchOption.TopDirectoryOnly);
 			
 			foreach(string res in resources){
-				t.SetCamp("resources." + Path.GetFileNameWithoutExtension(res), File.ReadAllText(res));
+				string resn = Path.GetFileNameWithoutExtension(res);
+				if(resn.Contains(' ')){
+					Console.WriteLine("Error in the name of resource " + res);
+					continue;
+				}
+				t.SetCamp("resources." + resn, File.ReadAllText(res));
 				Console.WriteLine("Loaded resource " + res);
 			}
 		}else{
@@ -70,12 +85,23 @@ static class CreatorUtility{
 		string name = ask("Name of the plugin:");
 		t.SetCamp("name", name);
 		
+		t.SetCamp("version", Tebas.currentVersion);
+		
+		if(File.Exists(path + "/description.txt")){
+			loadFile("description.txt", "description");
+		}
+		
 		if(Directory.Exists(path + "/scripts")){
 			string[] scripts = Directory.GetFiles(path + "/scripts", "*.tbscr", SearchOption.TopDirectoryOnly);
 			
 			foreach(string scr in scripts){
-				t.SetCamp(name + ".script." + Path.GetFileNameWithoutExtension(scr), File.ReadAllText(scr));
-				Console.WriteLine("Loaded script " + Path.GetFileNameWithoutExtension(scr));
+				string scrn = Path.GetFileNameWithoutExtension(scr);
+				if(scrn.Contains(' ') || scrn.StartsWith("*")){
+					Console.WriteLine("Error in the name of script " + scrn);
+					continue;
+				}
+				t.SetCamp("script." + scrn, File.ReadAllText(scr));
+				Console.WriteLine("Loaded script " + scrn);
 			}
 		}else{
 			Console.WriteLine("We could not find the scripts folder");
@@ -85,7 +111,12 @@ static class CreatorUtility{
 			string[] resources = Directory.GetFiles(path + "/resources", "*", SearchOption.TopDirectoryOnly);
 			
 			foreach(string res in resources){
-				t.SetCamp(name + ".resources." + Path.GetFileNameWithoutExtension(res), File.ReadAllText(res));
+				string resn = Path.GetFileNameWithoutExtension(res);
+				if(resn.Contains(' ')){
+					Console.WriteLine("Error in the name of resource " + res);
+					continue;
+				}
+				t.SetCamp("resources." + resn, File.ReadAllText(res));
 				Console.WriteLine("Loaded resource " + res);
 			}
 		}else{
@@ -108,9 +139,9 @@ static class CreatorUtility{
 		string s;
 		do{
 			s = ask(q).ToLower();
-		}while(s != "true" && s != "false");
+		}while(s != "y" && s != "n");
 		
-		return (s == "true" ? true : false);
+		return (s == "y" ? true : false);
 	}
 	
 	static void loadFile(string p, string o){

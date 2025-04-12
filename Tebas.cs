@@ -7,6 +7,8 @@ class Tebas{
 	//Context variables
 	
 	public static bool quiet;
+	public static bool forced;
+	
 	public static Dependencies dep;
 	public static AshFile config;
 	
@@ -23,7 +25,7 @@ class Tebas{
 	private static bool configInit;
 	private static bool localInit;
 	
-	public const string currentVersion = "v0.3.4";
+	public const string currentVersion = "0.4.0";
 	
 	public static void Main(string[] args){
 		workingDirectory = Directory.GetCurrentDirectory();
@@ -186,10 +188,44 @@ class Tebas{
 		}
 	}
 	
+	public static bool setContextFullSilent(){ //project and template, from local source
+		string f = workingDirectory;
+		while(true){
+			if(File.Exists(f + "/project.tebas")){
+				break;
+			}
+			
+			f = Path.GetDirectoryName(f);
+			if(f == null){
+				return false;
+			}
+		}
+		
+		workingDirectory = f;
+		
+		project = new AshFile(workingDirectory + "/project.tebas");
+		
+		pn = Path.GetFileName(workingDirectory);
+		
+		if(project.CanGetCamp("template", out string t)){
+			if(!TemplateHandler.exists(t)){
+				return false;
+			}
+			tn = t;
+			
+			template = TemplateHandler.get(tn);
+			
+			templateDirectory = dep.path + "/templates/" + tn;
+			return true;
+		}else{
+			return false;
+		}
+	}
+	
 	//Commands
 	
 	public static void version(){
-		consoleOutput("Current version: " + currentVersion);
+		consoleOutput("Current version: v" + currentVersion);
 	}
 	
 	//Project
@@ -320,7 +356,7 @@ class Tebas{
 			return;
 		}
 		
-		if(!askDeletionConfirmation()){
+		if(!forced && !askDeletionConfirmation()){
 			consoleOutput("Deletion cancelled");
 			return;
 		}
@@ -499,6 +535,36 @@ class Tebas{
 		TemplateHandler.runScript("info");
 	}
 	
+	public static void localGitStartUsing(){
+		if(!initializeLocal()){
+			return;
+		}
+		
+		if(project.CanGetCamp("git.use", out bool b) && b){
+			consoleOutput("Git is already used in this project");
+			return;
+		}
+		
+		project.SetCamp("git.use", true);
+		project.Save();
+		
+		GitHelper.tryInit();
+	}
+	
+	public static void localGitStopUsing(){
+		if(!initializeLocal()){
+			return;
+		}
+		
+		if(project.CanGetCamp("git.use", out bool b) && !b){
+			consoleOutput("Git is already not in use in this project");
+			return;
+		}
+		
+		project.SetCamp("git.use", false);
+		project.Save();
+	}
+	
 	public static void localGit(){
 		if(!initializeLocal()){
 			return;
@@ -524,19 +590,22 @@ class Tebas{
 		}
 		
 		if(!template.CanGetCamp("codeFilesFolderBlacklist", out string b)){
-			consoleOutput("The template does not have code file folder blacklist.");
-			TemplateHandler.runScript("stats");
-			return;
+			b = "";
 		}
 		
 		string[] exs = x.Split(new string[]{"\r\n", "\n", "\r"}, StringSplitOptions.None);
-		string[] bs = b.Split(new string[]{"\r\n", "\n", "\r"}, StringSplitOptions.None);
+		List<string> bs = b.Split(new string[]{"\r\n", "\n", "\r"}, StringSplitOptions.None).ToList();
 		
-		for(int i = 0; i < bs.Length; i++){
+		for(int i = 0; i < bs.Count; i++){
+			if(bs[i] == ""){
+				bs.RemoveAt(i);
+				i--;
+				continue;
+			}
 			bs[i] = workingDirectory + "/" + bs[i];
 		}
 		
-		List<string> files = GetFilesWithExtensions(workingDirectory, exs, bs);
+		List<string> files = GetFilesWithExtensions(workingDirectory, exs, bs.ToArray());
 		
 		int l = 0;
 		foreach(string p in files){
@@ -546,6 +615,41 @@ class Tebas{
 		consoleOutput("Total number of code lines: " + l);
 		
 		TemplateHandler.runScript("stats");
+	}
+	
+	public static int getNumberOfLinesOfCode(){
+		if(!setContextFullSilent()){
+			return 0;
+		}
+		
+		if(!template.CanGetCamp("codeExtensions", out string x)){
+			return 0;
+		}
+		
+		if(!template.CanGetCamp("codeFilesFolderBlacklist", out string b)){
+			b = "";
+		}
+		
+		string[] exs = x.Split(new string[]{"\r\n", "\n", "\r"}, StringSplitOptions.None);
+		List<string> bs = b.Split(new string[]{"\r\n", "\n", "\r"}, StringSplitOptions.None).ToList();
+		
+		for(int i = 0; i < bs.Count; i++){
+			if(bs[i] == ""){
+				bs.RemoveAt(i);
+				i--;
+				continue;
+			}
+			bs[i] = workingDirectory + "/" + bs[i];
+		}
+		
+		List<string> files = GetFilesWithExtensions(workingDirectory, exs, bs.ToArray());
+		
+		int l = 0;
+		foreach(string p in files){
+			l += File.ReadAllLines(p).Length;
+		}
+		
+		return l;
 	}
 	
 	public static void localAdd(){
@@ -741,6 +845,12 @@ class Tebas{
 			return;
 		}
 		
+		AshFile te = template;
+		string t = tn;
+		string td = templateDirectory;
+		AshFile pj = project;
+		string p = pn;
+		
 		template = null;
 		tn = "";
 		templateDirectory = "";
@@ -749,6 +859,12 @@ class Tebas{
 		
 		Script s = new Script(Path.GetFileNameWithoutExtension(filePath), File.ReadAllText(filePath));
 		s.run(null);
+		
+		template = te;
+		tn = t;
+		templateDirectory = td;
+		project = pj;
+		pn = p;
 	}
 	
 	public static void runStandaloneScript(string filePath, IEnumerable<string> args){
@@ -759,6 +875,12 @@ class Tebas{
 			return;
 		}
 		
+		AshFile te = template;
+		string t = tn;
+		string td = templateDirectory;
+		AshFile pj = project;
+		string p = pn;
+		
 		template = null;
 		tn = "";
 		templateDirectory = "";
@@ -767,6 +889,12 @@ class Tebas{
 		
 		Script s = new Script(Path.GetFileNameWithoutExtension(filePath), File.ReadAllText(filePath));
 		s.run(args);
+		
+		template = te;
+		tn = t;
+		templateDirectory = td;
+		project = pj;
+		pn = p;
 	}
 	
 	//loop
@@ -818,6 +946,46 @@ class Tebas{
 			return true;
 		}
 		return false;
+	}
+	
+	public static int isVersionNewer(string vs){ //0 is same version or error (continue), 1 is older version, -1 is newer version(cancel)
+		string[] c = currentVersion.Split(".");
+		if(c.Length != 3){
+			return 0;
+		}
+		
+		if(!int.TryParse(c[0], out int c1) || !int.TryParse(c[1], out int c2) || !int.TryParse(c[2], out int c3)){
+			return 0;
+		}
+		
+		string[] v = vs.Split(".");
+		if(v.Length != 3){
+			return 0;
+		}
+		
+		if(!int.TryParse(v[0], out int v1) || !int.TryParse(v[1], out int v2) || !int.TryParse(v[2], out int v3)){
+			return 0;
+		}
+		
+		if(c1 < v1){
+			return -1;
+		}else if(c1 > v1){
+			return 1;
+		}else{
+			if(c2 < v2){
+				return -1;
+			}else if(c2 > v2){
+				return 1;
+			}else{
+				if(c3 < v3){
+					return -1;
+				}else if(c3 > v3){
+					return 1;
+				}else{
+					return 0;
+				}
+			}
+		}
 	}
 	
 	//maybe it works 

@@ -1,1 +1,0 @@
-These are the files used with the creator utility. The final product is 'tbtem.tbtem'. This template can be used to create tebas templates(crfters crafting crafters)

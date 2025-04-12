@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using AshLib.Formatting;
 
 public class Script{
 	static readonly char[] invalidNameChars = "[]\"(),{}%".ToCharArray();
@@ -22,7 +23,20 @@ public class Script{
 		
 		Tebas.initializeConfig();
 		
-		lines = code.Split(new string[]{"\r\n", "\n", "\r"}, StringSplitOptions.None);
+		List<string> l = code.Split(new string[]{"\r\n", "\n", "\r"}, StringSplitOptions.None).ToList();
+		
+		for(int i = 0; i < l.Count; i++){
+			if(l[i].EndsWith("/+")){
+				l[i] = l[i].Substring(0, l[i].Length - 2);
+				if(i + 1 < l.Count){
+					l[i] = l[i] + l[i + 1];
+					l.RemoveAt(i + 1);
+					i--;
+				}
+			}
+		}
+		
+		lines = l.ToArray();
 		
 		sentences = new Sentence[lines.Length];
 		
@@ -74,11 +88,19 @@ public class Script{
 				
 				switch(s.command){
 					case "process.cmd":
-					ProcessExecuter.runProcess(name + " CMD", "cmd",  "/c " + getString(1), Tebas.workingDirectory);
+					ProcessExecuter.runProcess(name + " CMD", Environment.ExpandEnvironmentVariables(@"%SystemRoot%\System32\cmd.exe"),  "/c " + getString(1), Tebas.workingDirectory);
+					break;
+					
+					case "process.link":
+					ProcessExecuter.openLink(getString(1));
 					break;
 					
 					case "process.run":
 					ProcessExecuter.runProcess(name + " " + getString(1).ToUpper(), getString(1),  getString(2), Tebas.workingDirectory);
+					break;
+					
+					case "process.runDetached":
+					ProcessExecuter.runProcessNewWindow(getString(1),  getString(2), Tebas.workingDirectory);
 					break;
 					
 					case "process.runOutput":
@@ -87,12 +109,30 @@ public class Script{
 					ProcessExecuter.runProcessWithOutput(name + " " + getString(1).ToUpper(), getString(1),  getString(2), Tebas.workingDirectory, tables[getTableRef(3)], tables[getTableRef(4)]);
 					break;
 					
+					case "process.isExecutableInPath":
+					if(ProcessExecuter.isExecutableInPath(getString(2), out string fullPath)){
+						setString(getStringRef(1), tables["true"][0]);
+					}else{
+						setString(getStringRef(1), tables["false"][0]);
+					}
+					break;
+					
+					case "process.getExecutableFullPath":
+					ProcessExecuter.isExecutableInPath(getString(2), out fullPath);
+					setString(getStringRef(1), fullPath);
+					break;
+					
 					case "console.print":
+					outputLine(getString(1));
+					break;
+					
+					case "console.printExpand":
 					outputLine(expandString(getString(1)));
 					break;
 					
-					case "console.printNoExpand":
-					outputLine(getString(1));
+					case "console.printFormat":
+					FormatString fs = getString(1);
+					outputLine(fs.ToString());
 					break;
 					
 					case "console.ask":
@@ -129,7 +169,7 @@ public class Script{
 					break;
 					
 					case "string.substring":
-					setString(getStringRef(1), (int.TryParse(getString(3), out int u) && int.TryParse(getString(4), out int v) && u >= 0 && u < getString(2).Length && v > 0 && u + v < getString(2).Length ? getString(2).Substring(u, v) : ""));
+					setString(getStringRef(1), (int.TryParse(getString(3), out int u) && int.TryParse(getString(4), out int v) && u >= 0 && u < getString(2).Length && v >= 0 && u + v <= getString(2).Length ? getString(2).Substring(u, v) : ""));
 					break;
 					
 					case "string.replace":
@@ -173,7 +213,7 @@ public class Script{
 					break;
 					
 					case "self.substring":
-					setString(getStringRef(1), (int.TryParse(getString(2), out u) && int.TryParse(getString(3), out v) && u >= 0 && u < getString(2).Length && v > 0 && u + v < getString(2).Length ? getString(1).Substring(u, v) : ""));
+					setString(getStringRef(1), (int.TryParse(getString(2), out u) && int.TryParse(getString(3), out v) && u >= 0 && u < getString(2).Length && v >= 0 && u + v <= getString(2).Length ? getString(1).Substring(u, v) : ""));
 					break;
 					
 					case "self.replace":
@@ -197,7 +237,7 @@ public class Script{
 					break;
 					
 					case "table.access":
-					if(tables.ContainsKey(getTableRef(2)) && getIndex(getString(3), getTableRef(2), out u)){
+					if(tables.ContainsKey(getTableRef(2)) && getIndex(getString(3), getTableRef(2), out u) && u >= 0 && u < tables[getTableRef(2)].Count){
 						setString(getStringRef(1), tables[getTableRef(2)][u]);
 					}else{
 						setString(getStringRef(1), "");
@@ -256,6 +296,23 @@ public class Script{
 					}
 					break;
 					
+					case "table.pop":
+					if(tables.ContainsKey(getTableRef(2)) && getIndex("-1", getTableRef(2), out u) && u >= 0 && u < tables[getTableRef(2)].Count){
+						setString(getStringRef(1), tables[getTableRef(2)][u]);
+						tables[getTableRef(2)].RemoveAt(tables[getTableRef(2)].Count - 1);
+					}else{
+						setString(getStringRef(1), "");
+					}
+					break;
+					
+					case "table.peek":
+					if(tables.ContainsKey(getTableRef(2)) && getIndex("-1", getTableRef(2), out u) && u >= 0 && u < tables[getTableRef(2)].Count){
+						setString(getStringRef(1), tables[getTableRef(2)][u]);
+					}else{
+						setString(getStringRef(1), "");
+					}
+					break;
+					
 					case "table.append":
 					if(tables.ContainsKey(getTableRef(1))){
 						tables[getTableRef(1)].AddRange(getTable(2));
@@ -290,11 +347,15 @@ public class Script{
 					break;
 					
 					case "bool.and":
-					setString(getStringRef(1), ((tables["true"].Contains(getString(2)) && tables["true"].Contains(getString(3)) ? tables["true"][0] : tables["false"][0])));
+					setString(getStringRef(1), (tables["true"].Contains(getString(2)) && tables["true"].Contains(getString(3)) ? tables["true"][0] : tables["false"][0]));
 					break;
 					
 					case "bool.or":
-					setString(getStringRef(1), ((tables["true"].Contains(getString(2)) || tables["true"].Contains(getString(3)) ? tables["true"][0] : tables["false"][0])));
+					setString(getStringRef(1), (tables["true"].Contains(getString(2)) || tables["true"].Contains(getString(3)) ? tables["true"][0] : tables["false"][0]));
+					break;
+					
+					case "bool.isBool":
+					setString(getStringRef(1), (tables["true"].Contains(getString(2)) || tables["false"].Contains(getString(2)) ? tables["true"][0] : tables["false"][0]));
 					break;
 					
 					case "math.isNumber":
@@ -492,7 +553,7 @@ public class Script{
 					break;
 					
 					case "template.create":
-					CreatorUtility.template(getString(1));
+					CreatorUtility.template(getPathExclusive(getString(1)));
 					break;
 					
 					case "plugin.read":
@@ -520,7 +581,7 @@ public class Script{
 					break;
 					
 					case "plugin.create":
-					CreatorUtility.plugin(getString(1));
+					CreatorUtility.plugin(getPathExclusive(getString(1)));
 					break;
 					
 					case "project.read":
@@ -535,8 +596,32 @@ public class Script{
 					projectAppend(getString(1), getString(2));
 					break;
 					
+					case "project.gitUsed":
+					if(Tebas.project != null && Tebas.project.CanGetCamp("git.use", out bool b) && b){
+						setString(getStringRef(1), tables["true"][0]);
+					}else{
+						setString(getStringRef(1), tables["false"][0]);
+					}
+					break;
+					
+					case "shared.read":
+					setString(getStringRef(1), SharedHandler.read(getString(2)));
+					break;
+					
+					case "shared.write":
+					SharedHandler.write(getString(1), getString(2));
+					break;
+					
+					case "shared.append":
+					SharedHandler.append(getString(1), getString(2));
+					break;
+					
 					case "tebas.commit":
 					Tebas.localCommit(getString(1));
+					break;
+					
+					case "tebas.getDefaultGitBranch":
+					setString(getStringRef(1), GitHelper.getBranch());
 					break;
 					
 					case "tebas.push":
@@ -565,6 +650,10 @@ public class Script{
 					
 					case "tebas.remoteExists":
 					setString(getStringRef(1), (GitHelper.remoteExists(getString(2)) ? tables["true"][0] : tables["false"][0]));
+					break;
+					
+					case "tebas.script":
+					Tebas.runStandaloneScript(getPathExclusive(getString(1)), StringHelper.splitSentence(getString(2)));
 					break;
 					
 					case "scope":
@@ -1074,6 +1163,10 @@ public class Script{
 	string getString(int i){
 		string s = sentences[lp].getArg(i);
 		
+		if(s.Length > 2 && s[0] == 'f' && s[1] == '"' && s[s.Length - 1] == '"'){
+			return expandString(s.Substring(2, s.Length - 3));
+		}
+		
 		if(s.Length > 1 && s[0] == '"' && s[s.Length - 1] == '"'){
 			return s.Substring(1, s.Length - 2);
 		}
@@ -1130,6 +1223,10 @@ public class Script{
 	}
 	
 	string getStringAll(string s){
+		if(s.Length > 2 && s[0] == 'f' && s[1] == '"' && s[s.Length - 1] == '"'){
+			return expandString(s.Substring(2, s.Length - 3));
+		}
+		
 		if(s.Length > 1 && s[0] == '"' && s[s.Length - 1] == '"'){
 			return s.Substring(1, s.Length - 2);
 		}
@@ -1427,7 +1524,16 @@ public class Script{
 			return PluginHandler.runningPlugin;
 			
 			case "d":
-			return DateTime.Now.ToString();
+			return DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+			
+			case "h":
+			return DateTime.Now.ToString("HH:mm:ss");
+			
+			case "tbx":
+			return System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+			
+			case "tbv":
+			return Tebas.currentVersion;
 			
 			default:
 			return "";

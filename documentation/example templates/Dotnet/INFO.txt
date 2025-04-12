@@ -1,1 +1,0 @@
-These are the files used with the Creator Utility. The final product is 'dotnet.tbtem'. This template helps you with dotnet. YOU NEED TO HAVE 'dotnet' AVAILABLE IN THE PATH VARIABLE

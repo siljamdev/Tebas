@@ -1,8 +1,0 @@
-console.print "New Tebas template"
-
-folder.create "W/scripts"
-folder.create "W/resources"
-file.create "W/extensions.txt"
-file.create "W/blacklist.txt"
-file.create "W/default.gitignore"
-file.create "W/readme.md"

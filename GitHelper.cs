@@ -12,7 +12,7 @@ public static class GitHelper{
 		Tebas.project.SetCamp("git.initialized", true);
 	}
 	
-	static void tryInit(){
+	public static void tryInit(){
 		if(Tebas.project.CanGetCamp("git.initialized", out bool b) && !b){
 			init();
 		}
@@ -90,7 +90,7 @@ public static class GitHelper{
 		return gitPath;
 	}
 	
-	static string getBranch(){
+	public static string getBranch(){
 		Tebas.initializeConfig();
 		
 		string branch = "main";
@@ -137,7 +137,7 @@ public static class GitHelper{
 			return;
 		}
 		
-		if(!Tebas.askDeletionConfirmation()){
+		if(!Tebas.forced && !Tebas.askDeletionConfirmation()){
 			Tebas.consoleOutput("Deletion cancelled");
 			return;
 		}

@@ -42,7 +42,7 @@ public static class TemplateHandler{
 		return false;
 	}
 	
-	public static void install(string path){
+	public static void install(string path, IEnumerable<string> args){
 		
 		path = StringHelper.removeQuotesSingle(path);
 		
@@ -59,12 +59,32 @@ public static class TemplateHandler{
 			return;
 		}
 		
-		if(exists(name)){
-			Console.WriteLine("A template with that name is already installed, do you want to update it? (Y/N)");
+		string desc = template.GetCampOrDefault<string>("description", null);
+		if(desc != null){
+			Console.WriteLine("Template description: " + desc);
+		}
+		
+		if(!Tebas.forced && exists(name)){
+			Console.WriteLine("A template called " + name + " is already installed, do you want to update it? (Y/N)");
 			string ans = Console.ReadLine();
 			
 			if(ans.ToLower() != "y"){
 				return;
+			}
+		}
+		
+		if(template.CanGetCamp("version", out string vs)){
+			int v = Tebas.isVersionNewer(vs);
+			if(v == -1){
+				Console.WriteLine("The template version(" + vs + ") is newer than the current tebas version(" + Tebas.currentVersion + "). Please update your client");
+				return;
+			}else if(v == 1 && !Tebas.forced){
+				Console.WriteLine("The template version(" + vs + ") is older than the current tebas version(" + Tebas.currentVersion + "), do you want to install it? (Y/N)");
+				string ans = Console.ReadLine();
+				
+				if(ans.ToLower() != "y"){
+					return;
+				}
 			}
 		}
 		
@@ -82,7 +102,7 @@ public static class TemplateHandler{
 		
 		template.Save(Tebas.templateDirectory + "/template.tbtem");
 		
-		runScript("install");
+		runScript("install", args);
 		
 		Tebas.consoleOutput("Template succesfully installed: " + Tebas.tn);
 	}
@@ -101,7 +121,7 @@ public static class TemplateHandler{
 		
 		Tebas.workingDirectory = Tebas.templateDirectory;
 		
-		if(Tebas.askDeletionConfirmation()){
+		if(Tebas.forced || Tebas.askDeletionConfirmation()){
 			runScript("uninstall");
 			Directory.Delete(Tebas.templateDirectory, true);
 			Tebas.consoleOutput("Template uninstalled succesfully");
@@ -166,6 +186,12 @@ public static class TemplateHandler{
 		Tebas.workingDirectory = Tebas.templateDirectory;
 		
 		Tebas.consoleOutput("Template name: " + Tebas.tn);
+		
+		string desc = Tebas.template.GetCampOrDefault<string>("description", null);
+		if(desc != null){
+			Tebas.consoleOutput("Template description: " + desc);
+		}
+		
 		if(Tebas.template.CanGetCamp("git.defaultUse", out bool b)){
 			Tebas.consoleOutput("Use git: " + b);
 		}
@@ -175,6 +201,22 @@ public static class TemplateHandler{
 			string[] p = s.Split(new string[]{"\r\n", "\n", "\r"}, StringSplitOptions.None);
 			
 			foreach(string h in p){
+				Tebas.consoleOutput("    " + h);
+			}
+		}
+		
+		List<string> scripts = new List<string>();
+		
+		foreach(string k in Tebas.template.data.Keys){
+			if(k.StartsWith("script.")){
+				scripts.Add(k.Substring(7));
+			}
+		}
+		
+		if(scripts.Count > 0){
+			Tebas.consoleOutput("This template has " + scripts.Count + " scripts:");
+			
+			foreach(string h in scripts){
 				Tebas.consoleOutput("    " + h);
 			}
 		}

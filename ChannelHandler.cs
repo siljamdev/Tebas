@@ -153,10 +153,49 @@ public static class ChannelHandler{
 			if(projects.Count > 0){
 				Tebas.consoleOutput("Number of projects in this channel: " + projects.Count);
 				Tebas.consoleOutput("Project list:");
+			}else{
+				Tebas.consoleOutput("There are no projects in this channel");
 			}
 			
 			foreach(string s in projects){
 				Tebas.consoleOutput("    " + s);
+			}
+		}else{
+			Tebas.consoleOutput("The specified channel doesn't exist");
+		}
+	}
+	
+	public static void stats(string name){
+		initialize();
+		
+		if(channels.CanGetCamp(name, out string path)){
+			string[] directories = Directory.GetDirectories(path);
+			List<string> projects = new List<string>();
+			
+			foreach(string s in directories){
+				if(File.Exists(s + "/project.tebas")){
+					projects.Add(s);
+				}
+			}
+			
+			if(projects.Count > 0){
+				Tebas.consoleOutput("Number of projects in this channel: " + projects.Count);
+				Tebas.consoleOutput("Project list:");
+			}else{
+				Tebas.consoleOutput("There are no projects in this channel");
+			}
+			
+			int l = 0;
+			
+			foreach(string s in projects){
+				Tebas.workingDirectory = s;
+				int n = Tebas.getNumberOfLinesOfCode();
+				l += n;
+				Tebas.consoleOutput("    " + Path.GetFileName(s) + ": " + n);
+			}
+			
+			if(projects.Count > 0){
+				Tebas.consoleOutput("Total lines of code: " + l);
 			}
 		}else{
 			Tebas.consoleOutput("The specified channel doesn't exist");

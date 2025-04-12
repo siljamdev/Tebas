@@ -1,3 +1,0 @@
-console.print "Stats dotnet project"
-project.read def.0 "timesCompiled"
-console.print "This project has been compiled {def.0} times"

@@ -1,1 +1,0 @@
-These are the files used with the creator utility. The final product is 'tbplg.tbtem'. This template can be used to create tebas plugins

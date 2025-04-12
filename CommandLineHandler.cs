@@ -13,17 +13,28 @@ public static class CommandLineHandler{
 			return;
 		}
 		
-		if(args[0] == "-q"){
+		if(args[clp] == "-q"){
 			Tebas.quiet = true; //Activate quiet mode
+			clp++;
+		}else if(args[clp] == "-f"){
+			Tebas.forced = true; //Activate force mode
 			clp++;
 		}
 		
-		for(int i = 0; i < args.Length; i++){
-			args[i] = StringHelper.removeQuotesSingle(args[i]);
+		if(args[clp] == "-q"){
+			Tebas.quiet = true; //Activate quiet mode
+			clp++;
+		}else if(args[clp] == "-f"){
+			Tebas.forced = true; //Activate force mode
+			clp++;
 		}
 		
+		/* for(int i = 0; i < args.Length; i++){
+			args[i] = StringHelper.removeQuotesSingle(args[i]); //If i search it, this is the line
+		} */
+		
 		if(Path.GetExtension(args[0]) == ".tbtem"){
-			TemplateHandler.install(args[0]);
+			TemplateHandler.install(args[0], args.Skip(0));
 			Console.WriteLine("Press any key to close");
 			waitAnyKey();
 			return;
@@ -34,9 +45,12 @@ public static class CommandLineHandler{
 			waitAnyKey();
 			return;
 		}else if(Path.GetExtension(args[0]) == ".tbplg"){
-			PluginHandler.install(args[0]);
+			PluginHandler.install(args[0], args.Skip(0));
 			Console.WriteLine("Press any key to close");
 			waitAnyKey();
+			return;
+		}else if(Path.GetExtension(args[0]) == ".tbscr"){
+			Tebas.runStandaloneScript(args[0], args.Skip(0));
 			return;
 		}
 		
@@ -86,7 +100,7 @@ public static class CommandLineHandler{
 			commandScript(args);
 			break;
 			
-			case "loop": //Standalone script
+			case "loop": //Run loop
 			clp++;
 			commandLoop(args);
 			break;
@@ -160,6 +174,11 @@ public static class CommandLineHandler{
 			case "list":
 			clp++;
 			commandChannelList(args);
+			break;
+			
+			case "stats":
+			clp++;
+			commandChannelStats(args);
 			break;
 			
 			case "info":
@@ -284,6 +303,16 @@ public static class CommandLineHandler{
 			commandLocalGit(args);
 			break;
 			
+			case "usegit":
+			clp++;
+			commandLocalUseGit(args);
+			break;
+			
+			case "stopgit":
+			clp++;
+			commandLocalStopGit(args);
+			break;
+			
 			case "stats":
 			clp++;
 			commandLocalStats(args);
@@ -357,6 +386,16 @@ public static class CommandLineHandler{
 			commandLocalGit(args);
 			break;
 			
+			case "usegit":
+			clp++;
+			commandLocalUseGit(args);
+			break;
+			
+			case "stopgit":
+			clp++;
+			commandLocalStopGit(args);
+			break;
+			
 			case "stats":
 			clp++;
 			commandLocalStats(args);
@@ -393,7 +432,7 @@ public static class CommandLineHandler{
 			break;
 			
 			default:
-			commandTryScript(args);
+			commandTryScriptOrPlugin(args);
 			break;
 		}
 	}
@@ -535,7 +574,7 @@ public static class CommandLineHandler{
 		name = args[clp];
 		clp++;
 		
-		v = args[clp];
+		v = StringHelper.removeQuotesSingle(args[clp]);
 		clp++;
 		
 		ChannelHandler.set(name, v);
@@ -591,6 +630,20 @@ public static class CommandLineHandler{
 		ChannelHandler.info(name);
 	}
 	
+	static void commandChannelStats(string[] args){
+		string name;
+		
+		if(!determineIfEnoughLength(1, args.Length)){
+			Tebas.consoleOutput("Not enough arguments");
+			return;
+		}
+		
+		name = args[clp];
+		clp++;
+		
+		ChannelHandler.stats(name);
+	}
+	
 	//Template
 	static void commandTemplateInstall(string[] args){
 		string path;
@@ -600,10 +653,10 @@ public static class CommandLineHandler{
 			return;
 		}
 		
-		path = args[clp];
+		path = StringHelper.removeQuotesSingle(args[clp]);
 		clp++;
 		
-		TemplateHandler.install(path);
+		TemplateHandler.install(path, args.Skip(clp));
 	}
 	
 	static void commandTemplateUninstall(string[] args){
@@ -646,7 +699,7 @@ public static class CommandLineHandler{
 			return;
 		}
 		
-		path = args[clp];
+		path = StringHelper.removeQuotesSingle(args[clp]);
 		clp++;
 		
 		CreatorUtility.template(path);
@@ -661,10 +714,10 @@ public static class CommandLineHandler{
 			return;
 		}
 		
-		path = args[clp];
+		path = StringHelper.removeQuotesSingle(args[clp]);
 		clp++;
 		
-		PluginHandler.install(path);
+		PluginHandler.install(path, args.Skip(clp));
 	}
 	
 	static void commandPluginUninstall(string[] args){
@@ -714,7 +767,7 @@ public static class CommandLineHandler{
 			return;
 		}
 		
-		path = args[clp];
+		path = StringHelper.removeQuotesSingle(args[clp]);
 		clp++;
 		
 		CreatorUtility.plugin(path);
@@ -760,6 +813,14 @@ public static class CommandLineHandler{
 	
 	static void commandLocalGit(string[] args){
 		Tebas.localGit();
+	}
+	
+	static void commandLocalUseGit(string[] args){
+		Tebas.localGitStartUsing();
+	}
+	
+	static void commandLocalStopGit(string[] args){
+		Tebas.localGitStopUsing();
 	}
 	
 	static void commandLocalStats(string[] args){
@@ -834,6 +895,37 @@ public static class CommandLineHandler{
 		Tebas.tryScript(v, args.Skip(clp));
 	}
 	
+	static void commandTryScriptOrPlugin(string[] args){
+		string name;
+		
+		if(!determineIfEnoughLength(1, args.Length)){
+			Tebas.consoleOutput("Not enough arguments");
+			return;
+		}
+		
+		name = args[clp];
+		clp++;
+		
+		if(name.StartsWith("*")){
+			if(!determineIfEnoughLength(1, args.Length)){
+				Tebas.consoleOutput("Unknown command");
+				return;
+			}
+			
+			name = name.Substring(1);
+			
+			string s = args[clp];
+			clp++;
+			
+			if(!PluginHandler.runScript(name, s, args.Skip(clp))){
+				Tebas.consoleOutput("Unknown plugin command");
+				return;
+			}
+		}else{
+			Tebas.tryScript(name, args.Skip(clp));
+		}
+	}
+	
 	//local config remote
 	
 	static void commandLocalRemoteList(string[] args){
@@ -897,7 +989,7 @@ public static class CommandLineHandler{
 			return;
 		}
 		
-		f = args[clp];
+		f = StringHelper.removeQuotesSingle(args[clp]);
 		clp++;
 		
 		Tebas.runStandaloneScript(f, args.Skip(clp));
@@ -914,6 +1006,9 @@ public static class CommandLineHandler{
 	static void commandHelp(string[] args){
 		Tebas.consoleOutput("Help for command line arguments:");
 		Tebas.consoleOutput("");
+		Tebas.consoleOutput("  You can add -q before everything to make it quiet, where the console output is minimal");
+		Tebas.consoleOutput("  You can add -f before everything to make it forced. This only affects certain actions that usually need confirmation");
+		Tebas.consoleOutput("");
 		Tebas.consoleOutput("Sections:");
 		Tebas.consoleOutput("");
 		Tebas.consoleOutput("version  Shows the current Tebas version");
@@ -927,26 +1022,29 @@ public static class CommandLineHandler{
 		Tebas.consoleOutput("        rename [name] [newname]  Renames that channel");
 		Tebas.consoleOutput("        list                     Shows a list of all channels");
 		Tebas.consoleOutput("        info [name]              Shows info on a specific channel");
+		Tebas.consoleOutput("        stats [name]             Shows stats on a specific channel. Mainly total number of code lines");
 		Tebas.consoleOutput("");
 		Tebas.consoleOutput("template");
 		Tebas.consoleOutput(" Manages the templates (templates for projects). This section can be executed anywhere");
-		Tebas.consoleOutput("         install [path]    Installs the template from a file (.tbtem)");
-		Tebas.consoleOutput("         uninstall [name]  Deletes that template");
-		Tebas.consoleOutput("         list              Shows list of all templates installed");
-		Tebas.consoleOutput("         info [name]       Shows info on a specific template");
-		Tebas.consoleOutput("         create [path]     Create a template using the creator utility");
+		Tebas.consoleOutput("         install [path] [args]  Installs the template from a file (.tbtem)");
+		Tebas.consoleOutput("         uninstall [name]       Deletes that template");
+		Tebas.consoleOutput("         list                   Shows list of all templates installed");
+		Tebas.consoleOutput("         info [name]            Shows info on a specific template");
+		Tebas.consoleOutput("         create [path]          Create a template using the creator utility");
 		Tebas.consoleOutput("");
 		Tebas.consoleOutput("plugin");
 		Tebas.consoleOutput(" Manages the plugins. This section can be executed anywhere");
-		Tebas.consoleOutput("        install [path]          Installs the plugin from a file (.tbplg)");
-		Tebas.consoleOutput("        uninstall [name]        Deletes that plugin");
-		Tebas.consoleOutput("        list                    Shows list of all plugins installed");
-		Tebas.consoleOutput("        create [path]           Create a plugin using the creator utility");
-		Tebas.consoleOutput("        [name] [script] [args]  Attempts to run a script of that plugin");
+		Tebas.consoleOutput("       install [path] [args]   Installs the plugin from a file (.tbplg)");
+		Tebas.consoleOutput("       uninstall [name]        Deletes that plugin");
+		Tebas.consoleOutput("       list                    Shows list of all plugins installed");
+		Tebas.consoleOutput("       create [path]           Create a plugin using the creator utility");
+		Tebas.consoleOutput("       [name] [script] [args]  Attempts to run a script of that plugin");
+		Tebas.consoleOutput("");
+		Tebas.consoleOutput("*[plugin name] [script] [args]   Another way to run a plugin script");
 		Tebas.consoleOutput("");
 		Tebas.consoleOutput("script");
 		Tebas.consoleOutput(" Lets you run a plugin, just for the fun of it. All enviroment variables are empty but the working directory");
-		Tebas.consoleOutput("        [script file path] [args]   Attempts to run a script from a file");
+		Tebas.consoleOutput("       [script file path] [args]   Attempts to run a script from a file");
 		Tebas.consoleOutput("");
 		Tebas.consoleOutput("global");
 		Tebas.consoleOutput(" Manages global things. This section can be executed anywhere");
@@ -962,6 +1060,8 @@ public static class CommandLineHandler{
 		Tebas.consoleOutput("local");
 		Tebas.consoleOutput(" Manages the local project. This section must be executed in a folder containing a project, and the local keyword can be skipped entirely (For example, instead of \'tebas local info\', \'tebas info\'");
 		Tebas.consoleOutput("      git               The equivalent of doing \'git status\'");
+		Tebas.consoleOutput("      usegit            Starts using git in the current project");
+		Tebas.consoleOutput("      stopgit           Stops using git in the current project");
 		Tebas.consoleOutput("      push [remote]     The equivalent of doing \'git push\'. If there is only one remote, you dont need to specify it");
 		Tebas.consoleOutput("      pull [remote]     The equivalent of doing \'git pull\'. If there is only one remote, you dont need to specify it");
 		Tebas.consoleOutput("      add               The equivalent of doing \'git add .\'");

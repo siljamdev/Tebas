@@ -104,7 +104,7 @@ public static class PluginHandler{
 		return true;
 	}
 	
-	public static void install(string path){
+	public static void install(string path, IEnumerable<string> args){
 		initialize();
 		
 		path = StringHelper.removeQuotesSingle(path);
@@ -122,12 +122,32 @@ public static class PluginHandler{
 			return;
 		}
 		
-		if(exists(name)){
-			Console.WriteLine("A plugin with that name is already installed, do you want to update it? (Y/N)");
+		string desc = plugin.GetCampOrDefault<string>("description", null);
+		if(desc != null){
+			Console.WriteLine("Plugin description: " + desc);
+		}
+		
+		if(!Tebas.forced && exists(name)){
+			Console.WriteLine("A plugin called " + name + " is already installed, do you want to update it? (Y/N)");
 			string ans = Console.ReadLine();
 			
 			if(ans.ToLower() != "y"){
 				return;
+			}
+		}
+		
+		if(plugin.CanGetCamp("version", out string vs)){
+			int v = Tebas.isVersionNewer(vs);
+			if(v == -1){
+				Console.WriteLine("The plugin version(" + vs + ") is newer than the current tebas version(" + Tebas.currentVersion + "). Please update your client");
+				return;
+			}else if(v == 1 && !Tebas.forced){
+				Console.WriteLine("The plugin version(" + vs + ") is older than the current tebas version(" + Tebas.currentVersion + "), do you want to install it? (Y/N)");
+				string ans = Console.ReadLine();
+				
+				if(ans.ToLower() != "y"){
+					return;
+				}
 			}
 		}
 		
@@ -138,14 +158,50 @@ public static class PluginHandler{
 		}
 		
 		plugin.DeleteCamp("name");
+		plugin.DeleteCamp("version");
+		
+		List<string> keysList = plugin.data.Keys.ToList();
+		
+		foreach(string s in keysList){
+			plugin.RenameCamp(s, name + "." + s);
+		}
 		
 		plugins = plugins + plugin;
 		
 		plugins.Save();
 		
-		runScript(name, "install");
+		runScript(name, "install", args);
 		
 		Tebas.consoleOutput("Plugin succesfully installed: " + name);
+	}
+	
+	public static void info(string name){
+		initialize();
+		
+		if(!exists(name)){
+			Tebas.consoleOutput("That plugin is not installed");
+			return;
+		}
+		
+		Tebas.consoleOutput("Plugin name: " + name);
+		
+		string desc = plugins.GetCampOrDefault<string>(name + ".description", null);
+		if(desc != null){
+			Tebas.consoleOutput("Plugin description: " + desc);
+		}
+		
+		if(Tebas.template.CanGetCamp("git.defaultUse", out bool b)){
+			Tebas.consoleOutput("Use git: " + b);
+		}
+		
+		if(Tebas.template.CanGetCamp("codeExtensions", out string s)){
+			Tebas.consoleOutput("Code files extensions:");
+			string[] p = s.Split(new string[]{"\r\n", "\n", "\r"}, StringSplitOptions.None);
+			
+			foreach(string h in p){
+				Tebas.consoleOutput("    " + h);
+			}
+		}
 	}
 	
 	public static void uninstall(string name){
@@ -156,7 +212,7 @@ public static class PluginHandler{
 			return;
 		}
 		
-		if(Tebas.askDeletionConfirmation()){
+		if(Tebas.forced || Tebas.askDeletionConfirmation()){
 			runScript(name, "uninstall");
 			foreach(KeyValuePair<string, object> kvp in plugins.data){
 				if(kvp.Key.Split(".")[0] == name){

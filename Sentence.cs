@@ -63,6 +63,11 @@ class Sentence{
 	}
 	
 	string parsePart(){
+		if(line[cpi] == 'f' && line[cpi + 1] == '"'){
+			cpi += 2;
+			return "f" + parseQuote();
+		}
+		
 		if(line[cpi] == '"'){
 			cpi++;
 			return parseQuote();
@@ -123,7 +128,10 @@ class Sentence{
 		StringBuilder t = new StringBuilder();
 		
 		while(cpi < line.Length){
-			if(line[cpi] == '"'){
+			if(line[cpi] == 'f' && line[cpi + 1] == '"'){
+				cpi += 2;
+				t.Append("f" + parseQuote());
+			}else if(line[cpi] == '"'){
 				cpi++;
 				t.Append(parseQuote());
 			}

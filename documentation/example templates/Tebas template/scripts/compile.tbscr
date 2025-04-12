@@ -1,3 +1,0 @@
-console.print "Compiling Tebas template"
-
-template.create %wd
