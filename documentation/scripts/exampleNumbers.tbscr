@@ -17,4 +17,4 @@ while def.0 {
 	math.sumUp num.1 num.1 //Sums 1 to num.1 and stores it in num.1
 }
 
-console.print "You guessed it! It took you {num.1} attempts" //display, with {} expansion
+console.print f"You guessed it! It took you {num.1} attempts" //display, with {} expansion

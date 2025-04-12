@@ -4,7 +4,7 @@ call showTable //Call the function
 function showTable { //Function
 	scope control //Scope declared, a table that will be used locally on this function only
 	
-	console.print "{show.length} files found:" //print the number of files found
+	console.print f"{show.length} files found:" //print the number of files found
 	
 	string.set control.0 "0" //Index of file
 	string.set control.4 "0" //Total bytes

@@ -14,4 +14,4 @@ while def.0 {
 }
 
 self.upper def.1 //set itself to uppercase
-console.print "That is nice! I also like {def.1} a lot" //display, with {} expansion
+console.print f"That is nice! I also like {def.1} a lot" //display, with {} expansion
