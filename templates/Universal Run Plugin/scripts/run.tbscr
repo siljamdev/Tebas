@@ -1,32 +1,5 @@
-string.equal def.0 %tn "dotnet"
-if def.0 {
-	template.run "run" ""
-	exit
-}
-
-string.equal def.0 %tn "c"
-if def.0 {
-	template.run "run" ""
-	exit
-}
-
-path.extension def.1 args.0
-
-//html file
-string.equal def.0 def.1 ".html"
-if def.0 {
-	plugin.read def.2 %pl "browserPath"
-	string.set def.3 f"\"{args.0}\""
-	process.run def.2 def.3
-	exit
-}
-
-string.equal def.0 %tn "fgrom"
-if def.0 {
-	string.set def.4 f"\"{args.0}\""
-	template.run "run" def.4
-	exit
-}
+string.removeQuotes def.2 args.0
+path.extension def.1 def.2
 
 string.equal def.0 %tn "tbtem"
 if def.0 {
@@ -40,10 +13,42 @@ if def.0 {
 	exit
 }
 
+//tebas script file
+string.equal def.0 def.1 ".tbscr"
+if def.0 {
+	tebas.script args.0 ""
+	exit
+}
+
+string.equal def.0 %tn "dotnet"
+if def.0 {
+	template.run "run" ""
+	exit
+}
+
+string.equal def.0 %tn "c"
+if def.0 {
+	template.run "run" ""
+	exit
+}
+
+//html file
+string.equal def.0 def.1 ".html"
+if def.0 {
+	plugin.read def.2 %pl "browserPath"
+	process.run def.2 f"{args.0}"
+	exit
+}
+
+string.equal def.0 %tn "fgrom"
+if def.0 {
+	template.run "run" f"{args.0}"
+	exit
+}
+
 string.equal def.0 %tn "python"
 if def.0 {
-	string.set def.4 f"\"{args.0}\""
-	template.run "run" def.4
+	template.run "run" f"{args.0}"
 	exit
 }
 
@@ -51,14 +56,14 @@ if def.0 {
 string.equal def.0 def.1 ".fgrom"
 if def.0 {
 	plugin.read def.2 %pl "fgromPath"
-	string.set def.3 f"\"{args.0}\""
-	process.run def.2 def.3
+	process.run def.2 f"{args.0}"
 	exit
 }
 
-//tebas script file
-string.equal def.0 def.1 ".tbscr"
+//python file
+string.equal def.0 def.1 ".py"
 if def.0 {
-	tebas.script args.0 ""
+	plugin.read def.2 %pl "pythonPath"
+	process.run def.2 f"{args.0}"
 	exit
 }

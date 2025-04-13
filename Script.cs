@@ -798,7 +798,9 @@ public class Script{
 						FlowComponent fc = flow.Pop();
 						if(fc.ft == FlowType.Function){
 							Scope sco = scope.Pop();
-							tables[sco.table] = sco.list;
+							if(sco.table != null){
+								tables[sco.table] = sco.list;
+							}
 							lp = fc.line;
 							break;
 						}
