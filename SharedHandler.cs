@@ -11,7 +11,7 @@ public static class SharedHandler{
 			return;
 		}
 		
-		Tebas.initializeLocalSilent();
+		//Tebas.initializeLocalSilent();
 		
 		shared = new AshFile(Tebas.dep.path + "/shared.ash");
 		init = true;
