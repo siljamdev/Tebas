@@ -20,7 +20,11 @@ public static class SharedHandler{
 	public static void write(string name, string content){
 		initialize();
 		
-		shared.SetCamp(name, content);
+		if(content == ""){
+			shared.DeleteCamp(name);
+		}else{
+			shared.SetCamp(name, content);
+		}
 		
 		shared.Save();
 	}

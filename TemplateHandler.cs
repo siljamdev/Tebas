@@ -236,7 +236,11 @@ public static class TemplateHandler{
 	
 	public static void resourceWrite(string n, string c){
 		if(!(Tebas.template is null)){
-			Tebas.template.SetCamp("resources." + n, c);
+			if(c == ""){
+				Tebas.template.DeleteCamp("resources." + n);
+			}else{
+				Tebas.template.SetCamp("resources." + n, c);
+			}
 			Tebas.template.Save();
 		}
 	}

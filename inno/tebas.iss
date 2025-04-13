@@ -2,10 +2,10 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Tebas"
-#define MyAppVersion "0.4.0"
+#define MyAppVersion "0.4.1"
 #define MyAppPublisher "AshProj"
 #define MyAppURL "https://github.com/siljamdev/Tebas"
-; source executable
+; Not source, but the created executable once installed. AND SOURCE TOO!
 #define MyAppExeName "tebas.exe"
 
 [Setup]
@@ -14,13 +14,18 @@
 AppId={{53E69D5E-1898-46F6-BB88-8AECAB11AB2E}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
-;AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\Tebas
 DisableDirPage=yes
+
+ 
+;This lets the user decide. If admin rights are required, they will be prompted.
+PrivilegesRequired=lowest
+
+
 ; "ArchitecturesAllowed=x64compatible" specifies that Setup cannot run
 ; on anything but x64 and Windows 11 on Arm.
 ArchitecturesAllowed=x64compatible
@@ -44,7 +49,7 @@ ChangesEnvironment=true
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-Source: "{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#MyAppName}_portable_{#MyAppVersion}_winx64.exe"; DestDir: "{app}"; DestName: "{#MyAppExeName}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 ; Add to PATH environment variable
@@ -67,9 +72,53 @@ Root: HKCR; Subkey: "Tebas.Project\shell\open\command"; \
 Root: HKCR; Subkey: ".tbplg"; ValueType: string; ValueData: "Tebas.Plugin"; Flags: uninsdeletekey
 Root: HKCR; Subkey: "Tebas.Plugin\shell\open\command"; \
     ValueType: string; ValueData: """{app}\tebas.exe"" ""%1"""
+	
+	; Register .tbscr files
+Root: HKCR; Subkey: ".tbscr"; ValueType: string; ValueData: "Tebas.Script"; Flags: uninsdeletekey
+Root: HKCR; Subkey: "Tebas.Plugin\shell\open\command"; \
+    ValueType: string; ValueData: """{app}\tebas.exe"" ""%1"""
     
 [Code]
 const EnvironmentKey = 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment';
+const INSTALL_MODE_ALL_USERS = 1;
+const INSTALL_MODE_LOCAL_ONLY = 2;
+
+var
+  InstallMode: Integer;
+
+procedure InitializeWizard;
+begin
+  InstallMode := INSTALL_MODE_ALL_USERS;  // Default to "Install for All Users"
+
+  // Add a custom page for installation mode selection
+  // This is a simple input page where the user can select their preference
+  // We will create a radio button with two choices
+  CreateStringChangePage(wpSelectDir, 'Select installation mode', 
+    'Select whether to install for all users or just for yourself:', True);
+  
+  // Adding radio button for "Install for all users" option
+  AddRadioButton('Install for all users', INSTALL_MODE_ALL_USERS);
+  // Adding radio button for "Install only for me" option (local install)
+  AddRadioButton('Install for me (local)', INSTALL_MODE_LOCAL_ONLY);
+end;
+
+procedure CurPageChanged(CurPageID: Integer);
+begin
+  // Check the selected installation mode
+  if InstallMode = INSTALL_MODE_LOCAL_ONLY then
+  begin
+    // Change DefaultDirName to install in AppData for the current user
+    DefaultDirName := ExpandConstant('{userappdata}\{#MyAppName}');
+  end
+  else
+  begin
+    // Default for all users (Program Files)
+    DefaultDirName := '{autopf}\{#MyAppName}';
+  end;
+end;
+
+
+
 
 function NeedsAddPath(Param: string): boolean;
 var

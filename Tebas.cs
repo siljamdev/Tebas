@@ -25,7 +25,7 @@ class Tebas{
 	private static bool configInit;
 	private static bool localInit;
 	
-	public const string currentVersion = "0.4.0";
+	public const string currentVersion = "0.4.1";
 	
 	public static void Main(string[] args){
 		workingDirectory = Directory.GetCurrentDirectory();
@@ -225,7 +225,8 @@ class Tebas{
 	//Commands
 	
 	public static void version(){
-		consoleOutput("Current version: v" + currentVersion);
+		Console.WriteLine("Current version: v" + currentVersion);
+		Console.WriteLine("Tebas project manager, created by Siljam");
 	}
 	
 	//Project

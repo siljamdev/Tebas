@@ -1554,7 +1554,11 @@ public class Script{
 	
 	void projectWrite(string n, string c){
 		if(!(Tebas.project is null)){
-			Tebas.project.SetCamp("resources." + n, c);
+			if(c == ""){
+				Tebas.project.DeleteCamp("resources." + n);
+			}else{
+				Tebas.project.SetCamp("resources." + n, c);
+			}
 			Tebas.project.Save();
 		}
 	}

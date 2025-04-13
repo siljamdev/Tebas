@@ -13,18 +13,18 @@ public static class CommandLineHandler{
 			return;
 		}
 		
-		if(args[clp] == "-q"){
+		if(clp < args.Length && args[clp] == "-q"){
 			Tebas.quiet = true; //Activate quiet mode
 			clp++;
-		}else if(args[clp] == "-f"){
+		}else if(clp < args.Length && args[clp] == "-f"){
 			Tebas.forced = true; //Activate force mode
 			clp++;
 		}
 		
-		if(args[clp] == "-q"){
+		if(clp < args.Length && args[clp] == "-q"){
 			Tebas.quiet = true; //Activate quiet mode
 			clp++;
-		}else if(args[clp] == "-f"){
+		}else if(clp < args.Length && args[clp] == "-f"){
 			Tebas.forced = true; //Activate force mode
 			clp++;
 		}
@@ -33,24 +33,24 @@ public static class CommandLineHandler{
 			args[i] = StringHelper.removeQuotesSingle(args[i]); //If i search it, this is the line
 		} */
 		
-		if(Path.GetExtension(args[0]) == ".tbtem"){
-			TemplateHandler.install(args[0], args.Skip(0));
+		if(clp < args.Length && Path.GetExtension(args[clp]) == ".tbtem"){
+			TemplateHandler.install(args[clp], args.Skip(clp + 1));
 			Console.WriteLine("Press any key to close");
 			waitAnyKey();
 			return;
-		}else if(Path.GetExtension(args[0]) == ".tebas"){
-			Tebas.workingDirectory = Path.GetDirectoryName(args[0]);
+		}else if(clp < args.Length && Path.GetExtension(args[clp]) == ".tebas"){
+			Tebas.workingDirectory = Path.GetDirectoryName(args[clp]);
 			Tebas.localInfo();
 			Console.WriteLine("Press any key to close");
 			waitAnyKey();
 			return;
-		}else if(Path.GetExtension(args[0]) == ".tbplg"){
-			PluginHandler.install(args[0], args.Skip(0));
+		}else if(clp < args.Length && Path.GetExtension(args[clp]) == ".tbplg"){
+			PluginHandler.install(args[clp], args.Skip(clp + 1));
 			Console.WriteLine("Press any key to close");
 			waitAnyKey();
 			return;
-		}else if(Path.GetExtension(args[0]) == ".tbscr"){
-			Tebas.runStandaloneScript(args[0], args.Skip(0));
+		}else if(clp < args.Length && Path.GetExtension(args[clp]) == ".tbscr"){
+			Tebas.runStandaloneScript(args[clp], args.Skip(clp + 1));
 			return;
 		}
 		
