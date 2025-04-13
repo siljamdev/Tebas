@@ -19,11 +19,14 @@ AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\Tebas
-DisableDirPage=yes
 
  
 ;This lets the user decide. If admin rights are required, they will be prompted.
-PrivilegesRequired=lowest
+PrivilegesRequired=admin
+PrivilegesRequiredOverridesAllowed=dialog
+UsePreviousPrivileges=no
+
+DisableDirPage=no
 
 
 ; "ArchitecturesAllowed=x64compatible" specifies that Setup cannot run
@@ -49,111 +52,123 @@ ChangesEnvironment=true
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-Source: "{#MyAppName}_portable_{#MyAppVersion}_winx64.exe"; DestDir: "{app}"; DestName: "{#MyAppExeName}"; Flags: ignoreversion
+Source: "{#MyAppName}_portable_v{#MyAppVersion}_winx64.exe"; DestDir: "{app}"; DestName: "{#MyAppExeName}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 ; Add to PATH environment variable
 [Registry]
 Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; \
     ValueType: expandsz; ValueName: "Path"; ValueData: "{olddata};{app}\"; \
-    Check: NeedsAddPath(ExpandConstant('{app}\'))
+    Check: NeedsAddPathAdmin(ExpandConstant('{app}\'))
+
+Root: HKCU; Subkey: "Environment"; \
+    ValueType: expandsz; ValueName: "Path"; ValueData: "{olddata};{app}\"; \
+    Check: NeedsAddPathLocal(ExpandConstant('{app}\'))
 
 ; Register .tbtem files
-Root: HKCR; Subkey: ".tbtem"; ValueType: string; ValueData: "Tebas.Template"; Flags: uninsdeletekey
-Root: HKCR; Subkey: "Tebas.Template\shell\open\command"; \
-    ValueType: string; ValueData: """{app}\tebas.exe"" ""%1"""
+Root: HKA; Subkey: "Software\Classes\.tbtem"; ValueType: string; ValueData: "Tebas.Template"; Flags: uninsdeletekey
+Root: HKA; Subkey: "Software\Classes\Tebas.Template\shell\open\command"; \
+    ValueType: string; ValueData: """{app}\tebas.exe"" ""%1"""; Flags: uninsdeletekey
 
 ; Register .tebas files
-Root: HKCR; Subkey: ".tebas"; ValueType: string; ValueData: "Tebas.Project"; Flags: uninsdeletekey
-Root: HKCR; Subkey: "Tebas.Project\shell\open\command"; \
-    ValueType: string; ValueData: """{app}\tebas.exe"" ""%1"""
+Root: HKA; Subkey: "Software\Classes\.tebas"; ValueType: string; ValueData: "Tebas.Project"; Flags: uninsdeletekey
+Root: HKA; Subkey: "Software\Classes\Tebas.Project\shell\open\command"; \
+    ValueType: string; ValueData: """{app}\tebas.exe"" ""%1"""; Flags: uninsdeletekey
 
 ; Register .tbplg files
-Root: HKCR; Subkey: ".tbplg"; ValueType: string; ValueData: "Tebas.Plugin"; Flags: uninsdeletekey
-Root: HKCR; Subkey: "Tebas.Plugin\shell\open\command"; \
-    ValueType: string; ValueData: """{app}\tebas.exe"" ""%1"""
+Root: HKA; Subkey: "Software\Classes\.tbplg"; ValueType: string; ValueData: "Tebas.Plugin"; Flags: uninsdeletekey
+Root: HKA; Subkey: "Software\Classes\Tebas.Plugin\shell\open\command"; \
+    ValueType: string; ValueData: """{app}\tebas.exe"" ""%1"""; Flags: uninsdeletekey
 	
 	; Register .tbscr files
-Root: HKCR; Subkey: ".tbscr"; ValueType: string; ValueData: "Tebas.Script"; Flags: uninsdeletekey
-Root: HKCR; Subkey: "Tebas.Plugin\shell\open\command"; \
-    ValueType: string; ValueData: """{app}\tebas.exe"" ""%1"""
+Root: HKA; Subkey: "Software\Classes\.tbscr"; ValueType: string; ValueData: "Tebas.Script"; Flags: uninsdeletekey
+Root: HKA; Subkey: "Software\Classes\Tebas.Script\shell\open\command"; \
+    ValueType: string; ValueData: """{app}\tebas.exe"" ""%1"""; Flags: uninsdeletekey
     
 [Code]
-const EnvironmentKey = 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment';
-const INSTALL_MODE_ALL_USERS = 1;
-const INSTALL_MODE_LOCAL_ONLY = 2;
+const EnvironmentKeyAdmin = 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment';
+const EnvironmentKeyLocal = 'Environment';
 
-var
-  InstallMode: Integer;
-
-procedure InitializeWizard;
-begin
-  InstallMode := INSTALL_MODE_ALL_USERS;  // Default to "Install for All Users"
-
-  // Add a custom page for installation mode selection
-  // This is a simple input page where the user can select their preference
-  // We will create a radio button with two choices
-  CreateStringChangePage(wpSelectDir, 'Select installation mode', 
-    'Select whether to install for all users or just for yourself:', True);
-  
-  // Adding radio button for "Install for all users" option
-  AddRadioButton('Install for all users', INSTALL_MODE_ALL_USERS);
-  // Adding radio button for "Install only for me" option (local install)
-  AddRadioButton('Install for me (local)', INSTALL_MODE_LOCAL_ONLY);
-end;
-
-procedure CurPageChanged(CurPageID: Integer);
-begin
-  // Check the selected installation mode
-  if InstallMode = INSTALL_MODE_LOCAL_ONLY then
-  begin
-    // Change DefaultDirName to install in AppData for the current user
-    DefaultDirName := ExpandConstant('{userappdata}\{#MyAppName}');
-  end
-  else
-  begin
-    // Default for all users (Program Files)
-    DefaultDirName := '{autopf}\{#MyAppName}';
-  end;
-end;
-
-
-
-
-function NeedsAddPath(Param: string): boolean;
+function NeedsAddPathAdmin(Param: string): boolean;
 var
   OrigPath: string;
 begin
+  if not isAdminInstallMode then begin
+    Result := False;
+	exit;
+  end;
   if not RegQueryStringValue(HKEY_LOCAL_MACHINE,
-    EnvironmentKey,
+    EnvironmentKeyAdmin,
     'Path', OrigPath)
   then begin
     Result := True;
     exit;
   end;
-  { look for the path with leading and trailing semicolon }
-  { Pos() returns 0 if not found }
+  // look for the path with leading and trailing semicolon
+  // Pos() returns 0 if not found
   Result := Pos(';' + Param + ';', ';' + OrigPath + ';') = 0;
 end;
 
-procedure EnvRemovePath(Path: string);
+function NeedsAddPathLocal(Param: string): boolean;
+var
+  OrigPath: string;
+begin
+ if isAdminInstallMode then begin
+    Result := False;
+	exit;
+  end;
+  if not RegQueryStringValue(HKEY_CURRENT_USER,
+    EnvironmentKeyLocal,
+    'Path', OrigPath)
+  then begin
+    Result := True;
+    exit;
+  end;
+  // look for the path with leading and trailing semicolon
+  // Pos() returns 0 if not found
+  Result := Pos(';' + Uppercase(Param) + ';', ';' + Uppercase(OrigPath) + ';') = 0;
+end;
+
+procedure EnvRemovePathAdmin(Path: string);
 var
     Paths: string;
     P: Integer;
 begin
-    { Skip if registry entry not exists }
-    if not RegQueryStringValue(HKEY_LOCAL_MACHINE, EnvironmentKey, 'Path', Paths) then
+    //Skip if registry entry not exists
+    if not RegQueryStringValue(HKEY_LOCAL_MACHINE, EnvironmentKeyAdmin, 'Path', Paths) then
         exit;
 
-    { Skip if string not found in path }
+    //Skip if string not found in path
     P := Pos(';' + Uppercase(Path) + ';', ';' + Uppercase(Paths) + ';');
     if P = 0 then exit;
 
-    { Update path variable }
+    //Update path variable
     Delete(Paths, P - 1, Length(Path) + 1);
 
-    { Overwrite path environment variable }
-    if RegWriteStringValue(HKEY_LOCAL_MACHINE, EnvironmentKey, 'Path', Paths)
+    //Overwrite path environment variable
+    if RegWriteStringValue(HKEY_LOCAL_MACHINE, EnvironmentKeyAdmin, 'Path', Paths)
+    then Log(Format('The [%s] removed from PATH: [%s]', [Path, Paths]))
+    else Log(Format('Error while removing the [%s] from PATH: [%s]', [Path, Paths]));
+end;
+
+procedure EnvRemovePathLocal(Path: string);
+var
+    Paths: string;
+    P: Integer;
+begin
+    //Skip if registry entry not exists
+    if not RegQueryStringValue(HKEY_CURRENT_USER, EnvironmentKeyLocal, 'Path', Paths) then
+        exit;
+
+    //Skip if string not found in path
+    P := Pos(';' + Uppercase(Path) + ';', ';' + Uppercase(Paths) + ';');
+    if P = 0 then exit;
+
+    //Update path variable
+    Delete(Paths, P - 1, Length(Path) + 1);
+
+    //Overwrite path environment variable
+    if RegWriteStringValue(HKEY_CURRENT_USER, EnvironmentKeyLocal, 'Path', Paths)
     then Log(Format('The [%s] removed from PATH: [%s]', [Path, Paths]))
     else Log(Format('Error while removing the [%s] from PATH: [%s]', [Path, Paths]));
 end;
@@ -161,7 +176,12 @@ end;
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
     if CurUninstallStep = usPostUninstall
-    then EnvRemovePath(ExpandConstant('{app}\'));
+    then begin
+	  if isAdmin then 
+	    EnvRemovePathAdmin(ExpandConstant('{app}\'))
+	  else
+	    EnvRemovePathLocal(ExpandConstant('{app}\'));
+	end;
 end;
 
 [Icons]
