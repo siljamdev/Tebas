@@ -57,7 +57,7 @@ public static class PluginHandler{
 		
 		foreach(KeyValuePair<string, object> kvp in plugins.data){
 			string[] n = kvp.Key.Split(".");
-			if(kvp is string && n[1] != "resources"){
+			if(kvp.Value is string && n[1] != "resources"){
 				if(!p.Contains(n[0])){
 					p.Add(n[0]);
 				}
