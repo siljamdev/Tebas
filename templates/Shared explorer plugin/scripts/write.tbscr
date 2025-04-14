@@ -1,0 +1,9 @@
+math.greater def.0 args.length "0"
+
+if! def.0 {
+	console.print "The name must be specified"
+	exit
+}
+
+console.ask def.1 "What do you want to write?: "
+shared.write args.0 def.1

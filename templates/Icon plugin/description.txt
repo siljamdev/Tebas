@@ -1,0 +1,1 @@
+Plugin that helps setting an icon in a folder (windows folder custom icon) and additionally sets the icon on dotnet projects

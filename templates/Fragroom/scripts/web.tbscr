@@ -1,4 +1,4 @@
-template.read def.0 "path"
+template.read def.0 "fgromPath"
 
 self.removeQuotes args.0
 

@@ -1,6 +1,8 @@
 console.print "Run dotnet project"
 
-process.runOutput "dotnet" "build /nologo /clp:NoSummary" dot err
+template.read dotnetPath.0 "dotnetPath"
+
+process.runOutput dotnetPath.0 "build /nologo /clp:NoSummary" dot err
 
 table.append dot err
 
@@ -42,7 +44,7 @@ if def.0 {
 	//console.pause "Console Paused"
 	exit
 } else {
-	process.cmd "start \"\" \"cmd /c dotnet run & exit\""
+	process.runDetached "cmd" f"/c \"{dotnetPath.0} run & exit\""
 }
 
 function orderWarning {

@@ -6,9 +6,10 @@ if def.0 {
 	call tryPath
 	table.pop def.1 stack
 	if def.1 {
-		console.print "Got the python path from CLI arguments"
+		console.print "Python path gotten from CLI arguments"
 		call successWrite
 	}
+	console.print "Invalid CLI path for python"
 }
 
 table.clear def
@@ -20,7 +21,7 @@ if! def.0 {
 	call tryPath
 	table.pop def.1 stack
 	if def.1 {
-		console.print "Got the python path from shared storage"
+		console.print "Python path gotten from shared storage"
 		call successWrite
 	}
 }
@@ -29,7 +30,7 @@ table.add stack "python"
 call tryPathVar
 table.pop def.1 stack
 if def.1 {
-	console.print "Got the python path from PATH variable"
+	console.print "Python path gotten from PATH variable"
 	call successWrite
 }
 
@@ -44,13 +45,18 @@ do! con.0 {
 
 call successWrite
 
+//Returns true/false and the path if true
 function tryPath {
 	scope cont
 	table.pop cont.0 stack
 	self.removeQuotes cont.0
 	
 	file.exists cont.1 cont.0
-	if cont.1 {
+	path.extension cont.2 cont.0
+	self.lower cont.2
+	string.equal cont.3 cont.2 ".exe"
+	bool.and cont.4 cont.1 cont.2
+	if cont.4 {
 		table.add stack cont.0
 		table.add stack true.0
 		return
@@ -58,8 +64,7 @@ function tryPath {
 	
 	process.isExecutableInPath cont.1 cont.0
 	if cont.1 {
-		process.getExecutableFullPath cont.2 cont.0
-		table.add stack cont.2
+		table.add stack cont.0
 		table.add stack true.0
 		return
 	}
@@ -67,6 +72,7 @@ function tryPath {
 	table.add stack false.0
 }
 
+//Returns true if its in the PATH variable
 function tryPathVar {
 	scope cont
 	table.pop cont.0 stack
@@ -74,8 +80,7 @@ function tryPathVar {
 	
 	process.isExecutableInPath cont.1 cont.0
 	if cont.1 {
-		process.getExecutableFullPath cont.2 cont.0
-		table.add stack cont.2
+		table.add stack cont.0
 		table.add stack true.0
 		return
 	}

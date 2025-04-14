@@ -11,6 +11,8 @@
     <Company>@company</Company>
     <PackageDescription>@desc</PackageDescription>
 	
+	<!--@icon-->
+	
 	<PublishSingleFile>true</PublishSingleFile>
   </PropertyGroup>
   

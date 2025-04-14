@@ -1,0 +1,5 @@
+console.print "Help icon plugin"
+console.print ""
+console.print "This plugin is aimed at setting an icon in a folder (windows folder custom icon) and additionally sets the icon on dotnet projects"
+console.print "List of scripts:"
+console.print "set [path]         sets the icon with the path to a .ico file"

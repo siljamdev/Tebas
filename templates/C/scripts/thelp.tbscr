@@ -6,3 +6,4 @@ console.print "run                    attempts to compile, and if succesful, run
 console.print "debug                  attempts to compile, and if succesful, runs the program with a pause at the end"
 console.print "build                  attempts to compile"
 console.print "publish [version]      attempts to compile into the release folder. Expects an argument, version"
+console.print "setpath [path]         re-sets the gcc path"

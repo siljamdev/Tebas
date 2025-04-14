@@ -8,11 +8,10 @@ if con.0 {
 
 math.greater con.0 args.length "1"
 if con.0 {
-	string.set def.1 "add package {args.0} --version {args.1}"
-	self.expand def.1
+	string.set def.1 f"add package {args.0} --version {args.1}"
 } else {
-	string.set def.1 "add package {args.0}"
-	self.expand def.1
+	string.set def.1 f"add package {args.0}"
 }
 
-process.run "dotnet" def.1
+template.read dotnetPath.0 "dotnetPath"
+process.run dotnetPath.0 def.1

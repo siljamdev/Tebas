@@ -1,6 +1,7 @@
 console.print "Build dotnet project"
 
-process.runOutput "dotnet" "build /nologo /clp:NoSummary" dot err
+template.read dotnetPath.0 "dotnetPath"
+process.runOutput dotnetPath.0 "build /nologo /clp:NoSummary" dot err
 
 table.append dot err
 

@@ -1,3 +1,6 @@
+string.removeQuotes def.2 args.0
+path.extension def.1 def.2
+
 string.equal def.0 %tn "dotnet"
 if def.0 {
 	template.run "debug" ""
@@ -13,5 +16,13 @@ if def.0 {
 string.equal def.0 %tn "python"
 if def.0 {
 	template.run "debug" f"{args.0}"
+	exit
+}
+
+//tebas script file
+string.equal def.0 def.1 ".tbscr"
+if def.0 {
+	tebas.script args.0 ""
+	console.pause "Press any key to continue"
 	exit
 }

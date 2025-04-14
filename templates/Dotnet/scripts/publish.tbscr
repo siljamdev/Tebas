@@ -9,6 +9,8 @@ if check.2 {
 	exit
 }
 
+template.read dotnetPath.0 "dotnetPath"
+
 string.set def.0 args.0
 console.print f"The version is {def.0}"
 
@@ -48,7 +50,8 @@ do! con.0 {
 
 string.set dotnet.0 f"publish -p:PublishSingleFile=true -r {con.1} -c Release --self-contained true --output releases/{def.0}"
 
-process.run "dotnet" dotnet.0
+
+process.run dotnetPath.0 dotnet.0
 
 string.set pdb.0 f"W/releases/{def.0}"
 
