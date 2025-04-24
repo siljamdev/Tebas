@@ -1,0 +1,22 @@
+console.print "New web project"
+
+file.exists cp.0 "W/*.html"
+
+if! cp.0 {
+	template.read cp.1 "html"
+	
+	file.create f"W/{%pn}.html"
+	file.write f"W/{%pn}.html" cp.1
+	
+	template.read cp.1 "style"
+	
+	file.create "W/style.css"
+	file.write "W/style.css" cp.1
+	
+	template.read cp.1 "script"
+	
+	file.create "W/script.js"
+	file.write "W/script.js" cp.1
+}
+
+project.write "timesRun" "0"

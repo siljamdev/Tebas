@@ -1,0 +1,31 @@
+console.print "Run web project"
+
+template.read py.0 "browserPath"
+
+math.greater con.0 args.length "0"
+string.equal con.1 args.0 ""
+bool.negate con.1 con.1
+bool.and con.0 con.0 con.1
+if con.0 {
+	self.removeQuotes args.0
+	
+	process.runDetached f"{py.0}" f"\"{args.0}\""
+	
+	project.read def.0 "timesRun"
+	math.sumUp def.0 def.0
+	project.write "timesRun" def.0
+} else {
+	folder.listChild htmlFiles "W" "*.html"
+	
+	math.greater con.1 htmlFiles.length "0"
+	if con.1 {
+		string.set f.0 htmlFiles.0
+		string.count f.1 f.0
+		math.subtract f.1 f.1 "2"
+		string.substring f.0 f.0 "2" f.1
+		
+		process.runDetached f"{py.0}" f"\"{%wd}/{f.0}\""
+	} else {
+		console.print "Couldn't find any file"
+	}
+}
