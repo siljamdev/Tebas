@@ -15,15 +15,8 @@
     
     <ApplicationIcon>res/icon.ico</ApplicationIcon>
 	
+	<PublishSingleFile>true</PublishSingleFile>
 	<SelfContained>true</SelfContained>
-  </PropertyGroup>
-  
-  <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'win-x64'">
-    <PublishAot>true</PublishAot>
-  </PropertyGroup>
-  
-  <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'win-x86'">
-    <PublishSingleFile>true</PublishSingleFile>
   </PropertyGroup>
 
   <ItemGroup>
