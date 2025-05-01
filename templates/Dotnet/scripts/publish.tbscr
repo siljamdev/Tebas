@@ -48,7 +48,7 @@ do! con.0 {
 	table.contains con.0 ["win-x64","win-x86","win-arm","win-arm64","linux-x64","linux-arm","linux-arm64","osx-x64","osx-arm64","freebsd-x64","freebsd-arm","freebsd-arm64","ios-arm64","android-arm","android-arm64","tizen-x64","tvos-arm64","watchos-arm64"] con.1
 }
 
-string.set dotnet.0 f"publish -p:PublishSingleFile=true -r {con.1} -c Release --self-contained true --output releases/{def.0}"
+string.set dotnet.0 f"publish -r {con.1} -c Release --output releases/{def.0}"
 
 
 process.run dotnetPath.0 dotnet.0
