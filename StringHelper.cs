@@ -27,20 +27,22 @@ public static class StringHelper{
 		bool stringOpened = false;
 		bool previousEscapeCode = false;
 		bool previousSpace = false;
-		int startIndex = 0;
-		List<string> a = new List<string>();
 		
-		l += " ";
+		StringBuilder c = new StringBuilder();
+		
+		List<string> a = new List<string>();
 		
 		for(int i = 0; i < l.Length; i++){
 			if(l[i] == '\"'){
 				if(!previousEscapeCode){
 					stringOpened = !stringOpened;
+					continue;
 				}
 			}
 			
 			if(l[i] == '\\' && !previousEscapeCode){
 				previousEscapeCode = true;
+				continue;
 			}else{
 				previousEscapeCode = false;
 			}
@@ -48,12 +50,19 @@ public static class StringHelper{
 			if(l[i].isWhitespace() && !stringOpened){
 				if(!previousSpace){
 					previousSpace = true;
-					a.Add(l.Substring(startIndex, i - startIndex));
+					a.Add(c.ToString());
+					c.Clear();
 				}
-				startIndex = i + 1;
+				continue;
 			}else{
 				previousSpace = false;
 			}
+			
+			c.Append(l[i]);
+		}
+		
+		if(c.Length > 0){
+			a.Add(c.ToString());
 		}
 		
 		return a.ToArray();
