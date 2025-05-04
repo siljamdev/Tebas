@@ -4,15 +4,23 @@
 Tebas is a project manager for coding projects with git support  
 **It is still in development, so expect breaking changes**
 
-It is a command based utility to handle projects. The main focus is user-made templates, that are what provide the useful functionalities.
+## Usage
+Tebas is a command based utility to handle projects. The main focus is user-made templates, that are what provide the useful functionalities.
 It will add a **project.tebas** file into your project.
 
 There are channels, which are folders where projects will be created. Each project is in a separate folder and has a **project.tebas** file.
 Each project is created with a template, which gives additional features.
 
-There is an extensive command line help menu.
+The interface to work with Tebas is command line arguments. For example:  
+`tebas channel list` will output a list of channels.  
+There is also an extensive command line help menu.
 
 **ALL DOCUMENTATION WAS MADE BY HAND**
+
+## Installation
+You can install Tebas for windows x64 with the installer(made with [inno setup](https://jrsoftware.org/isinfo.php)), that will let you choose between installing for everyone or locally or download a portable executable.  
+For windows x86, you can download the portable executable.  
+For linux and mac, you can probably build the executable yourself. The only part that might not work is the script cmd command. Probably i will fix this in the future.
 
 ## Templates
 These are user made. If you want to make a template, i suggest using the Creator Utility, looking into the structure of the [templates](./templates).
