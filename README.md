@@ -23,14 +23,17 @@ For windows x86, you can download the portable executable.
 For linux and mac, you can probably build the executable yourself. The only part that might not work is the script cmd command. Probably i will fix this in the future.
 
 ## Templates
-These are user made. If you want to make a template, i suggest using the Creator Utility, looking into the structure of the [templates](./templates).
+These are user made.  
 They are [AshFiles](https://github.com/Dumbelfo08/AshLib) with the **.tbtem** extension. You can double click them to install them.
 
-Many useful templates are present [here](./templates) for you to use, just downlaod the **.tbtem** file and install it.
+Many useful templates are present [here](./templates) for you to use, just downlaod the **.tbtem** file and install it.  
+If you want to make a template, i suggest using the built-in Creator Utility, looking into the example templates in [templates](./templates) and reading the [template structure guide](./documentation/templateStructure.md). There are also [design guidelines](./documentation/templateGuidelines.md).
 
 ## Plugins
-These are user made. They are like templates, but instead of applying to a project, they are global. If you want to create a plugin, i suggest using the Creator Utility, looking into the structure of the [plugins](./templates) (the format is the same, but it only uses script and resources folder)
+These are user made. They are like templates, but instead of applying to a project, they are global.  
 They are [AshFiles](https://github.com/Dumbelfo08/AshLib) with the **.tbplg** extension. You can double click them to install them.
+
+If you want to make a plugin, i suggest using the built-in Creator Utility, looking into the example plugin in [templates](./templates) and reading the [plugin structure guide](./documentation/templateStructure.md). There are also [design guidelines](./documentation/templateGuidelines.md). (the format is the same as templates, but with less things)
 
 ## Scripting language
 The templates use a custom scripting language to provide functionality. You can look into [here](./documentation/scripts) for documentation and examples.  
