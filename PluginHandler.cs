@@ -15,7 +15,10 @@ public static class PluginHandler{
 		
 		Tebas.initializeLocalSilent();
 		
-		plugins = new AshFile(Tebas.dep.path + "/plugins.ash");
+		plugins = Tebas.dep.ReadAshFile("plugins.ash");
+		
+		plugins.format = 3;
+		
 		init = true;
 	}
 	
@@ -110,7 +113,7 @@ public static class PluginHandler{
 		path = StringHelper.removeQuotesSingle(path);
 		
 		if(!File.Exists(path)){
-			Tebas.consoleOutput("That file does not exist");
+			Tebas.consoleError("That file does not exist");
 			return;
 		}
 		
@@ -118,16 +121,20 @@ public static class PluginHandler{
 		
 		string name;
 		if(!plugin.CanGetCamp("name", out name)){
-			Tebas.consoleOutput("Plugin is incorrectly formatted: name missing");
+			Tebas.consoleError("Plugin is incorrectly formatted: name missing");
+			return;
+		}
+		
+		if(!isNameValid(name)){
 			return;
 		}
 		
 		string desc = plugin.GetCampOrDefault<string>("description", null);
 		if(desc != null){
-			Console.WriteLine("Plugin description: " + desc);
+			Tebas.consoleOutput("Plugin description: " + desc);
 		}
 		
-		if(!Tebas.forced && exists(name)){
+		if(!Tebas.forced && Tebas.isConsoleInteractive() && exists(name)){
 			Console.WriteLine("A plugin called " + name + " is already installed, do you want to update it? (Y/N)");
 			string ans = Console.ReadLine();
 			
@@ -179,7 +186,7 @@ public static class PluginHandler{
 		initialize();
 		
 		if(!exists(name)){
-			Tebas.consoleOutput("That plugin is not installed");
+			Tebas.consoleError("That plugin is not installed");
 			return;
 		}
 		
@@ -190,18 +197,23 @@ public static class PluginHandler{
 			Tebas.consoleOutput("Plugin description: " + desc);
 		}
 		
-		if(Tebas.template.CanGetCamp("git.defaultUse", out bool b)){
-			Tebas.consoleOutput("Use git: " + b);
+		List<string> scripts = new List<string>();
+		
+		foreach(string k in plugins.data.Keys){
+			if(k.StartsWith(name + ".script.")){
+				scripts.Add(k.Substring(8 + name.Length));
+			}
 		}
 		
-		if(Tebas.template.CanGetCamp("codeExtensions", out string s)){
-			Tebas.consoleOutput("Code files extensions:");
-			string[] p = s.Split(new string[]{"\r\n", "\n", "\r"}, StringSplitOptions.None);
+		if(scripts.Count > 0){
+			Tebas.consoleOutput("This plugin has " + scripts.Count + " scripts:");
 			
-			foreach(string h in p){
+			foreach(string h in scripts){
 				Tebas.consoleOutput("    " + h);
 			}
 		}
+		
+		runScript(name, "info");
 	}
 	
 	public static void uninstall(string name){
@@ -220,9 +232,9 @@ public static class PluginHandler{
 				}
 			}
 			plugins.Save();
-			Tebas.consoleOutput("Template uninstalled succesfully");
+			Tebas.consoleOutput("Plugin uninstalled succesfully");
 		}else{
-			Tebas.consoleOutput("Deletion cancelled");
+			Tebas.consoleOutput("Uninstallation cancelled");
 		}
 	}
 	
@@ -265,5 +277,38 @@ public static class PluginHandler{
 		}else{
 			return "";
 		}
+	}
+	
+	public static bool isNameValid(string name){		
+		if(name.Contains(' ')){
+			Tebas.consoleError("A plugin name cannot have spaces, plugin name was: '" + name + "'");
+			return false;
+		}
+		
+		if(name.Contains('*')){
+			Tebas.consoleError("A plugin name cannot have '*', plugin name was: '" + name + "'");
+			return false;
+		}
+		
+		if(name.Contains('@')){
+			Tebas.consoleOutput("A plugin name cannot have '@', plugin name was: '" + name + "'");
+			return false;
+		}
+		
+		return true;
+	}
+	
+	public static bool isScriptNameValid(string name){		
+		if(name.Contains(' ') || name.Contains('*') || name.Contains('@')){
+			return false;
+		}
+		return true;
+	}
+	
+	public static string fixName(string name){
+		if(name.StartsWith("*")){
+			return name.Substring(1);
+		}
+		return name;
 	}
 }

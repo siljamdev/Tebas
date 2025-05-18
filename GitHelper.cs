@@ -6,20 +6,40 @@ public static class GitHelper{
 		if(!Directory.Exists(".git")){
 			ProcessExecuter.runProcess("GIT", getGitPath(), "init -b " + getBranch(), Tebas.workingDirectory);
 		}else{
-			Tebas.consoleOutput("Git has already been initilized here");
+			Tebas.consoleError("Git has already been initilized here");
 		}
 		
 		Tebas.project.SetCamp("git.initialized", true);
 	}
 	
 	public static void tryInit(){
-		if(Tebas.project.CanGetCamp("git.initialized", out bool b) && !b){
+		if(!Tebas.project.CanGetCamp("git.initialized", out bool b) || !b){
 			init();
+		}
+	}
+	
+	public static void addGitignore(){
+		if(File.Exists(Tebas.workingDirectory + "/.gitignore")){
+			return;
+		}
+		
+		string gitIgnore = "";
+		if(Tebas.config.CanGetCamp("git.defaultGitignore", out string k)){
+			gitIgnore = k;
+		}
+		
+		if(Tebas.template.CanGetCamp("git.gitignore", out string l)){
+			gitIgnore += Environment.NewLine + l;
+		}
+		
+		if(gitIgnore.Length > 0){
+			File.WriteAllText(Tebas.workingDirectory + "/.gitignore", gitIgnore);
 		}
 	}
 	
 	public static void status(){
 		tryInit();
+		Tebas.consoleOutput("Current working branch: " + getBranch());
 		ProcessExecuter.runProcess("GIT", getGitPath(), "status", Tebas.workingDirectory);
 	}
 	
@@ -40,18 +60,18 @@ public static class GitHelper{
 	
 	public static void push(string r){
 		if(getNumberOfRemotes() < 1){
-			Tebas.consoleOutput("There are no remotes in this project");
+			Tebas.consoleError("There are no remotes in this project");
 			return;
 		}
 		if(getNumberOfRemotes() == 1){
 			r = getSingleRemote();
 		}else if(r == null){
-			Tebas.consoleOutput("There is more than one remote, it needs to be specified");
+			Tebas.consoleError("There is more than one remote, it needs to be specified");
 			return;
 		}
 		
 		if(!remoteExists(r)){
-			Tebas.consoleOutput("That remote does not exsist");
+			Tebas.consoleError("That remote does not exsist");
 			return;
 		}
 		
@@ -61,18 +81,18 @@ public static class GitHelper{
 	
 	public static void pull(string r){
 		if(getNumberOfRemotes() < 1){
-			Tebas.consoleOutput("There are no remotes in this project");
+			Tebas.consoleError("There are no remotes in this project");
 			return;
 		}
 		if(getNumberOfRemotes() == 1){
 			r = getSingleRemote();
 		}else if(r == null){
-			Tebas.consoleOutput("There is more than one remote, it needs to be specified");
+			Tebas.consoleError("There is more than one remote, it needs to be specified");
 			return;
 		}
 		
 		if(!remoteExists(r)){
-			Tebas.consoleOutput("That remote does not exsist");
+			Tebas.consoleError("That remote does not exsist");
 			return;
 		}
 		
@@ -91,6 +111,16 @@ public static class GitHelper{
 	}
 	
 	public static string getBranch(){
+		if(!Tebas.initializeLocal()){
+			return getDefaultBranch();
+		}
+		if(Tebas.project.CanGetCamp("git.branch", out string s)){
+			return s;
+		}
+		return getDefaultBranch();
+	}
+	
+	public static string getDefaultBranch(){
 		Tebas.initializeConfig();
 		
 		string branch = "main";
@@ -98,6 +128,17 @@ public static class GitHelper{
 			branch = s;
 		}
 		return branch;
+	}
+	
+	public static void setWorkingBranch(string branch){
+		if(!Tebas.initializeLocal()){
+			return;
+		}
+		Tebas.project.SetCamp("git.branch", branch);
+		Tebas.project.Save();
+		
+		ProcessExecuter.runProcess("GIT", getGitPath(), "switch -c " + branch, Tebas.workingDirectory);
+		ProcessExecuter.runProcess("GIT", getGitPath(), "switch " + branch, Tebas.workingDirectory);
 	}
 	
 	public static bool remoteExists(string name){
@@ -133,7 +174,7 @@ public static class GitHelper{
 		}
 		
 		if(!remoteExists(name)){
-			Tebas.consoleOutput("That remote does not exsist");
+			Tebas.consoleError("That remote does not exsist");
 			return;
 		}
 		
@@ -157,7 +198,7 @@ public static class GitHelper{
 		}
 		
 		if(!remoteExists(oldname)){
-			Tebas.consoleOutput("That remote does not exsist");
+			Tebas.consoleError("That remote does not exsist");
 			return;
 		}
 		

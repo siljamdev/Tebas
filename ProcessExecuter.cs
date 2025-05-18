@@ -113,10 +113,21 @@ public static class ProcessExecuter{
 	}
 	
 	public static void openLink(string url){
-		Process.Start(new ProcessStartInfo{
-			FileName = url,
-			UseShellExecute = true
-		});
+		try{
+			if(OperatingSystem.IsWindows()){
+				Process.Start(new ProcessStartInfo{
+					FileName = url,
+					UseShellExecute = true
+				});
+			}
+			else if(OperatingSystem.IsLinux()){
+				Process.Start("xdg-open", url);
+			}
+			else if(OperatingSystem.IsMacOS()){
+				Process.Start("open", url);
+			}
+		}
+		catch(Exception e){}
 	}
 	
 	public static void runProcessWithOutput(string name, string command, string arguments, string workingDirectory, List<string> output, List<string> error)

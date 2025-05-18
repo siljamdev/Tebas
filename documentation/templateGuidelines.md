@@ -3,7 +3,7 @@
 **Disclaimer**: This guidelines are the ones I followed designing the useful templates avaiable [in this repo](../templates)
 
 ## Help script
-Templates should have a `thelp` script and plugins `phelp`. These commands will explain all other avaialable commands, what they do, and how to use them.
+Templates should have a `thelp` global script and plugins `phelp`. These commands will explain all other avaialable commands, what they do, and how to use them.
 
 ## Arguments
 It is preferent for scripts to have CLI arguments than interactive prompts, when possible. This makes it possible to automate many tasks.

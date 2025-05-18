@@ -51,12 +51,12 @@ public class Script{
 				if(sentences[i].command == "function"){
 					string n = sentences[i].getArg(1);
 					if(isValidName(n)){
-						functions.Add(sentences[i].getArg(1), i);
+						functions.Add(n, i);
+					}else{
+						Console.Error.WriteLine("Invalid function name: " + n);
 					}
 				}
-			}catch(Exception){
-				
-			}
+			}catch(Exception){}
 		}
 	}
 	
@@ -88,7 +88,11 @@ public class Script{
 				
 				switch(s.command){
 					case "process.cmd":
-					ProcessExecuter.runProcess(name + " CMD", Environment.ExpandEnvironmentVariables(@"%SystemRoot%\System32\cmd.exe"),  "/c " + getString(1), Tebas.workingDirectory);
+					if(OperatingSystem.IsWindows()){
+						ProcessExecuter.runProcess(name + " CMD", Environment.ExpandEnvironmentVariables(@"%SystemRoot%\System32\cmd.exe"),  "/c \"" + getString(1) + "\"", Tebas.workingDirectory);
+					}else{
+						ProcessExecuter.runProcess(name + " SH", "sh",  "-c \"" + getString(1) + "\"", Tebas.workingDirectory);
+					}
 					break;
 					
 					case "process.link":
@@ -132,16 +136,30 @@ public class Script{
 					
 					case "console.printFormat":
 					FormatString fs = getString(1);
-					outputLine(fs.ToString());
+					
+					if(Tebas.useColors()){
+						outputLine(fs.ToString());
+					}else{
+						outputLine(fs.content);
+					}
 					break;
 					
 					case "console.ask":
 					output(getString(2));
+					
+					if(!Tebas.isConsoleInteractive()){
+						setString(getStringRef(1), "");
+						break;
+					}
 					setString(getStringRef(1), Console.ReadLine());
 					break;
 					
 					case "console.pause":
 					output(getString(1));
+					if(!Tebas.isConsoleInteractive()){
+						outputLine("");
+						break;
+					}
 					Console.ReadLine();
 					outputLine("");
 					break;
@@ -213,7 +231,7 @@ public class Script{
 					break;
 					
 					case "self.substring":
-					setString(getStringRef(1), (int.TryParse(getString(2), out u) && int.TryParse(getString(3), out v) && u >= 0 && u < getString(2).Length && v >= 0 && u + v <= getString(2).Length ? getString(1).Substring(u, v) : ""));
+					setString(getStringRef(1), (int.TryParse(getString(2), out u) && int.TryParse(getString(3), out v) && u >= 0 && u < getString(1).Length && v >= 0 && u + v <= getString(1).Length ? getString(1).Substring(u, v) : ""));
 					break;
 					
 					case "self.replace":
@@ -621,6 +639,10 @@ public class Script{
 					break;
 					
 					case "tebas.getDefaultGitBranch":
+					setString(getStringRef(1), GitHelper.getDefaultBranch());
+					break;
+					
+					case "tebas.getCurrentGitBranch":
 					setString(getStringRef(1), GitHelper.getBranch());
 					break;
 					
@@ -670,7 +692,7 @@ public class Script{
 					
 					case "while":
 					if(s.getArg(2) != "{"){
-						throw new TebasScriptError("Incorrect while loop");
+						throw new TebasScriptError("Incorrect while loop: missing {");
 					}
 					if(tables["true"].Contains(getString(1))){
 						flow.Push(new FlowComponent(FlowType.While, lp, flowLevel));
@@ -683,7 +705,7 @@ public class Script{
 					
 					case "while!":
 					if(s.getArg(2) != "{"){
-						throw new TebasScriptError("Incorrect while! loop");
+						throw new TebasScriptError("Incorrect while! loop: missing {");
 					}
 					if(!tables["true"].Contains(getString(1))){
 						flow.Push(new FlowComponent(FlowType.While, lp, flowLevel));
@@ -696,7 +718,7 @@ public class Script{
 					
 					case "do":
 					if(s.getArg(2) != "{"){
-						throw new TebasScriptError("Incorrect do loop");
+						throw new TebasScriptError("Incorrect do loop: missing {");
 					}
 					
 					flow.Push(new FlowComponent(FlowType.Do, lp, flowLevel));
@@ -705,7 +727,7 @@ public class Script{
 					
 					case "do!":
 					if(s.getArg(2) != "{"){
-						throw new TebasScriptError("Incorrect do! loop");
+						throw new TebasScriptError("Incorrect do! loop: missing {");
 					}
 					
 					flow.Push(new FlowComponent(FlowType.DoNeg, lp, flowLevel));
@@ -740,7 +762,7 @@ public class Script{
 					
 					case "if":
 					if(s.getArg(2) != "{"){
-						throw new TebasScriptError("Incorrect if statement");
+						throw new TebasScriptError("Incorrect if statement: missing {");
 					}
 					
 					if(tables["true"].Contains(getString(1))){
@@ -757,7 +779,7 @@ public class Script{
 					
 					case "if!":
 					if(s.getArg(2) != "{"){
-						throw new TebasScriptError("Incorrect if! statement");
+						throw new TebasScriptError("Incorrect if! statement: missing {");
 					}
 					
 					if(!tables["true"].Contains(getString(1))){
@@ -784,6 +806,8 @@ public class Script{
 						}
 						scope.Push(new Scope(null, null));
 						lp = functions[s.getArg(1)];
+					}else{
+						throw new TebasScriptError("Incorrect call: not found function " + s.getArg(1));
 					}
 					break;
 					
@@ -1536,6 +1560,9 @@ public class Script{
 			
 			case "tbv":
 			return Tebas.currentVersion;
+			
+			case "os":
+			return OperatingSystem.IsWindows() ? "windows" : OperatingSystem.IsLinux()   ? "linux" : OperatingSystem.IsMacOS()   ? "macos" : "";
 			
 			default:
 			return "";

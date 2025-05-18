@@ -7,13 +7,17 @@ static class CreatorUtility{
 	static string path;
 	
 	public static void template(string p){
-		path = StringHelper.removeQuotesSingle(p);
+		path = p.removeQuotesSingle();
 		
 		Console.WriteLine("Welcome to the Tebas template creator!");
 		Console.WriteLine();
 		
 		t = new AshFile();
 		string name = ask("Name of the template:");
+		while(!TemplateHandler.isNameValid(name)){
+			Console.WriteLine("Invalid name. Try again");
+			name = ask("Name of the template:");
+		}
 		t.SetCamp("name", name);
 		
 		t.SetCamp("version", Tebas.currentVersion);
@@ -41,7 +45,7 @@ static class CreatorUtility{
 			
 			foreach(string scr in scripts){
 				string scrn = Path.GetFileNameWithoutExtension(scr);
-				if(scrn.Contains(' ') || scrn.StartsWith("*")){
+				if(!TemplateHandler.isScriptNameValid(scrn)){
 					Console.WriteLine("Error in the name of script " + scrn);
 					continue;
 				}
@@ -50,6 +54,22 @@ static class CreatorUtility{
 			}
 		}else{
 			Console.WriteLine("We could not find the scripts folder");
+		}
+		
+		if(Directory.Exists(path + "/scripts/global")){
+			string[] scripts = Directory.GetFiles(path + "/scripts/global", "*.tbscr", SearchOption.TopDirectoryOnly);
+			
+			foreach(string scr in scripts){
+				string scrn = Path.GetFileNameWithoutExtension(scr);
+				if(!TemplateHandler.isScriptNameValid(scrn)){
+					Console.WriteLine("Error in the name of global script " + scrn);
+					continue;
+				}
+				t.SetCamp("global." + scrn, File.ReadAllText(scr));
+				Console.WriteLine("Loaded global script " + scrn);
+			}
+		}else{
+			Console.WriteLine("We could not find the global scripts folder");
 		}
 		
 		if(Directory.Exists(path + "/resources")){
@@ -76,13 +96,17 @@ static class CreatorUtility{
 	}
 	
 	public static void plugin(string p){
-		path = StringHelper.removeQuotesSingle(p);
+		path = p.removeQuotesSingle();
 		
 		Console.WriteLine("Welcome to the Tebas plugin creator!");
 		Console.WriteLine();
 		
 		t = new AshFile();
 		string name = ask("Name of the plugin:");
+		while(!PluginHandler.isNameValid(name)){
+			Console.WriteLine("Invalid name. Try again");
+			name = ask("Name of the template:");
+		}
 		t.SetCamp("name", name);
 		
 		t.SetCamp("version", Tebas.currentVersion);
@@ -96,7 +120,7 @@ static class CreatorUtility{
 			
 			foreach(string scr in scripts){
 				string scrn = Path.GetFileNameWithoutExtension(scr);
-				if(scrn.Contains(' ') || scrn.StartsWith("*")){
+				if(PluginHandler.isScriptNameValid(scrn)){
 					Console.WriteLine("Error in the name of script " + scrn);
 					continue;
 				}

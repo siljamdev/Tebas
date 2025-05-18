@@ -16,11 +16,13 @@ public static class TemplateHandler{
 		return new AshFile(Tebas.dep.path + "/templates/" + name + "/template.tbtem");
 	}
 	
-	public static bool runScript(string name, IEnumerable<string> args){
+	public static bool runScript(string name, IEnumerable<string> args = null){
 		if(!(Tebas.template is null)){
 			string code = "";
 			if(!Tebas.template.CanGetCamp("script." + name, out code)){
-				return false;
+				if(!Tebas.template.CanGetCamp("global." + name, out code)){
+					return false;
+				}
 			}
 			Script s = new Script(Tebas.tn + " " + name, code);
 			s.run(args);
@@ -29,14 +31,17 @@ public static class TemplateHandler{
 		return false;
 	}
 	
-	public static bool runScript(string name){
+	public static bool runGlobal(string name, string script, IEnumerable<string> args = null){
+		if(!Tebas.setContextTemplate(name)){
+			return false;
+		}
 		if(!(Tebas.template is null)){
 			string code = "";
-			if(!Tebas.template.CanGetCamp("script." + name, out code)){
+			if(!Tebas.template.CanGetCamp("global." + name, out code)){
 				return false;
 			}
 			Script s = new Script(Tebas.tn + " " + name, code);
-			s.run(null);
+			s.run(args);
 			return true;
 		}
 		return false;
@@ -47,7 +52,7 @@ public static class TemplateHandler{
 		path = StringHelper.removeQuotesSingle(path);
 		
 		if(!File.Exists(path)){
-			Tebas.consoleOutput("That file does not exist");
+			Tebas.consoleError("That file does not exist");
 			return;
 		}
 		
@@ -55,16 +60,18 @@ public static class TemplateHandler{
 		
 		string name;
 		if(!template.CanGetCamp("name", out name)){
-			Tebas.consoleOutput("Template is incorrectly formatted: name missing");
+			Tebas.consoleError("Template is incorrectly formatted: name missing");
 			return;
 		}
 		
+		
+		
 		string desc = template.GetCampOrDefault<string>("description", null);
 		if(desc != null){
-			Console.WriteLine("Template description: " + desc);
+			Tebas.consoleOutput("Template description: " + desc);
 		}
 		
-		if(!Tebas.forced && exists(name)){
+		if(!Tebas.forced && Tebas.isConsoleInteractive() && exists(name)){
 			Console.WriteLine("A template called " + name + " is already installed, do you want to update it? (Y/N)");
 			string ans = Console.ReadLine();
 			
@@ -126,7 +133,7 @@ public static class TemplateHandler{
 			Directory.Delete(Tebas.templateDirectory, true);
 			Tebas.consoleOutput("Template uninstalled succesfully");
 		}else{
-			Tebas.consoleOutput("Deletion cancelled");
+			Tebas.consoleOutput("Uninstallation cancelled");
 		}
 	}
 	
@@ -220,6 +227,22 @@ public static class TemplateHandler{
 				Tebas.consoleOutput("    " + h);
 			}
 		}
+		
+		List<string> globals = new List<string>();
+		
+		foreach(string k in Tebas.template.data.Keys){
+			if(k.StartsWith("global.")){
+				globals.Add(k.Substring(7));
+			}
+		}
+		
+		if(globals.Count > 0){
+			Tebas.consoleOutput("This template has " + globals.Count + " global scripts:");
+			
+			foreach(string h in scripts){
+				Tebas.consoleOutput("    " + h);
+			}
+		}
 	}
 	
 	public static string resourceRead(string n){
@@ -255,5 +278,38 @@ public static class TemplateHandler{
 				Tebas.template.Save();
 			}
 		}
+	}
+	
+	public static bool isNameValid(string name){		
+		if(name.Contains(' ')){
+			Tebas.consoleOutput("A template name cannot have spaces, template name was: '" + name + "'");
+			return false;
+		}
+		
+		if(name.Contains('*')){
+			Tebas.consoleOutput("A template name cannot have '*', template name was: '" + name + "'");
+			return false;
+		}
+		
+		if(name.Contains('@')){
+			Tebas.consoleOutput("A template name cannot have '@', template name was: '" + name + "'");
+			return false;
+		}
+		
+		return true;
+	}
+	
+	public static bool isScriptNameValid(string name){		
+		if(name.Contains(' ') || name.Contains('*') || name.Contains('@')){
+			return false;
+		}
+		return true;
+	}
+	
+	public static string fixName(string name){
+		if(name.StartsWith("@")){
+			return name.Substring(1);
+		}
+		return name;
 	}
 }

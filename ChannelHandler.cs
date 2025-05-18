@@ -20,6 +20,8 @@ public static class ChannelHandler{
 			channels.SetCamp("default", Tebas.dep.path + "/projects");
 		}
 		
+		channels.format = 3;
+		
 		channels.Save();
 		
 		channelInit = true;
@@ -63,6 +65,10 @@ public static class ChannelHandler{
 	public static void set(string name, string path){
 		initialize();
 		
+		if(!isNameValid(name)){
+			return;
+		}
+		
 		channels.SetCamp(name, path);
 		
 		Tebas.consoleOutput("Channel set succesfully");
@@ -74,19 +80,18 @@ public static class ChannelHandler{
 		initialize();
 		
 		if(oldName == "default"){
-			Tebas.consoleOutput("default channel cannot be renamed, only changed");
+			Tebas.consoleError("#default channel cannot be renamed, only changed");
 			return;
 		}
 		
-		if(prohibitedNames.Contains(newName)){
-			Tebas.consoleOutput("A channel cannot be named " + newName);
+		if(!isNameValid(newName)){
 			return;
 		}
 		
 		if(channels.CanRenameCamp(oldName, newName)){
 			Tebas.consoleOutput("Name changed succesfully");
 		}else{
-			Tebas.consoleOutput("The specified channel doesn't exist");
+			Tebas.consoleError("The specified channel doesn't exist");
 		}
 		
 		channels.Save();
@@ -96,7 +101,7 @@ public static class ChannelHandler{
 		initialize();
 		
 		if(name == "default"){
-			Tebas.consoleOutput("default channel cannot be deleted, only changed");
+			Tebas.consoleError("default channel cannot be deleted, only changed");
 			return;
 		}
 		
@@ -108,7 +113,7 @@ public static class ChannelHandler{
 				Tebas.consoleOutput("Deletion cancelled");
 			}
 		}else{
-			Tebas.consoleOutput("The specified channel doesn't exist");
+			Tebas.consoleError("The specified channel doesn't exist");
 		}
 		
 		channels.Save();
@@ -130,7 +135,7 @@ public static class ChannelHandler{
 		}
 		
 		foreach(string s in c){
-			Tebas.consoleOutput("    " + s + ": " + (string) channels.GetCamp(s));
+			Tebas.consoleOutput("    #" + s + ": " + (string) channels.GetCamp(s));
 		}
 	}
 	
@@ -138,17 +143,10 @@ public static class ChannelHandler{
 		initialize();
 		
 		if(channels.CanGetCamp(name, out string path)){
-			Tebas.consoleOutput("Channel name: " + name);
-			Tebas.consoleOutput("Channel path: " + path);
+			Tebas.consoleOutput("Channel name: #" + name);
+			Tebas.consoleOutput("Channel path: '" + path + "'");
 			
-			string[] directories = Directory.GetDirectories(path);
-			List<string> projects = new List<string>();
-			
-			foreach(string s in directories){
-				if(File.Exists(s + "/project.tebas")){
-					projects.Add(Path.GetFileName(s));
-				}
-			}
+			List<string> projects = allProjects(name);
 			
 			if(projects.Count > 0){
 				Tebas.consoleOutput("Number of projects in this channel: " + projects.Count);
@@ -161,11 +159,11 @@ public static class ChannelHandler{
 				Tebas.consoleOutput("    " + s);
 			}
 		}else{
-			Tebas.consoleOutput("The specified channel doesn't exist");
+			Tebas.consoleError("The specified channel doesn't exist");
 		}
 	}
 	
-	public static void stats(string name){
+	public static List<string> allProjects(string name){
 		initialize();
 		
 		if(channels.CanGetCamp(name, out string path)){
@@ -177,6 +175,18 @@ public static class ChannelHandler{
 					projects.Add(s);
 				}
 			}
+			
+			return projects;
+		}else{
+			return new List<string>();
+		}
+	}
+	
+	public static int stats(string name){
+		initialize();
+		
+		if(channels.CanGetCamp(name, out string path)){
+			List<string> projects = allProjects(name);
 			
 			if(projects.Count > 0){
 				Tebas.consoleOutput("Number of projects in this channel: " + projects.Count);
@@ -197,8 +207,59 @@ public static class ChannelHandler{
 			if(projects.Count > 0){
 				Tebas.consoleOutput("Total lines of code: " + l);
 			}
+			return l;
 		}else{
-			Tebas.consoleOutput("The specified channel doesn't exist");
+			Tebas.consoleError("The specified channel doesn't exist");
+			return 0;
 		}
+	}
+	
+	public static int statsShort(string name){
+		initialize();
+		
+		if(channels.CanGetCamp(name, out string path)){
+			List<string> projects = allProjects(name);
+			
+			int l = 0;
+			
+			foreach(string s in projects){
+				Tebas.workingDirectory = s;
+				int n = Tebas.getNumberOfLinesOfCode();
+				l += n;
+			}
+			
+			if(projects.Count > 0){
+				Tebas.consoleOutput("    #" + name + ": " + l);
+			}
+			return l;
+		}else{
+			return 0;
+		}
+	}
+	
+	static bool isNameValid(string name){
+		if(prohibitedNames.Contains(name)){
+			Tebas.consoleError("A channel cannot be named #" + name);
+			return false;
+		}
+		
+		if(name.Contains(' ')){
+			Tebas.consoleError("A channel name cannot have spaces");
+			return false;
+		}
+		
+		if(name.Contains('#')){
+			Tebas.consoleError("A channel name cannot have '#'");
+			return false;
+		}
+		
+		return true;
+	}
+	
+	public static string fixName(string name){
+		if(name.StartsWith("#")){
+			return name.Substring(1).ToLower();
+		}
+		return name.ToLower();
 	}
 }
