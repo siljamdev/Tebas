@@ -162,7 +162,7 @@ public class Script{
 					case "console.ask":
 					output(getString(2));
 					
-					if(!Tebas.isConsoleInteractive()){
+					if(!Environment.UserInteractive){
 						setString(getStringRef(1), "");
 						break;
 					}
@@ -171,7 +171,7 @@ public class Script{
 					
 					case "console.pause":
 					output(getString(1));
-					if(!Tebas.isConsoleInteractive()){
+					if(!Environment.UserInteractive){
 						outputLine("");
 						break;
 					}
