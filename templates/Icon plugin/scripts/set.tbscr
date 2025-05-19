@@ -34,14 +34,26 @@ call tryDotnet
 
 function setFolder {
 	scope ini
+	
+	string.equal ini.0 %os "windows"
+	if! ini.0 {
+		console.print "Linux and MacOS not supported for folder icons."
+		return
+	}
+	
 	plugin.read ini.0 %pl "desktop"
 	
 	table.peek ini.1 stack
 	self.replace ini.0 "@icon" ini.1
+	
+	process.cmd f"attrib -s -r \"{%wd}\""
+	process.cmd f"attrib -s -r -h desktop.ini"
+	file.delete "W/desktop.ini"
+	
 	file.create "W/desktop.ini"
 	file.write "W/desktop.ini" ini.0
 	process.cmd f"attrib +s +r \"{%wd}\""
-	process.cmd "attrib +h desktop.ini"
+	process.cmd "attrib +h +s +r desktop.ini"
 }
 
 function tryDotnet {
