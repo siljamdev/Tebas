@@ -280,7 +280,7 @@ public static class PluginHandler{
 	}
 	
 	public static bool isNameValid(string name){		
-		if(name.Contains(' ')){
+		if(name.Any(StringHelper.isWhitespace)){
 			Tebas.consoleError("A plugin name cannot have spaces, plugin name was: '" + name + "'");
 			return false;
 		}
@@ -291,7 +291,12 @@ public static class PluginHandler{
 		}
 		
 		if(name.Contains('@')){
-			Tebas.consoleOutput("A plugin name cannot have '@', plugin name was: '" + name + "'");
+			Tebas.consoleError("A plugin name cannot have '@', plugin name was: '" + name + "'");
+			return false;
+		}
+		
+		if(name == ""){
+			Tebas.consoleError("A plugin name cannot be empty, plugin name was: '" + name + "'");
 			return false;
 		}
 		
@@ -299,7 +304,7 @@ public static class PluginHandler{
 	}
 	
 	public static bool isScriptNameValid(string name){		
-		if(name.Contains(' ') || name.Contains('*') || name.Contains('@')){
+		if(name == "" || name.Any(StringHelper.isWhitespace) || name.Contains('*') || name.Contains('@')){
 			return false;
 		}
 		return true;

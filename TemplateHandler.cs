@@ -281,18 +281,23 @@ public static class TemplateHandler{
 	}
 	
 	public static bool isNameValid(string name){		
-		if(name.Contains(' ')){
-			Tebas.consoleOutput("A template name cannot have spaces, template name was: '" + name + "'");
+		if(name.Any(StringHelper.isWhitespace)){
+			Tebas.consoleError("A template name cannot have spaces, template name was: '" + name + "'");
 			return false;
 		}
 		
 		if(name.Contains('*')){
-			Tebas.consoleOutput("A template name cannot have '*', template name was: '" + name + "'");
+			Tebas.consoleError("A template name cannot have '*', template name was: '" + name + "'");
 			return false;
 		}
 		
 		if(name.Contains('@')){
-			Tebas.consoleOutput("A template name cannot have '@', template name was: '" + name + "'");
+			Tebas.consoleError("A template name cannot have '@', template name was: '" + name + "'");
+			return false;
+		}
+		
+		if(name == ""){
+			Tebas.consoleError("A template name cannot be empty, template name was: '" + name + "'");
 			return false;
 		}
 		
@@ -300,7 +305,7 @@ public static class TemplateHandler{
 	}
 	
 	public static bool isScriptNameValid(string name){		
-		if(name.Contains(' ') || name.Contains('*') || name.Contains('@')){
+		if(name == "" || name.Any(StringHelper.isWhitespace) || name.Contains('*') || name.Contains('@')){
 			return false;
 		}
 		return true;

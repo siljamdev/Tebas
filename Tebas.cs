@@ -27,7 +27,11 @@ class Tebas{
 	private static bool configInit;
 	private static bool localInit;
 	
-	public const string currentVersion = "0.5.0";
+	public const string currentVersion = "0.5.1";
+	
+	public static readonly CharFormat severeErrorCharFormat = new CharFormat(Color3.Red);
+	public static readonly CharFormat errorCharFormat = new CharFormat(new Color3("E54548"));
+	public static readonly CharFormat blueCharFormat = new CharFormat(new Color3("00AFFF"));
 	
 	public static void Main(string[] args){
 		workingDirectory = Directory.GetCurrentDirectory();
@@ -1130,7 +1134,7 @@ class Tebas{
 		
 		if(!quiet){
 			if(useColors()){
-				FormatString fs = new FormatString(s, new CharFormat(new Color3("E54548")));
+				FormatString fs = new FormatString(s, errorCharFormat);
 				Console.Error.WriteLine(fs);
 			}else{
 				Console.Error.WriteLine(s);
@@ -1142,7 +1146,7 @@ class Tebas{
 		initializeConfig();
 		
 		if(useColors()){
-			FormatString fs = new FormatString(s, new CharFormat(Color3.Red));
+			FormatString fs = new FormatString(s, severeErrorCharFormat);
 			Console.Error.WriteLine(fs);
 		}else{
 			Console.Error.WriteLine(s);

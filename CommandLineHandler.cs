@@ -726,7 +726,26 @@ public static class CommandLineHandler{
 		path = StringHelper.removeQuotesSingle(args[clp]);
 		clp++;
 		
-		CreatorUtility.template(path);
+		string? name = null;
+		bool? git = null;
+		bool? readme = null;
+		
+		if(determineIfEnoughLength(1, args.Length)){
+			name = args[clp];
+			clp++;
+			
+			if(determineIfEnoughLength(1, args.Length)){
+				git = args[clp].ToLower() == "true";
+				clp++;
+				
+				if(determineIfEnoughLength(1, args.Length)){
+					readme = args[clp].ToLower() == "true";
+					clp++;
+				}
+			}
+		}
+		
+		CreatorUtility.template(path, name, git, readme);
 	}
 	
 	static void commandTryTemplateGlobalScript(string[] args){
@@ -829,7 +848,14 @@ public static class CommandLineHandler{
 		path = StringHelper.removeQuotesSingle(args[clp]);
 		clp++;
 		
-		CreatorUtility.plugin(path);
+		string? name = null;
+		
+		if(determineIfEnoughLength(1, args.Length)){
+			name = args[clp];
+			clp++;
+		}
+		
+		CreatorUtility.plugin(path, name);
 	}
 	
 	//Global
@@ -1123,12 +1149,12 @@ public static class CommandLineHandler{
 		Tebas.consoleOutput("");
 		Tebas.consoleOutput("template");
 		Tebas.consoleOutput(" Manages the templates (templates for projects). This section can be executed anywhere");
-		Tebas.consoleOutput("         install <path> [args]   Installs the template from a file (.tbtem)");
-		Tebas.consoleOutput("         uninstall <name>        Deletes that template");
-		Tebas.consoleOutput("         list                    Shows list of all templates installed");
-		Tebas.consoleOutput("         info <name>             Shows info on a specific template");
-		Tebas.consoleOutput("         create <path>           Create a template using the creator utility");
-		Tebas.consoleOutput("         <name> <script> [args]  Attempts to run a global script of that template");
+		Tebas.consoleOutput("         install <path> [args]                      Installs the template from a file (.tbtem)");
+		Tebas.consoleOutput("         uninstall <name>                           Deletes that template");
+		Tebas.consoleOutput("         list                                       Shows list of all templates installed");
+		Tebas.consoleOutput("         info <name>                                Shows info on a specific template");
+		Tebas.consoleOutput("         create <path> [name] [useGit] [addReadme]  Create a template using the creator utility. Last two optional arguments must be 'true' or 'false'");
+		Tebas.consoleOutput("         <name> <script> [args]                     Attempts to run a global script of that template");
 		Tebas.consoleOutput("");
 		Tebas.consoleOutput("<@template name> <script> [args]   Another way to run a global template script");
 		Tebas.consoleOutput("");
@@ -1138,7 +1164,7 @@ public static class CommandLineHandler{
 		Tebas.consoleOutput("       uninstall <name>        Deletes that plugin");
 		Tebas.consoleOutput("       list                    Shows list of all plugins installed");
 		Tebas.consoleOutput("       info <name>             Shows info on a specific plugin");
-		Tebas.consoleOutput("       create <path>           Create a plugin using the creator utility");
+		Tebas.consoleOutput("       create <path> [name]    Create a plugin using the creator utility");
 		Tebas.consoleOutput("       <name> <script> [args]  Attempts to run a script of that plugin");
 		Tebas.consoleOutput("");
 		Tebas.consoleOutput("<*plugin name> <script> [args]   Another way to run a plugin script");

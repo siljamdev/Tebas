@@ -45,7 +45,7 @@ public static class GitHelper{
 	
 	public static void add(){
 		tryInit();
-		ProcessExecuter.runProcess("GIT", getGitPath(), "add .", Tebas.workingDirectory);
+		ProcessExecuter.runProcess("GIT", getGitPath(), "add -A", Tebas.workingDirectory);
 	}
 	
 	public static void commit(string m){
@@ -137,8 +137,13 @@ public static class GitHelper{
 		Tebas.project.SetCamp("git.branch", branch);
 		Tebas.project.Save();
 		
-		ProcessExecuter.runProcess("GIT", getGitPath(), "switch -c " + branch, Tebas.workingDirectory);
-		ProcessExecuter.runProcess("GIT", getGitPath(), "switch " + branch, Tebas.workingDirectory);
+		int exitCode = ProcessExecuter.runProcessExitCode(getGitPath(), "rev-parse --verify refs/heads/" + branch, Tebas.workingDirectory);
+		
+		if(exitCode == 0){
+			ProcessExecuter.runProcess("GIT", getGitPath(), "switch " + branch, Tebas.workingDirectory);
+		}else{
+			ProcessExecuter.runProcess("GIT", getGitPath(), "switch -c " + branch, Tebas.workingDirectory);
+		}
 	}
 	
 	public static bool remoteExists(string name){
@@ -148,18 +153,25 @@ public static class GitHelper{
 		return false;
 	}
 	
+	public static string getRemoteUrl(string name){
+		if(Tebas.project.CanGetCamp("git.remote." + name, out string s)){
+			return s;
+		}
+		return "";
+	}
+	
 	public static void remoteSet(string name, string url){
 		if(!Tebas.initializeLocal()){
 			return;
 		}
 		
-		bool h = remoteExists(name);
-		
 		Tebas.project.SetCamp("git.remote." + name, url);
 		Tebas.project.Save();
 		
 		tryInit();
-		if(h){
+		
+		int exitCode = ProcessExecuter.runProcessExitCode(getGitPath(), "remote get-url " + name, Tebas.workingDirectory);
+		if(exitCode == 0){
 			ProcessExecuter.runProcess("GIT", getGitPath(), "remote set-url " + name + " \"" + url + "\"", Tebas.workingDirectory);
 		}else{
 			ProcessExecuter.runProcess("GIT", getGitPath(), "remote add " + name + " \"" + url + "\"", Tebas.workingDirectory);

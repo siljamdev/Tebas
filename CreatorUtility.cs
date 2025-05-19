@@ -6,23 +6,41 @@ static class CreatorUtility{
 	static AshFile t;
 	static string path;
 	
-	public static void template(string p){
+	public static void template(string p, string? name = null, bool? useGit = null, bool? addReadme = null){
 		path = p.removeQuotesSingle();
+		
+		if(!Directory.Exists(path)){
+			Console.Error.WriteLine("The specified path does not exist: '" + path + "'");
+			return;
+		}
 		
 		Console.WriteLine("Welcome to the Tebas template creator!");
 		Console.WriteLine();
 		
 		t = new AshFile();
-		string name = ask("Name of the template:");
-		while(!TemplateHandler.isNameValid(name)){
-			Console.WriteLine("Invalid name. Try again");
+		
+		if(name == null){
 			name = ask("Name of the template:");
+			while(!TemplateHandler.isNameValid(name)){
+				Console.Error.WriteLine("Invalid name. Try again");
+				name = ask("Name of the template:");
+			}
+		}else{
+			if(!TemplateHandler.isNameValid(name)){
+				Console.Error.WriteLine("The specified name is not valid: '" + name + "'");
+				return;
+			}
 		}
+		
 		t.SetCamp("name", name);
 		
 		t.SetCamp("version", Tebas.currentVersion);
 		
-		t.SetCamp("git.defaultUse", askTF("Uses git? (Y/N):"));
+		if(useGit == null){
+			t.SetCamp("git.defaultUse", askTF("Uses git? (Y/N):"));	
+		}else{
+			t.SetCamp("git.defaultUse", (bool) useGit);	
+		}
 		
 		loadFile("default.gitignore", "git.gitignore");
 		
@@ -30,12 +48,14 @@ static class CreatorUtility{
 			t.SetCamp("addReadme", true);
 			loadFile("readme.md", "readme");
 		}else{
-			t.SetCamp("addReadme", askTF("Add readme file? (Y/N):"));
+			if(addReadme == null){
+				t.SetCamp("addReadme", askTF("Add readme file? (Y/N):"));
+			}else{
+				t.SetCamp("addReadme", (bool) addReadme);
+			}
 		}
 		
-		if(File.Exists(path + "/description.txt")){
-			loadFile("description.txt", "description");
-		}
+		loadFile("description.txt", "description");
 		
 		loadFile("extensions.txt", "codeExtensions");
 		loadFile("blacklist.txt", "codeFilesFolderBlacklist");
@@ -46,11 +66,11 @@ static class CreatorUtility{
 			foreach(string scr in scripts){
 				string scrn = Path.GetFileNameWithoutExtension(scr);
 				if(!TemplateHandler.isScriptNameValid(scrn)){
-					Console.WriteLine("Error in the name of script " + scrn);
+					Console.WriteLine("  Error in the name of script " + scrn);
 					continue;
 				}
 				t.SetCamp("script." + scrn, File.ReadAllText(scr));
-				Console.WriteLine("Loaded script " + scrn);
+				Console.WriteLine("  Loaded script " + scrn);
 			}
 		}else{
 			Console.WriteLine("We could not find the scripts folder");
@@ -62,11 +82,11 @@ static class CreatorUtility{
 			foreach(string scr in scripts){
 				string scrn = Path.GetFileNameWithoutExtension(scr);
 				if(!TemplateHandler.isScriptNameValid(scrn)){
-					Console.WriteLine("Error in the name of global script " + scrn);
+					Console.WriteLine("  Error in the name of global script " + scrn);
 					continue;
 				}
 				t.SetCamp("global." + scrn, File.ReadAllText(scr));
-				Console.WriteLine("Loaded global script " + scrn);
+				Console.WriteLine("  Loaded global script " + scrn);
 			}
 		}else{
 			Console.WriteLine("We could not find the global scripts folder");
@@ -78,11 +98,11 @@ static class CreatorUtility{
 			foreach(string res in resources){
 				string resn = Path.GetFileNameWithoutExtension(res);
 				if(resn.Contains(' ')){
-					Console.WriteLine("Error in the name of resource " + res);
+					Console.WriteLine("  Error in the name of resource " + res);
 					continue;
 				}
 				t.SetCamp("resources." + resn, File.ReadAllText(res));
-				Console.WriteLine("Loaded resource " + res);
+				Console.WriteLine("  Loaded resource " + res);
 			}
 		}else{
 			Console.WriteLine("We could not find the resources folder");
@@ -95,25 +115,37 @@ static class CreatorUtility{
 		Console.WriteLine("Bye!");
 	}
 	
-	public static void plugin(string p){
+	public static void plugin(string p, string? name = null){
 		path = p.removeQuotesSingle();
+		
+		if(!Directory.Exists(path)){
+			Console.Error.WriteLine("The specified path does not exist: '" + path + "'");
+			return;
+		}
 		
 		Console.WriteLine("Welcome to the Tebas plugin creator!");
 		Console.WriteLine();
 		
 		t = new AshFile();
-		string name = ask("Name of the plugin:");
-		while(!PluginHandler.isNameValid(name)){
-			Console.WriteLine("Invalid name. Try again");
-			name = ask("Name of the template:");
+		
+		if(name == null){
+			name = ask("Name of the plugin:");
+			while(!PluginHandler.isNameValid(name)){
+				Console.Error.WriteLine("Invalid name. Try again");
+				name = ask("Name of the plugin:");
+			}
+		}else{
+			if(!PluginHandler.isNameValid(name)){
+				Console.Error.WriteLine("The specified name is not valid: '" + name + "'");
+				return;
+			}
 		}
+		
 		t.SetCamp("name", name);
 		
 		t.SetCamp("version", Tebas.currentVersion);
 		
-		if(File.Exists(path + "/description.txt")){
-			loadFile("description.txt", "description");
-		}
+		loadFile("description.txt", "description");
 		
 		if(Directory.Exists(path + "/scripts")){
 			string[] scripts = Directory.GetFiles(path + "/scripts", "*.tbscr", SearchOption.TopDirectoryOnly);
@@ -121,11 +153,11 @@ static class CreatorUtility{
 			foreach(string scr in scripts){
 				string scrn = Path.GetFileNameWithoutExtension(scr);
 				if(PluginHandler.isScriptNameValid(scrn)){
-					Console.WriteLine("Error in the name of script " + scrn);
+					Console.WriteLine("  Error in the name of script " + scrn);
 					continue;
 				}
 				t.SetCamp("script." + scrn, File.ReadAllText(scr));
-				Console.WriteLine("Loaded script " + scrn);
+				Console.WriteLine("  Loaded script " + scrn);
 			}
 		}else{
 			Console.WriteLine("We could not find the scripts folder");
@@ -137,11 +169,11 @@ static class CreatorUtility{
 			foreach(string res in resources){
 				string resn = Path.GetFileNameWithoutExtension(res);
 				if(resn.Contains(' ')){
-					Console.WriteLine("Error in the name of resource " + res);
+					Console.WriteLine("  Error in the name of resource " + res);
 					continue;
 				}
 				t.SetCamp("resources." + resn, File.ReadAllText(res));
-				Console.WriteLine("Loaded resource " + res);
+				Console.WriteLine("  Loaded resource " + res);
 			}
 		}else{
 			Console.WriteLine("We could not find the resources folder");

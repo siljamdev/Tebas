@@ -1,10 +1,7 @@
 using System;
 using System.Text;
 
-public static class StringHelper{
-	
-	static readonly char[] whitespace = {' ', '\n', '\r', '\t'};
-	
+public static class StringHelper{	
 	//remove surrounding quotes
 	public static string removeQuotesSingle(this string p){
 		p = p.Trim();
@@ -73,7 +70,7 @@ public static class StringHelper{
 	}
 	
 	public static bool isWhitespace(this char c){
-		if(whitespace.Contains(c)){
+		if(char.IsWhiteSpace(c)){
 			return true;
 		}
 		return false;

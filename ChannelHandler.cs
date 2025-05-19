@@ -243,13 +243,18 @@ public static class ChannelHandler{
 			return false;
 		}
 		
-		if(name.Contains(' ')){
+		if(name.Any(StringHelper.isWhitespace)){
 			Tebas.consoleError("A channel name cannot have spaces");
 			return false;
 		}
 		
 		if(name.Contains('#')){
 			Tebas.consoleError("A channel name cannot have '#'");
+			return false;
+		}
+		
+		if(name == ""){
+			Tebas.consoleError("A channel name cannot be empty");
 			return false;
 		}
 		

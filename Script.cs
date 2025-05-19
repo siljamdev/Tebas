@@ -12,6 +12,11 @@ public class Script{
 	
 	Dictionary<string, List<string>> tables;
 	
+	bool useColors = true;
+	
+	FormatString formattedName;
+	FormatString formattedErrorName;
+	
 	int lp; //linepointer;
 	
 	Random rand;
@@ -20,6 +25,12 @@ public class Script{
 		//code = code.Replace("\\n", "\n");
 		
 		this.name = name;
+		this.useColors = Tebas.useColors();
+		
+		bool showName = (Tebas.config.CanGetCamp("scriptShowsName", out bool b) && b);
+		
+		formattedName = showName ? new FormatString("[" + name + "] ", Tebas.blueCharFormat) : new FormatString();
+		formattedErrorName = showName ? new FormatString("[" + name + " ERROR] ", Tebas.errorCharFormat) : new FormatString();
 		
 		Tebas.initializeConfig();
 		
@@ -53,7 +64,7 @@ public class Script{
 					if(isValidName(n)){
 						functions.Add(n, i);
 					}else{
-						Console.Error.WriteLine("Invalid function name: " + n);
+						outputErrorLine("Invalid function name: " + n);
 					}
 				}
 			}catch(Exception){}
@@ -100,17 +111,21 @@ public class Script{
 					break;
 					
 					case "process.run":
-					ProcessExecuter.runProcess(name + " " + getString(1).ToUpper(), getString(1),  getString(2), Tebas.workingDirectory);
+					ProcessExecuter.runProcess(name + " " + getString(1).ToUpper(), getString(1), getString(2), Tebas.workingDirectory);
 					break;
 					
 					case "process.runDetached":
-					ProcessExecuter.runProcessNewWindow(getString(1),  getString(2), Tebas.workingDirectory);
+					ProcessExecuter.runProcessNewWindow(getString(1), getString(2), Tebas.workingDirectory);
 					break;
 					
 					case "process.runOutput":
 					tables[getTableRef(3)] = new List<string>();
 					tables[getTableRef(4)] = new List<string>();
-					ProcessExecuter.runProcessWithOutput(name + " " + getString(1).ToUpper(), getString(1),  getString(2), Tebas.workingDirectory, tables[getTableRef(3)], tables[getTableRef(4)]);
+					ProcessExecuter.runProcessWithOutput(getString(1), getString(2), Tebas.workingDirectory, tables[getTableRef(3)], tables[getTableRef(4)]);
+					break;
+					
+					case "process.runExitCode":
+					setString(getStringRef(1), ProcessExecuter.runProcessExitCode(getString(2), getString(3), Tebas.workingDirectory).ToString());
 					break;
 					
 					case "process.isExecutableInPath":
@@ -184,6 +199,10 @@ public class Script{
 					
 					case "string.split":
 					tables[getTableRef(1)] = getString(2).Split(getTable(3).ToArray(), StringSplitOptions.None).ToList();
+					break;
+					
+					case "string.splitChars":
+					tables[getTableRef(1)] = getString(2).Select(c => c.ToString()).ToList();
 					break;
 					
 					case "string.substring":
@@ -482,6 +501,12 @@ public class Script{
 					}
 					break;
 					
+					case "file.copy":
+					if(File.Exists(getPath(getString(1))) && !File.Exists(getPath(getString(2)))){
+						File.Copy(getPath(getString(1)), getPath(getString(2)));
+					}
+					break;
+					
 					case "file.write":
 					if(File.Exists(getPath(getString(1)))){
 						File.WriteAllText(getPath(getString(1)), getString(2));
@@ -562,6 +587,10 @@ public class Script{
 					TemplateHandler.runScript(getString(1), StringHelper.splitSentence(getString(2)));
 					break;
 					
+					case "template.global":
+					TemplateHandler.runGlobal(getString(1), getString(2), StringHelper.splitSentence(getString(3)));
+					break;
+					
 					case "template.installed":
 					setString(getStringRef(1), (TemplateHandler.exists(getString(2)) ? tables["true"][0] : tables["false"][0]));
 					break;
@@ -622,6 +651,30 @@ public class Script{
 					}
 					break;
 					
+					case "project.remoteSet":
+					Tebas.localRemoteSet(getString(1), getString(2));
+					break;
+					
+					case "project.remoteUrl":
+					setString(getStringRef(1), GitHelper.getRemoteUrl(getString(2)));
+					break;
+					
+					case "project.remoteDelete":
+					Tebas.localRemoteDelete(getString(1));
+					break;
+					
+					case "project.remoteList":
+					tables[getTableRef(1)] = GitHelper.getAllRemotes();
+					break;
+					
+					case "project.remoteExists":
+					setString(getStringRef(1), (GitHelper.remoteExists(getString(2)) ? tables["true"][0] : tables["false"][0]));
+					break;
+					
+					case "project.getCurrentGitBranch":
+					setString(getStringRef(1), GitHelper.getBranch());
+					break;
+					
 					case "shared.read":
 					setString(getStringRef(1), SharedHandler.read(getString(2)));
 					break;
@@ -642,10 +695,6 @@ public class Script{
 					setString(getStringRef(1), GitHelper.getDefaultBranch());
 					break;
 					
-					case "tebas.getCurrentGitBranch":
-					setString(getStringRef(1), GitHelper.getBranch());
-					break;
-					
 					case "tebas.push":
 					Tebas.localPush(getString(1));
 					break;
@@ -658,24 +707,24 @@ public class Script{
 					Tebas.localAdd();
 					break;
 					
-					case "tebas.remoteSet":
-					Tebas.localRemoteSet(getString(1), getString(2));
-					break;
-					
-					case "tebas.remoteDelete":
-					Tebas.localRemoteDelete(getString(1));
-					break;
-					
-					case "tebas.remoteList":
-					tables[getTableRef(1)] = GitHelper.getAllRemotes();
-					break;
-					
-					case "tebas.remoteExists":
-					setString(getStringRef(1), (GitHelper.remoteExists(getString(2)) ? tables["true"][0] : tables["false"][0]));
-					break;
-					
 					case "tebas.script":
 					Tebas.runStandaloneScript(getPathExclusive(getString(1)), StringHelper.splitSentence(getString(2)));
+					break;
+					
+					case "tebas.channelExists":
+					setString(getStringRef(1), ChannelHandler.canGetPath(getString(2), out string notused) ? tables["true"][0] : tables["false"][0]);
+					break;
+					
+					case "tebas.channelList":
+					tables[getTableRef(1)] = ChannelHandler.allNames().ToList();
+					break;
+					
+					case "tebas.channelPath":
+					setString(getStringRef(1), ChannelHandler.canGetPath(getString(2), out notused) ? notused : "");
+					break;
+					
+					case "tebas.isInteractive":
+					setString(getStringRef(1), Tebas.isConsoleInteractive() ? tables["true"][0] : tables["false"][0]);
 					break;
 					
 					case "scope":
@@ -916,246 +965,15 @@ public class Script{
 						lp = flow.Pop().line;
 					}
 					break;
-					
-					/* case "ask":
-					output(replace(s.getContinuous()));
-					table.Add(Console.ReadLine());
-					break;
-					
-					case "print":
-					outputLine(replace(s.getContinuous()));
-					break;
-					
-					case "run":
-					checkIfEnoughArgs(2);
-					ProcessExecuter.runProcess(name + " " + Path.GetFileName(getPath(0)), getPath(0),  getLiteral(1), Tebas.workingDirectory);
-					break;
-					
-					case "load":
-					checkIfEnoughArgs(1);
-					sentenceLoad();
-					break;
-					
-					case "set.literal":
-					checkIfEnoughArgs(1);
-					table.Add(getLiteral(0));
-					break;
-					
-					case "set.lower":
-					checkIfEnoughArgs(1);
-					table.Add(getTableArg(0).ToLower());
-					break;
-					
-					case "set.upper":
-					checkIfEnoughArgs(1);
-					table.Add(getTableArg(0).ToUpper());
-					break;
-					
-					case "set.choose":
-					checkIfEnoughArgs(4);
-					string h = getTableArg(0);
-					string[] vals = s.getList(1);
-					if(vals.Contains(h)){
-						table.Add(getLiteral(2));
-					}else{
-						table.Add(getLiteral(3));
-					}
-					break;
-					
-					case "set.sumup":
-					checkIfEnoughArgs(1);
-					h = getTableArg(0);
-					if(int.TryParse(h, out int b)){
-						table.Add((b+1).ToString());
-						break;
-					}
-					table.Add("");
-					break;
-					
-					case "set.sumdown":
-					checkIfEnoughArgs(1);
-					h = getTableArg(0);
-					if(int.TryParse(h, out b)){
-						table.Add((b-1).ToString());
-						break;
-					}
-					table.Add("");
-					break;
-					
-					case "set.replace":
-					checkIfEnoughArgs(1);
-					table.Add(replace(getTableArg(0)));
-					break;
-					
-					case "set.copy":
-					checkIfEnoughArgs(1);
-					table.Add(getTableArg(0));
-					break;
-					
-					case "goto":
-					checkIfEnoughArgs(1);
-					jumpToLabel(getLiteral(0));
-					break;
-					
-					case "branch":
-					checkIfEnoughArgs(3);
-					h = getTableArg(0);
-					vals = s.getList(1);
-					if(vals.Contains(h)){
-						jumpToLabel(getLiteral(2));
-					}
-					break;
-					
-					case "pause":
-					Console.ReadKey();
-					break;
-					
-					case "exit":
-					return;
-					
-					case "table.empty":
-					table = new List<string>();
-					break;
-					
-					case "file.read":
-					checkIfEnoughArgs(1);
-					string p = getPath(0);
-					if(p != "" && File.Exists(p)){
-						table.Add(File.ReadAllText(p));
-					}else{
-						table.Add("");
-					}
-					break;
-					
-					case "file.create":
-					checkIfEnoughArgs(1);
-					p = getPath(0);
-					if(p != "" && !File.Exists(p)){
-						File.Create(p).Dispose();
-					}
-					break;
-					
-					case "file.delete":
-					checkIfEnoughArgs(1);
-					p = getPath(0);
-					if(p != "" && File.Exists(p)){
-						File.Delete(p);
-					}
-					break;
-					
-					case "file.rename":
-					checkIfEnoughArgs(2);
-					p = getPath(0);
-					string p2 = p = getPath(1);
-					if(p != "" && p2 != "" && File.Exists(p) && !File.Exists(p2)){
-						File.Move(p, p2);
-					}
-					break;
-					
-					case "file.write":
-					checkIfEnoughArgs(2);
-					p = getPath(0);
-					if(p != "" && File.Exists(p)){
-						File.WriteAllText(p, getTableArg(1));
-					}
-					break;
-					
-					case "file.append":
-					checkIfEnoughArgs(2);
-					p = getPath(0);
-					if(p != "" && File.Exists(p)){
-						File.AppendAllText(p, getTableArg(1));
-					}
-					break;
-					
-					case "file.exists":
-					checkIfEnoughArgs(1);
-					p = getPath(0);
-					if(p != "" && File.Exists(p)){
-						table.Add("1");
-						break;
-					}
-					table.Add("0");
-					break;
-					
-					case "folder.create":
-					checkIfEnoughArgs(1);
-					p = getPath(0);
-					if(p != "" && !Directory.Exists(p)){
-						Directory.CreateDirectory(p);
-					}
-					break;
-					
-					case "folder.delete":
-					checkIfEnoughArgs(1);
-					p = getPath(0);
-					if(p != "" && Directory.Exists(p)){
-						Directory.Delete(p);
-					}
-					break;
-					
-					case "folder.rename":
-					checkIfEnoughArgs(2);
-					p = getPath(0);
-					p2 = getPath(1);
-					if(p != "" && p2 != "" && Directory.Exists(p) && !Directory.Exists(p2)){
-						Directory.Move(p, p2);
-					}
-					break;
-					
-					case "folder.exists":
-					checkIfEnoughArgs(1);
-					p = getPath(0);
-					if(p != "" && Directory.Exists(p)){
-						table.Add("1");
-						break;
-					}
-					table.Add("0");
-					break;
-					
-					case "template.read":
-					checkIfEnoughArgs(1);
-					sentenceTemplateRead();
-					break;
-					
-					case "template.write":
-					checkIfEnoughArgs(2);
-					sentenceTemplateWrite();
-					break;
-					
-					case "template.append":
-					checkIfEnoughArgs(2);
-					sentenceTemplateAppend();
-					break;
-					
-					case "template.run":
-					checkIfEnoughArgs(1);
-					TemplateHandler.runScript(getLiteral(0));
-					break;
-					
-					case "project.read":
-					checkIfEnoughArgs(1);
-					sentenceProjectRead();
-					break;
-					
-					case "project.write":
-					checkIfEnoughArgs(2);
-					sentenceProjectWrite();
-					break;
-					
-					case "project.append":
-					checkIfEnoughArgs(2);
-					sentenceProjectAppend();
-					break; */
 				}
 			}catch(TebasScriptError tse){
-				Console.WriteLine("The scripts contained an error in line " + lp + ": \"" + sentences[lp].ToString() + "\"");
-				Console.WriteLine(tse);
+				outputErrorLine("The scripts contained an error in line " + lp + ": \"" + sentences[lp].ToString() + "\"");
+				outputErrorLine(tse.ToString());
 				
 				setError(tse.ToString());
 			}catch(Exception e){
-				Console.WriteLine("An error occured in line " + lp + ": \"" + sentences[lp].ToString() + "\"");
-				Console.WriteLine(e);
+				outputErrorLine("An error occured in line " + lp + ": \"" + sentences[lp].ToString() + "\"");
+				outputErrorLine(e.ToString());
 				
 				setError(e.ToString());
 			}finally{
@@ -1509,25 +1327,30 @@ public class Script{
 	}
 	
 	void output(string s){
-		Console.Write(getName() + s);
+		if(useColors){
+			FormatString fs = formattedName + new FormatString(s, CharFormat.ResetAll);
+			Console.Write(fs);
+		}else{
+			Console.Write(formattedName.content + s);
+		}
 	}
 	
 	void outputLine(string s){
-		Console.WriteLine(getName() + s);
+		if(useColors){
+			FormatString fs = formattedName + new FormatString(s, CharFormat.ResetAll);
+			Console.WriteLine(fs);
+		}else{
+			Console.WriteLine(formattedName.content + s);
+		}
 	}
 	
-	string getName(){
-		if(Tebas.config.CanGetCamp("scriptShowsName", out bool b) && b){
-			return "[" + name + "] ";
+	void outputErrorLine(string s){
+		if(useColors){
+			FormatString fs = formattedErrorName + new FormatString(s, CharFormat.ResetAll);
+			Console.Error.WriteLine(fs);
+		}else{
+			Console.Error.WriteLine(formattedErrorName.content + s);
 		}
-		return "";
-	}
-	
-	string getErrorName(){
-		if(Tebas.config.CanGetCamp("scriptShowsName", out bool b) && b){
-			return "[" + name + " ERROR] ";
-		}
-		return "[ERROR]";
 	}
 	
 	string specialLoad(string s){
@@ -1603,122 +1426,6 @@ public class Script{
 			}
 		}
 	}
-	
-	/* void jumpToLabel(string b){
-		
-		if(b.Length > 0 && b[0] == ':'){
-			b = b.Substring(1, b.Length - 1);
-		}
-		
-		if(labels.ContainsKey(b)){
-			lp = labels[b];
-		}
-	}
-	
-	//Other thingiesssss, not individual sentences
-	
-	string replace(string s){
-		StringBuilder sb = new StringBuilder();
-		
-		bool previousEscapeCode = false;
-		bool readingC = false;
-		
-		StringBuilder c = new StringBuilder();
-		
-		for(int i = 0; i < s.Length; i++){
-			if(readingC){
-				if(s[i] != ']'){
-					c.Append(s[i]);
-				}else{
-					readingC = false;
-					if(int.TryParse(c.ToString(), out int u)){
-						sb.Append(getTableValue(u));
-					}
-					c = new StringBuilder();
-				}
-			}else{
-				if(s[i] == '[' && !previousEscapeCode){
-					readingC = true;
-					continue;
-				}
-				
-				if(s[i] == '\\' && !previousEscapeCode){
-					previousEscapeCode = true;
-					continue;
-				}else{
-					previousEscapeCode = false;
-				}
-				sb.Append(s[i]);
-			}
-		}
-		
-		return sb.ToString();
-	}
-	
-	string getLiteral(int n){
-		string s = sentences[lp].getLiteral(n);
-		
-		return replace(s);
-	}
-	
-	string getPath(int n){
-		string s = sentences[lp].getLiteral(n);
-		s = replace(s);
-		
-		if(s.StartsWith("W/")){
-			if(Tebas.workingDirectory != null){
-				return Tebas.workingDirectory + s.Substring(1);
-			}
-			return "";
-		}else if(s.StartsWith("T/")){
-			if(Tebas.templateDirectory != null){
-				return Tebas.templateDirectory + s.Substring(1);
-			}
-			return "";
-		}
-		
-		return s;
-	}
-	
-	string getTableValue(int u){
-		if(u < 0){
-			u = table.Count + u;
-		}
-		
-		if(u > -1 && u < table.Count){
-			return table[u];
-		}
-		return "";
-	}
-	
-	string getTableArg(int i){
-		int u = sentences[lp].getIndex(i, lp);
-		return getTableValue(u);
-	}
-	
-	//==================00
-	void output(string s){
-		Console.Write(getName() + s);
-	}
-	
-	void outputLine(string s){
-		Console.WriteLine(getName() + s);
-	}
-	
-	
-	string getName(){
-		if(Tebas.config.CanGetCamp("scriptShowsName", out bool b) && b){
-			return "[" + name + "] ";
-		}
-		return "";
-	}
-	
-	string getErrorName(){
-		if(Tebas.config.CanGetCamp("scriptShowsName", out bool b) && b){
-			return "[" + name + " ERROR] ";
-		}
-		return "[ERROR]";
-	} */
 }
 
 struct Scope{

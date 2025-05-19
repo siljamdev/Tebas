@@ -1,6 +1,8 @@
 using System;
 using System.Text;
 using System.Diagnostics;
+using AshLib.Formatting;
+using AshLib;
 
 public static class ProcessExecuter{
     public static void runProcess(string name, string command, string arguments, string workingDirectory)
@@ -15,15 +17,26 @@ public static class ProcessExecuter{
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
-            CreateNoWindow = false
+            CreateNoWindow = false,
+			StandardOutputEncoding = Encoding.UTF8,
+			StandardErrorEncoding = Encoding.UTF8
         };
 
         using (Process process = new Process { StartInfo = processInfo })
         {			
+			FormatString nam = getName(name);
+			FormatString err = getErrorName(name);
+			bool useColors = Tebas.useColors();
+			
 			process.ErrorDataReceived += (sender, args) => {
                 if(!string.IsNullOrEmpty(args.Data)){
                     // Display the standard error
-                    Console.WriteLine(getErrorName(name) + args.Data);
+					if(useColors){
+						FormatString fs = err + new FormatString(args.Data, CharFormat.ResetAll);
+						Console.Error.WriteLine(fs);
+					}else{
+						Console.Error.WriteLine(err.content + args.Data);
+					}
                 }
             };
 			
@@ -31,7 +44,12 @@ public static class ProcessExecuter{
             process.OutputDataReceived += (sender, args) => {
                 if(!string.IsNullOrEmpty(args.Data)){
                     // Display the standard output
-                    Console.WriteLine(getName(name) + args.Data);
+					if(useColors){
+						FormatString fs = nam + new FormatString(args.Data, CharFormat.ResetAll);
+						Console.WriteLine(fs);
+					}else{
+						Console.WriteLine(nam.content + args.Data);
+					}
                 }
             };
 			
@@ -98,18 +116,18 @@ public static class ProcessExecuter{
 		return false;
 	}
 	
-	static string getName(string n){
+	static FormatString getName(string n){
 		if(Tebas.config.CanGetCamp("processShowsName", out bool b) && b){
-			return "[" + n + "] ";
+			return new FormatString("[" + n + "] ", Tebas.blueCharFormat);
 		}
-		return "";
+		return new FormatString("");
 	}
 	
-	static string getErrorName(string n){
+	static FormatString getErrorName(string n){
 		if(Tebas.config.CanGetCamp("processShowsName", out bool b) && b){
-			return "[" + n + " ERROR] ";
+			return new FormatString("[" + n + " ERROR] ", Tebas.errorCharFormat);
 		}
-		return "[ERROR]";
+		return new FormatString("[ERROR] ", Tebas.errorCharFormat);
 	}
 	
 	public static void openLink(string url){
@@ -130,7 +148,7 @@ public static class ProcessExecuter{
 		catch(Exception e){}
 	}
 	
-	public static void runProcessWithOutput(string name, string command, string arguments, string workingDirectory, List<string> output, List<string> error)
+	public static void runProcessWithOutput(string command, string arguments, string workingDirectory, List<string> output, List<string> error)
     {		
 		ProcessStartInfo processInfo = new ProcessStartInfo
         {
@@ -141,8 +159,8 @@ public static class ProcessExecuter{
             RedirectStandardError = true,
             UseShellExecute = false,
             CreateNoWindow = false,
-			StandardOutputEncoding = Encoding.Default,
-			StandardErrorEncoding = Encoding.Default
+			StandardOutputEncoding = Encoding.UTF8,
+			StandardErrorEncoding = Encoding.UTF8
         };
 
         using (Process process = new Process { StartInfo = processInfo })
@@ -160,4 +178,25 @@ public static class ProcessExecuter{
             process.WaitForExit();
         }
     }
+	
+	public static int runProcessExitCode(string command, string arguments, string workingDirectory){
+		ProcessStartInfo processInfo = new ProcessStartInfo
+        {
+            FileName = command,
+            Arguments = arguments,
+            WorkingDirectory = workingDirectory,
+            RedirectStandardOutput = true, // Output is redirected but ignored
+            RedirectStandardError = true,  // Error is redirected but ignored
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+		
+		using (Process process = new Process { StartInfo = processInfo }){
+			// Start the process
+            process.Start();
+			// Wait for the process to exit
+            process.WaitForExit();
+			return process.ExitCode;
+		}
+	}
 }
