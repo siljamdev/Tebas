@@ -37,10 +37,10 @@ public static class TemplateHandler{
 		}
 		if(!(Tebas.template is null)){
 			string code = "";
-			if(!Tebas.template.CanGetCamp("global." + name, out code)){
+			if(!Tebas.template.CanGetCamp("global." + script, out code)){
 				return false;
 			}
-			Script s = new Script(Tebas.tn + " " + name, code);
+			Script s = new Script(Tebas.tn + " " + script, code);
 			s.run(args);
 			return true;
 		}

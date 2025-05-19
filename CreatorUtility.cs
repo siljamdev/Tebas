@@ -152,7 +152,7 @@ static class CreatorUtility{
 			
 			foreach(string scr in scripts){
 				string scrn = Path.GetFileNameWithoutExtension(scr);
-				if(PluginHandler.isScriptNameValid(scrn)){
+				if(!PluginHandler.isScriptNameValid(scrn)){
 					Console.WriteLine("  Error in the name of script " + scrn);
 					continue;
 				}
