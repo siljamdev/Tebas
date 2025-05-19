@@ -1,5 +1,6 @@
 string.removeQuotes def.2 args.0
 path.extension def.1 def.2
+self.lower def.1
 
 string.equal def.0 %tn "tbtem"
 if def.0 {
@@ -10,6 +11,28 @@ if def.0 {
 string.equal def.0 %tn "tbplg"
 if def.0 {
 	template.run "compile" ""
+	exit
+}
+
+string.equal def.0 %tn "web"
+if def.0 {
+	string.equal def.2 def.1 ".html"
+	if def.2 {
+		template.run "run" f"\"{args.0}\""
+	} else {
+		template.run "run" ""
+	}
+	exit
+}
+
+//html file
+string.equal def.0 def.1 ".html"
+if def.0 {
+	plugin.read def.2 %pl "browserPath"
+	string.equal def.3 def.2 ""
+	if! def.3 {
+		process.runDetached def.2 f"\"{args.0}\""
+	}
 	exit
 }
 
@@ -25,26 +48,15 @@ if def.0 {
 	exit
 }
 
-//html file
-string.equal def.0 def.1 ".html"
-if def.0 {
-	plugin.read def.2 %pl "browserPath"
-	string.equal def.3 def.2 ""
-	if! def.3 {
-		process.runDetached def.2 f"{args.0}"
-	}
-	exit
-}
-
 string.equal def.0 %tn "fgrom"
 if def.0 {
-	template.run "run" f"{args.0}"
+	template.run "run" f"\"{args.0}\""
 	exit
 }
 
 string.equal def.0 %tn "python"
 if def.0 {
-	template.run "run" f"{args.0}"
+	template.run "run" f"\"{args.0}\""
 	exit
 }
 
@@ -54,7 +66,7 @@ if def.0 {
 	plugin.read def.2 %pl "fgromPath"
 	string.equal def.3 def.2 ""
 	if! def.3 {
-		process.runDetached def.2 f"{args.0}"
+		process.runDetached def.2 f"\"{args.0}\""
 	}
 	exit
 }
@@ -65,9 +77,8 @@ if def.0 {
 	plugin.read def.2 %pl "pythonPath"
 	string.equal def.3 def.2 ""
 	if! def.3 {
-		process.runDetached def.2 f"{args.0}"
+		process.runDetached def.2 f"\"{args.0}\""
 	}
-	process.run def.2 f"{args.0}"
 	exit
 }
 

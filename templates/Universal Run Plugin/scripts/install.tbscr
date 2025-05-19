@@ -142,7 +142,7 @@ function successFragRoom {
 	scope cont
 	table.pop cont.0 stack
 	
-	template.write "fgromPath" cont.0
+	plugin.write %pl "fgromPath" cont.0
 	
 	string.equal cont.1 cont.0 ""
 	if! cont.1 {
@@ -154,7 +154,7 @@ function successBrowser {
 	scope cont
 	table.pop cont.0 stack
 	
-	template.write "browserPath" cont.0
+	plugin.write %pl "browserPath" cont.0
 	
 	string.equal cont.1 cont.0 ""
 	if! cont.1 {
@@ -166,7 +166,7 @@ function successPython {
 	scope cont
 	table.pop cont.0 stack
 	
-	template.write "pythonPath" cont.0
+	plugin.write %pl "pythonPath" cont.0
 	
 	string.equal cont.1 cont.0 ""
 	if! cont.1 {

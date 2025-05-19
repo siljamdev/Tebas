@@ -1,5 +1,0 @@
-console.print "Help Tebas template"
-console.print ""
-console.print "This template is used for making Tebas templates themselves"
-console.print "List of scripts:"
-console.print "compile            attempts to build the template"

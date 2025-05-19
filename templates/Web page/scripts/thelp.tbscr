@@ -1,6 +1,0 @@
-console.print "Help web template"
-console.print ""
-console.print "This template is used for making web pages"
-console.print "List of scripts:"
-console.print "run [file(optional)]        attempts to run an html file"
-console.print "setpath [path]              re-sets the browser path"
