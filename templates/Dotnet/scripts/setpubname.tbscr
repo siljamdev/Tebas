@@ -1,0 +1,32 @@
+call handle
+
+function handle {
+	project.read fg.0 "publishName"
+	console.print f"The current publish name is {fg.0}"
+	
+	math.greater def.0 args.length "0"
+	if def.0 {
+		table.add stack args.0
+		console.print "publish name gotten from CLI arguments"
+		call success
+		return
+	}
+	
+	console.ask def.2 "Enter the publish name (leave empty for mantaning it): "
+	string.equal def.3 def.2 ""
+	if def.3 {
+		return
+	}
+	
+	table.add stack def.2
+	
+	call success
+}
+
+function success {
+	scope cont
+	table.pop cont.0 stack
+	
+	project.write "publishName" cont.0
+	console.print f"The new publish name is {cont.0}"
+}

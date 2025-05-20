@@ -11,6 +11,7 @@ if def.0 {
 		call successWrite
 	}
 	console.print "Invalid CLI path for gcc"
+	exit
 }
 
 string.set con.0 "0"

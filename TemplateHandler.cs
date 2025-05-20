@@ -239,7 +239,7 @@ public static class TemplateHandler{
 		if(globals.Count > 0){
 			Tebas.consoleOutput("This template has " + globals.Count + " global scripts:");
 			
-			foreach(string h in scripts){
+			foreach(string h in globals){
 				Tebas.consoleOutput("    " + h);
 			}
 		}

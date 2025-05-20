@@ -48,3 +48,18 @@ if def.1 {
 } else {
 	project.write "use7zip" false.0
 }
+
+string.equal os.0 %os "windows"
+string.equal os.1 %os "linux"
+string.equal os.2 %os "macos"
+if os.0 {
+	project.write "publishTarget" "win-x64"
+} elseif os.1 {
+	project.write "publishTarget" "linux-x64"
+} elseif os.2 {
+	project.write "publishTarget" "osx-x64"
+}
+
+project.write "deletePdb" true.0
+project.write "publishName" "@og"
+project.write "copyPubFiles" true.0

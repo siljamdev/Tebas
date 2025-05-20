@@ -11,7 +11,7 @@
     <Company>@company</Company>
     <PackageDescription>@desc</PackageDescription>
 	
-	<!--@icon-->
+	<!--@propertyGr-->
 	
 	<PublishSingleFile>true</PublishSingleFile>
 	<SelfContained>true</SelfContained>

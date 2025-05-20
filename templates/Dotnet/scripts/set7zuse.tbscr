@@ -1,0 +1,18 @@
+math.equal check.0 args.length "0"
+math.equal check.1 args.0 ""
+bool.or check.2 check.0 check.1
+
+if check.2 {
+	console.print "The script expects a t/f argument, and none was provided"
+	exit
+}
+
+self.lower args.0
+string.equal def.0 args.0 "t"
+if def.0 {
+	project.write "use7zip" true.0
+	console.print "Set 7z use on publish to true"
+} else {
+	project.write "use7zip" false.0
+	console.print "Set 7z use on publish to false"
+}

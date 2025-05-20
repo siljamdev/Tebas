@@ -1,0 +1,44 @@
+call handle
+
+function handle {
+	project.read fg.0 "publishTarget"
+	console.print f"The current publish target is {fg.0}"
+	
+	math.greater def.0 args.length "0"
+	if def.0 {
+		table.add stack args.0
+		console.print "publish target gotten from CLI arguments"
+		call success
+		return
+	}
+	
+	console.print "Possible targets, separated by commas:"
+    console.print "    win-x64, win-x86"
+	console.print "    win-arm, win-arm64"
+	console.print "    linux-x64, linux-arm, linux-arm64"
+	console.print "    osx-x64, osx-arm64"
+	console.print "    freebsd-x64, freebsd-arm, freebsd-arm64"
+	console.print "    ios-arm64"
+	console.print "    android-arm, android-arm64"
+	console.print "    tizen-x64"
+	console.print "    tvos-arm64"
+	console.print "    watchos-arm64"
+	
+	console.ask def.2 "Enter the publish target (leave empty for mantaning it): "
+	string.equal def.3 def.2 ""
+	if def.3 {
+		return
+	}
+	
+	table.add stack def.2
+	
+	call success
+}
+
+function success {
+	scope cont
+	table.pop cont.0 stack
+	
+	project.write "publishTarget" cont.0
+	console.print f"The new publish target is {cont.0}"
+}

@@ -73,7 +73,7 @@ function tryDotnet {
 	file.read csproj.0 li.0
 	
 	table.peek def.2 stack
-	self.replace csproj.0 "<!--@icon-->" f"<ApplicationIcon>{def.2}</ApplicationIcon>"
+	self.replace csproj.0 "<!--@propertyGr-->" f"<ApplicationIcon>{def.2}</ApplicationIcon>\n<!--@propertyGr-->"
 	file.write li.0 csproj.0
 }
 

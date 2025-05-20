@@ -1,5 +1,4 @@
 call handleDotnet
-call handle7zip
 
 function handleDotnet {
 	template.read fg.0 "dotnetPath"
@@ -16,6 +15,7 @@ function handleDotnet {
 			return
 		}
 		console.print "Invalid CLI path for dotnet"
+		exit
 	}
 	
 	string.set con.0 "0"
@@ -40,47 +40,6 @@ function successDotnet {
 	
 	template.write "dotnetPath" cont.0
 	console.print f"The new dotnet path is {cont.0}"
-}
-
-function handle7zip {
-	template.read fg.0 "7zipPath"
-	console.print f"The current 7zip path is {fg.0}"
-	
-	math.greater def.0 args.length "1"
-	if def.0 {
-		table.add stack args.1
-		call tryPath
-		table.pop def.1 stack
-		if def.1 {
-			console.print "7zip path gotten from CLI arguments"
-			call success7zip
-			return
-		}
-		console.print "Invalid CLI path for 7zip"
-	}
-	
-	string.set con.0 "0"
-	
-	do! con.0 {
-		console.ask def.2 "Enter the path to 7z.exe (leave empty for mantaning the path): "
-		string.equal def.3 def.2 ""
-		if def.3 {
-			return
-		}
-		table.add stack def.2
-		call tryPath
-		table.pop con.0 stack
-	}
-	
-	call success7zip
-}
-
-function success7zip {
-	scope cont
-	table.pop cont.0 stack
-	
-	template.write "7zipPath" cont.0
-	console.print f"The new 7zip path is {cont.0}"
 }
 
 //Returns true/false and the path if true
