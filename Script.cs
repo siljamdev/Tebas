@@ -535,7 +535,7 @@ public class Script{
 					
 					case "folder.delete":
 					if(Directory.Exists(getPath(getString(1)))){
-						Directory.Delete(getPath(getString(1)));
+						Directory.Delete(getPath(getString(1)), recursive: true);
 					}
 					break;
 					

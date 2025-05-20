@@ -41,7 +41,7 @@ ChangesAssociations=yes
 DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
-OutputBaseFilename={#MyAppName}_installer_v{#MyAppVersion}_winx64
+OutputBaseFilename={#MyAppName}_installer_v{#MyAppVersion}_win-x64
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -52,7 +52,7 @@ ChangesEnvironment=true
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-Source: "{#MyAppName}_portable_v{#MyAppVersion}_winx64.exe"; DestDir: "{app}"; DestName: "{#MyAppExeName}"; Flags: ignoreversion
+Source: "{#MyAppName}_portable_v{#MyAppVersion}_win-x64.exe"; DestDir: "{app}"; DestName: "{#MyAppExeName}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 ; Add to PATH environment variable
