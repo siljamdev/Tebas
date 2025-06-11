@@ -43,12 +43,8 @@ function tryPath {
 	table.pop cont.0 stack
 	self.removeQuotes cont.0
 	
-	file.exists cont.1 cont.0
-	path.extension cont.2 cont.0
-	self.lower cont.2
-	string.equal cont.3 cont.2 ".exe"
-	bool.and cont.4 cont.1 cont.2
-	if cont.4 {
+	file.isExecutable cont.1 cont.0
+	if cont.1 {
 		table.add stack cont.0
 		table.add stack true.0
 		return

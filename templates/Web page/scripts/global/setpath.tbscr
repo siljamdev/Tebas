@@ -36,3 +36,25 @@ function successWrite {
 	console.print f"The new browser path is {cont.0}"
 	exit
 }
+
+function tryPath {
+	scope cont
+	table.pop cont.0 stack
+	self.removeQuotes cont.0
+	
+	file.isExecutable cont.1 cont.0
+	if cont.1 {
+		table.add stack cont.0
+		table.add stack true.0
+		return
+	}
+	
+	process.isExecutableInPath cont.1 cont.0
+	if cont.1 {
+		table.add stack cont.0
+		table.add stack true.0
+		return
+	}
+	
+	table.add stack false.0
+}
