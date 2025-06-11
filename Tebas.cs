@@ -27,7 +27,7 @@ class Tebas{
 	private static bool configInit;
 	private static bool localInit;
 	
-	public const string currentVersion = "0.5.1";
+	public const string currentVersion = "0.5.2";
 	
 	public static readonly CharFormat severeErrorCharFormat = new CharFormat(Color3.Red);
 	public static readonly CharFormat errorCharFormat = new CharFormat(new Color3("E54548"));
@@ -79,7 +79,7 @@ class Tebas{
 			new ModelInstance(ModelInstanceOperation.Type, "git.defaultBranch", "main")
 		);
 		
-		m.deleteNotMentioned = true;
+		m.deleteNotMentioned = true; 
 		
 		config *= m;
 		
@@ -87,6 +87,8 @@ class Tebas{
 		
 		config.Save();
 		configInit = true;
+		
+		FormatString.usesColors = !Console.IsOutputRedirected && config.CanGetCamp("useColors", out bool b) && b;
 	}
 	
 	public static bool initializeLocal(){
@@ -1119,7 +1121,7 @@ class Tebas{
 	public static bool useColors(){
 		initializeConfig();
 		
-		return FormatString.usesColors && config.CanGetCamp("useColors", out bool b) && b;
+		return FormatString.usesColors;
 	}
 	
 	//output

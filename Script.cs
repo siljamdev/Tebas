@@ -21,6 +21,10 @@ public class Script{
 	
 	Random rand;
 	
+	//Checking if file is executable on linux needs the access function from the libc, main c library
+	[System.Runtime.InteropServices.DllImport("libc", SetLastError = true)]
+	static extern int access(string pathname, int mode);
+	
 	public Script(string name, string code){
 		//code = code.Replace("\\n", "\n");
 		
@@ -525,6 +529,15 @@ public class Script{
 					
 					case "file.size":
 					setString(getStringRef(1), File.Exists(getPath(getString(2))) ? new FileInfo(getPath(getString(2))).Length.ToString() : "");
+					break;
+					
+					case "file.isExecutable":
+					if(OperatingSystem.IsWindows()){
+						string p = getPathExclusive(getString(2));
+						setString(getStringRef(1), (File.Exists(p) && Path.GetExtension(p).ToLower() == ".exe") ? tables["true"][0] : tables["false"][0]);
+					}else{
+						setString(getStringRef(1), (access(getPathExclusive(getString(2)), 1) == 0) ? tables["true"][0] : tables["false"][0]);
+					}
 					break;
 					
 					case "folder.create":

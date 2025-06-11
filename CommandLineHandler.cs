@@ -1122,6 +1122,7 @@ public static class CommandLineHandler{
 	}
 	
 	static void commandHelp(string[] args){
+		Tebas.consoleOutput("--Tebas project manager--");
 		Tebas.consoleOutput("Help for CLI:");
 		Tebas.consoleOutput("");
 		Tebas.consoleOutput("Usage:");
