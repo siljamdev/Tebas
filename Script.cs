@@ -298,7 +298,7 @@ public class Script{
 					break;
 					
 					case "table.deleteAt":
-					if(tables.ContainsKey(getTableRef(1)) && getIndex(getString(2), getTableRef(1), out u) && u >= 0 && u < tables[getStringRef(1).table].Count){
+					if(tables.ContainsKey(getTableRef(1)) && getIndex(getString(2), getTableRef(1), out u) && u >= 0 && u < tables[getTableRef(1)].Count){
 						tables[getTableRef(1)].RemoveAt(u);
 					}
 					break;

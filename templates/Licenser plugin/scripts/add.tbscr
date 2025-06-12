@@ -1,0 +1,48 @@
+string.equal def.0 %pn ""
+if def.0 {
+	console.print "This command can only be executed in a project"
+	exit
+}
+
+string.equal def.0 args.length "0"
+if def.0 {
+	console.print "This command needs a command line argument"
+	exit
+}
+
+self.trim args.0
+
+plugin.read def.0 %pl "licenses"
+
+string.split tem def.0 [":"]
+
+table.contains def.1 tem args.0
+if! def.1 {
+	console.print f"The plugin doesnt have the license: '{args.0}'"
+	exit
+}
+
+file.exists def.0 "W/LICENSE"
+if def.0 {
+	console.ask ans.0 "The LICENSE file already exists! Do you want to override it? (Y/N)"
+	self.lower ans.0
+	string.equal ans.0 ans.0 "y"
+	if! ans.0 {
+		exit
+	}
+}
+
+plugin.read text.0 %pl f"text.{args.0}"
+
+plugin.read a.0 %pl "author"
+
+self.replace text.0 "{author}" a.0
+
+string.substring year.0 %d "6" "4"
+
+self.replace text.0 "{year}" year.0
+
+file.create "W/LICENSE"
+file.write "W/LICENSE" text.0
+
+console.print "License added succesfully"

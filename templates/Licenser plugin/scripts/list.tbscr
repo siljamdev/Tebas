@@ -1,0 +1,16 @@
+console.print "List of available licenses"
+
+plugin.read def.0 %pl "licenses"
+
+string.split tem def.0 [":"]
+
+string.set t.1 "0"
+math.less t.2 t.1 tem.length
+while t.2 {
+	table.access t.3 tem t.1
+	
+	console.print f"  {t.3}"
+	
+	math.sumUp t.1 t.1
+	math.less t.2 t.1 tem.length
+}
