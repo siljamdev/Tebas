@@ -1,3 +1,19 @@
 console.print "Compiling Tebas template"
 
 template.create %wd
+
+template.read def.1 "autoInstall"
+if! def.1 {
+	exit
+}
+
+folder.list tem "W" "*.tbtem"
+math.greater def.1 tem.length "0"
+
+if! def.1 {
+	exit
+}
+
+path.filenameNoExtension def.2 tem.0
+
+process.runDetached %tbx f"\"{%wd}/{def.2}.tbtem\""

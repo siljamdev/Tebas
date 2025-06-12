@@ -1,0 +1,16 @@
+string.equal def.0 args.length "0"
+if def.0 {
+	console.print "This command needs a command line argument"
+	exit
+}
+
+self.trim args.0
+self.lower args.0
+string.equal def.0 args.0 "f"
+if def.0 {
+	template.write "autoInstall" false.0
+} else {
+	template.write "autoInstall" true.0
+}
+
+console.print "Auto install set succesfully"
