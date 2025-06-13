@@ -34,7 +34,7 @@ public static class SharedHandler{
 		
 		if(shared.CanGetCamp(name, out string v)){
 			shared.SetCamp(name, v + content);
-		}else{
+		}else if(content != ""){
 			shared.SetCamp(name, content);
 		}
 		

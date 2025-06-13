@@ -108,6 +108,12 @@ static class CreatorUtility{
 			Console.WriteLine("We could not find the resources folder");
 		}
 		
+		string[] prevTemplates = Directory.GetFiles(path, "*.tbtem"); //Delete all previous files so theres no confusions
+		
+		foreach(string file in prevTemplates){
+			File.Delete(file);
+		}
+		
 		t.Save(path + "/" + name + ".tbtem");
 		
 		Console.WriteLine("Output path: " + path + "/" + name + ".tbtem");
@@ -177,6 +183,12 @@ static class CreatorUtility{
 			}
 		}else{
 			Console.WriteLine("We could not find the resources folder");
+		}
+		
+		string[] prevPlugins = Directory.GetFiles(path, "*.tbplg"); //Delete all previous files so theres no confusions
+		
+		foreach(string file in prevPlugins){
+			File.Delete(file);
 		}
 		
 		t.Save(path + "/" + name + ".tbplg");

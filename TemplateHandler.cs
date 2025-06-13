@@ -2,6 +2,20 @@ using System;
 using AshLib.AshFiles;
 
 public static class TemplateHandler{
+	public static void initializeBlankTemplate(){
+		if(exists("blank")){
+			return;
+		}
+		AshFile blank = new AshFile();
+		blank.SetCamp("name", "blank");
+		blank.SetCamp("version", Tebas.currentVersion);
+		blank.SetCamp("git.defaultUse", false);
+		blank.SetCamp("addReadme", false);
+		blank.SetCamp("description", "Blank template for any unspecified project");
+		
+		blank.Save(Tebas.dep.path + "/templates/blank/template.tbtem");
+	}
+	
 	public static bool exists(string name){
 		if(Directory.Exists(Tebas.dep.path + "/templates/" + name)){
 			if(File.Exists(Tebas.dep.path + "/templates/" + name + "/template.tbtem")){
@@ -19,12 +33,14 @@ public static class TemplateHandler{
 	public static bool runScript(string name, IEnumerable<string> args = null){
 		if(!(Tebas.template is null)){
 			string code = "";
+			ScriptType type = ScriptType.Template;
 			if(!Tebas.template.CanGetCamp("script." + name, out code)){
+				type = ScriptType.TemplateGlobal;
 				if(!Tebas.template.CanGetCamp("global." + name, out code)){
 					return false;
 				}
 			}
-			Script s = new Script(Tebas.tn + " " + name, code);
+			Script s = new Script(Tebas.tn + " " + name, type, code);
 			s.run(args);
 			return true;
 		}
@@ -40,7 +56,7 @@ public static class TemplateHandler{
 			if(!Tebas.template.CanGetCamp("global." + script, out code)){
 				return false;
 			}
-			Script s = new Script(Tebas.tn + " " + script, code);
+			Script s = new Script(Tebas.tn + " " + script, ScriptType.TemplateGlobal, code);
 			s.run(args);
 			return true;
 		}
@@ -64,16 +80,20 @@ public static class TemplateHandler{
 			return;
 		}
 		
-		
+		if(!isNameValid(name)){
+			return;
+		}
 		
 		string desc = template.GetCampOrDefault<string>("description", null);
 		if(desc != null){
 			Tebas.consoleOutput("Template description: " + desc);
+			Tebas.consoleOutput("");
 		}
 		
 		if(!Tebas.forced && Tebas.isConsoleInteractive() && exists(name)){
 			Console.WriteLine("A template called " + name + " is already installed, do you want to update it? (Y/N)");
 			string ans = Console.ReadLine();
+			Tebas.consoleOutput("");
 			
 			if(ans.ToLower() != "y"){
 				return;
@@ -88,6 +108,7 @@ public static class TemplateHandler{
 			}else if(v == 1 && !Tebas.forced){
 				Console.WriteLine("The template version(" + vs + ") is older than the current tebas version(" + Tebas.currentVersion + "), do you want to install it? (Y/N)");
 				string ans = Console.ReadLine();
+				Tebas.consoleOutput("");
 				
 				if(ans.ToLower() != "y"){
 					return;
@@ -111,10 +132,16 @@ public static class TemplateHandler{
 		
 		runScript("install", args);
 		
+		Tebas.consoleOutput("");
 		Tebas.consoleOutput("Template succesfully installed: " + Tebas.tn);
 	}
 	
-	public static void uninstall(string name){		
+	public static void uninstall(string name){
+		if(name == "blank"){
+			Tebas.consoleOutput("Template 'blank' cannot be unistalled");
+			return;
+		}
+		
 		if(!exists(name)){
 			Tebas.consoleOutput("That template is not installed");
 			return;
@@ -131,6 +158,7 @@ public static class TemplateHandler{
 		if(Tebas.forced || Tebas.askDeletionConfirmation()){
 			runScript("uninstall");
 			Directory.Delete(Tebas.templateDirectory, true);
+			Tebas.consoleOutput("");
 			Tebas.consoleOutput("Template uninstalled succesfully");
 		}else{
 			Tebas.consoleOutput("Uninstallation cancelled");
@@ -200,7 +228,7 @@ public static class TemplateHandler{
 		}
 		
 		if(Tebas.template.CanGetCamp("git.defaultUse", out bool b)){
-			Tebas.consoleOutput("Use git: " + b);
+			Tebas.consoleOutput("Uses git: " + b);
 		}
 		
 		if(Tebas.template.CanGetCamp("codeExtensions", out string s)){
@@ -272,11 +300,10 @@ public static class TemplateHandler{
 		if(!(Tebas.template is null)){
 			if(Tebas.template.CanGetCamp("resources." + n, out string v)){
 				Tebas.template.SetCamp("resources." + n, v + c);
-				Tebas.template.Save();
-			}else{
+			}else if(c != ""){
 				Tebas.template.SetCamp("resources." + n, c);
-				Tebas.template.Save();
 			}
+			Tebas.template.Save();
 		}
 	}
 	
@@ -298,6 +325,11 @@ public static class TemplateHandler{
 		
 		if(name == ""){
 			Tebas.consoleError("A template name cannot be empty, template name was: '" + name + "'");
+			return false;
+		}
+		
+		if(name == "blank"){
+			Tebas.consoleError("A template name cannot be 'blank', template name was: '" + name + "'");
 			return false;
 		}
 		

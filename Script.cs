@@ -6,6 +6,8 @@ public class Script{
 	static readonly char[] invalidNameChars = "[]\"(),{}%".ToCharArray();
 	string name;
 	
+	ScriptType type;
+	
 	string[] lines;
 	Sentence[] sentences;
 	Dictionary<string, int> functions;
@@ -13,6 +15,8 @@ public class Script{
 	Dictionary<string, List<string>> tables;
 	
 	bool useColors = true;
+	
+	byte allowProcesses; //0 is never, 1 is ask and 2 is always
 	
 	FormatString formattedName;
 	FormatString formattedErrorName;
@@ -25,13 +29,16 @@ public class Script{
 	[System.Runtime.InteropServices.DllImport("libc", SetLastError = true)]
 	static extern int access(string pathname, int mode);
 	
-	public Script(string name, string code){
+	public Script(string name, ScriptType t, string code){
 		//code = code.Replace("\\n", "\n");
 		
 		this.name = name;
+		this.type = t;
 		this.useColors = Tebas.useColors();
 		
-		bool showName = (Tebas.config.CanGetCamp("scriptShowsName", out bool b) && b);
+		bool showName = (Tebas.config.CanGetCamp("script.showName", out bool b) && b);
+		
+		allowProcesses = Tebas.config.GetCampOrDefault("script.allowProcesses", (byte) 1); 
 		
 		formattedName = showName ? new FormatString("[" + name + "] ", Tebas.blueCharFormat) : new FormatString();
 		formattedErrorName = showName ? new FormatString("[" + name + " ERROR] ", Tebas.errorCharFormat) : new FormatString();
@@ -66,7 +73,11 @@ public class Script{
 				if(sentences[i].command == "function"){
 					string n = sentences[i].getArg(1);
 					if(isValidName(n)){
-						functions.Add(n, i);
+						if(sentences[i].getArg(2) != "{"){
+							outputErrorLine("Invalid function " + n + ": missing {");
+						}else{
+							functions.Add(n, i);
+						}
 					}else{
 						outputErrorLine("Invalid function name: " + n);
 					}
@@ -103,10 +114,32 @@ public class Script{
 				
 				switch(s.command){
 					case "process.cmd":
+					string pname;
+					string prog;
+					string args2;
 					if(OperatingSystem.IsWindows()){
-						ProcessExecuter.runProcess(name + " CMD", Environment.ExpandEnvironmentVariables(@"%SystemRoot%\System32\cmd.exe"),  "/c \"" + getString(1) + "\"", Tebas.workingDirectory);
+						pname = name + " CMD";
+						prog = Environment.ExpandEnvironmentVariables(@"%SystemRoot%\System32\cmd.exe");
+						args2 = "/c \"" + getString(1) + "\"";
 					}else{
-						ProcessExecuter.runProcess(name + " SH", "sh",  "-c \"" + getString(1) + "\"", Tebas.workingDirectory);
+						pname = name + " SH";
+						prog = "sh";
+						args2 = "-c \"" + getString(1) + "\"";
+					}
+					switch(allowProcesses){
+						case 0:
+						outputLine("Blocked process '" + prog + "' with args: " + args2);
+						break;
+						case 1:
+						outputLine("Do you allow to run process '" + prog + "' with args '" + args2 + "'? (Y/N)");
+						string ans = Console.ReadLine().ToLower();
+						if(ans == "y"){
+							ProcessExecuter.runProcess(pname, prog, args2, Tebas.workingDirectory);
+						}
+						break;
+						case 2:
+						ProcessExecuter.runProcess(pname, prog, args2, Tebas.workingDirectory);
+						break;
 					}
 					break;
 					
@@ -115,21 +148,90 @@ public class Script{
 					break;
 					
 					case "process.run":
-					ProcessExecuter.runProcess(name + " " + getString(1).ToUpper(), getString(1), getString(2), Tebas.workingDirectory);
+					pname = name + " " + getString(1).ToUpper();
+					prog = getString(1);
+					args2 = getString(2);
+					switch(allowProcesses){
+						case 0:
+						outputLine("Blocked process '" + prog + "' with args: " + args2);
+						break;
+						case 1:
+						outputLine("Do you allow to run process '" + prog + "' with args '" + args2 + "'? (Y/N)");
+						string ans = Console.ReadLine().ToLower();
+						if(ans == "y"){
+							ProcessExecuter.runProcess(pname, prog, args2, Tebas.workingDirectory);
+						}
+						break;
+						case 2:
+						ProcessExecuter.runProcess(pname, prog, args2, Tebas.workingDirectory);
+						break;
+					}
 					break;
 					
 					case "process.runDetached":
-					ProcessExecuter.runProcessNewWindow(getString(1), getString(2), Tebas.workingDirectory);
+					prog = getString(1);
+					args2 = getString(2);
+					switch(allowProcesses){
+						case 0:
+						outputLine("Blocked process '" + prog + "' with args: " + args2);
+						break;
+						case 1:
+						outputLine("Do you allow to run process '" + prog + "' with args '" + args2 + "'? (Y/N)");
+						string ans = Console.ReadLine().ToLower();
+						if(ans == "y"){
+							ProcessExecuter.runProcessNewWindow(prog, args2, Tebas.workingDirectory);
+						}
+						break;
+						case 2:
+						ProcessExecuter.runProcessNewWindow(prog, args2, Tebas.workingDirectory);
+						break;
+					}
 					break;
 					
 					case "process.runOutput":
 					tables[getTableRef(3)] = new List<string>();
 					tables[getTableRef(4)] = new List<string>();
-					ProcessExecuter.runProcessWithOutput(getString(1), getString(2), Tebas.workingDirectory, tables[getTableRef(3)], tables[getTableRef(4)]);
+					prog = getString(1);
+					args2 = getString(2);
+					
+					switch(allowProcesses){
+						case 0:
+						outputLine("Blocked process '" + prog + "' with args: " + args2);
+						break;
+						case 1:
+						outputLine("Do you allow to run process '" + prog + "' with args '" + args2 + "'? (Y/N)");
+						string ans = Console.ReadLine().ToLower();
+						if(ans == "y"){
+							ProcessExecuter.runProcessWithOutput(prog, args2, Tebas.workingDirectory, tables[getTableRef(3)], tables[getTableRef(4)]);
+						}
+						break;
+						case 2:
+						ProcessExecuter.runProcessWithOutput(prog, args2, Tebas.workingDirectory, tables[getTableRef(3)], tables[getTableRef(4)]);
+						break;
+					}
 					break;
 					
 					case "process.runExitCode":
-					setString(getStringRef(1), ProcessExecuter.runProcessExitCode(getString(2), getString(3), Tebas.workingDirectory).ToString());
+					prog = getString(1);
+					args2 = getString(2);
+					switch(allowProcesses){
+						case 0:
+						outputLine("Blocked process '" + prog + "' with args: " + args2);
+						setString(getStringRef(1), "");
+						break;
+						case 1:
+						outputLine("Do you allow to run process '" + prog + "' with args '" + args2 + "'? (Y/N)");
+						string ans = Console.ReadLine().ToLower();
+						if(ans == "y"){
+							setString(getStringRef(1), ProcessExecuter.runProcessExitCode(prog, args2, Tebas.workingDirectory).ToString());
+						}else{
+							setString(getStringRef(1), "");
+						}
+						break;
+						case 2:
+						setString(getStringRef(1), ProcessExecuter.runProcessExitCode(prog, args2, Tebas.workingDirectory).ToString());
+						break;
+					}
 					break;
 					
 					case "process.isExecutableInPath":
@@ -210,7 +312,14 @@ public class Script{
 					break;
 					
 					case "string.substring":
-					setString(getStringRef(1), (int.TryParse(getString(3), out int u) && int.TryParse(getString(4), out int v) && u >= 0 && u < getString(2).Length && v >= 0 && u + v <= getString(2).Length ? getString(2).Substring(u, v) : ""));
+					if(!int.TryParse(getString(3), out int u)){
+						setString(getStringRef(1), "");
+						break;
+					}
+					if(u < 0){
+						u = getString(2).Length + u;
+					}
+					setString(getStringRef(1), (int.TryParse(getString(4), out int v) && u >= 0 && u < getString(2).Length && v >= 0 && u + v <= getString(2).Length ? getString(2).Substring(u, v) : ""));
 					break;
 					
 					case "string.replace":
@@ -254,7 +363,14 @@ public class Script{
 					break;
 					
 					case "self.substring":
-					setString(getStringRef(1), (int.TryParse(getString(2), out u) && int.TryParse(getString(3), out v) && u >= 0 && u < getString(1).Length && v >= 0 && u + v <= getString(1).Length ? getString(1).Substring(u, v) : ""));
+					if(!int.TryParse(getString(2), out u)){
+						setString(getStringRef(1), "");
+						break;
+					}
+					if(u < 0){
+						u = getString(1).Length + u;
+					}
+					setString(getStringRef(1), (int.TryParse(getString(3), out v) && u >= 0 && u < getString(1).Length && v >= 0 && u + v <= getString(1).Length ? getString(1).Substring(u, v) : ""));
 					break;
 					
 					case "self.replace":
@@ -278,10 +394,21 @@ public class Script{
 					break;
 					
 					case "table.access":
-					if(tables.ContainsKey(getTableRef(2)) && getIndex(getString(3), getTableRef(2), out u) && u >= 0 && u < tables[getTableRef(2)].Count){
-						setString(getStringRef(1), tables[getTableRef(2)][u]);
+					List<string> l2 = getTable(2);
+					if(getIndex(getString(3), l2.Count, out u) && u >= 0 && u < l2.Count){
+						setString(getStringRef(1), l2[u]);
 					}else{
 						setString(getStringRef(1), "");
+					}
+					break;
+					
+					case "table.find":
+					string v22 = getString(3);
+					int index = getTable(2).FindIndex(n => n == v22);
+					if(index == -1){
+						setString(getStringRef(1), "");
+					}else{
+						setString(getStringRef(1), index.ToString());
 					}
 					break;
 					
@@ -300,6 +427,13 @@ public class Script{
 					case "table.deleteAt":
 					if(tables.ContainsKey(getTableRef(1)) && getIndex(getString(2), getTableRef(1), out u) && u >= 0 && u < tables[getTableRef(1)].Count){
 						tables[getTableRef(1)].RemoveAt(u);
+					}
+					break;
+					
+					case "table.deleteAll":
+					if(tables.ContainsKey(getTableRef(1))){
+						string v2 = getString(2);
+						tables[getTableRef(1)].RemoveAll(n => n == v2);
 					}
 					break;
 					
@@ -324,9 +458,18 @@ public class Script{
 					break;
 					
 					case "table.clear":
-					if(tables.ContainsKey(getTableRef(1))){
-						tables[getTableRef(1)].Clear();
+					tables.Remove(getTableRef(1));
+					break;
+					
+					case "table.range":
+					if(!int.TryParse(getString(3), out u)){
+						tables.Remove(getTableRef(1));
+						break;
 					}
+					if(u < 0){
+						u = getTable(2).Count + u;
+					}
+					tables[getTableRef(1)] = (int.TryParse(getString(4), out v) && u >= 0 && u < getTable(2).Count && v >= 0 && u + v <= getTable(2).Count ? getTable(2).GetRange(u, v) : new List<string>());
 					break;
 					
 					case "table.add":
@@ -585,19 +728,29 @@ public class Script{
 					break;
 					
 					case "template.read":
-					setString(getStringRef(1), TemplateHandler.resourceRead(getString(2)));
+					if(type == ScriptType.Template || type == ScriptType.TemplateGlobal){
+						setString(getStringRef(1), TemplateHandler.resourceRead(getString(2)));
+					}else{
+						setString(getStringRef(1), "");
+					}
 					break;
 					
 					case "template.write":
-					TemplateHandler.resourceWrite(getString(1), getString(2));
+					if(type == ScriptType.Template || type == ScriptType.TemplateGlobal){
+						TemplateHandler.resourceWrite(getString(1), getString(2));
+					}
 					break;
 					
 					case "template.append":
-					TemplateHandler.resourceAppend(getString(1), getString(2));
+					if(type == ScriptType.Template || type == ScriptType.TemplateGlobal){
+						TemplateHandler.resourceAppend(getString(1), getString(2));
+					}
 					break;
 					
 					case "template.run":
-					TemplateHandler.runScript(getString(1), StringHelper.splitSentence(getString(2)));
+					if(type != ScriptType.Standalone){
+						TemplateHandler.runScript(getString(1), StringHelper.splitSentence(getString(2)));
+					}
 					break;
 					
 					case "template.global":
@@ -617,15 +770,23 @@ public class Script{
 					break;
 					
 					case "plugin.read":
-					setString(getStringRef(1), PluginHandler.readResource(getString(2), getString(3)));
+					if(type == ScriptType.Plugin){
+						setString(getStringRef(1), PluginHandler.readResource(getString(2)));
+					}else{
+						setString(getStringRef(1), "");
+					}
 					break;
 					
 					case "plugin.write":
-					PluginHandler.writeResource(getString(1), getString(2), getString(3));
+					if(type == ScriptType.Plugin){
+						PluginHandler.writeResource(getString(1), getString(2));
+					}
 					break;
 					
 					case "plugin.append":
-					PluginHandler.appendResource(getString(1), getString(2), getString(3));
+					if(type == ScriptType.Plugin){
+						PluginHandler.appendResource(getString(1), getString(2));
+					}
 					break;
 					
 					case "plugin.run":
@@ -645,47 +806,75 @@ public class Script{
 					break;
 					
 					case "project.read":
-					setString(getStringRef(1), projectRead(getString(2)));
+					if(type == ScriptType.Template || type == ScriptType.Plugin){
+						setString(getStringRef(1), projectRead(getString(2)));
+					}else{
+						setString(getStringRef(1), "");
+					}
 					break;
 					
 					case "project.write":
-					projectWrite(getString(1), getString(2));
+					if(type == ScriptType.Template || type == ScriptType.Plugin){
+						projectWrite(getString(1), getString(2));
+					}
 					break;
 					
 					case "project.append":
-					projectAppend(getString(1), getString(2));
+					if(type == ScriptType.Template || type == ScriptType.Plugin){
+						projectAppend(getString(1), getString(2));
+					}
 					break;
 					
 					case "project.gitUsed":
-					if(Tebas.project != null && Tebas.project.CanGetCamp("git.use", out bool b) && b){
-						setString(getStringRef(1), tables["true"][0]);
+					if(type == ScriptType.Template || type == ScriptType.Plugin){
+						if(Tebas.project != null && Tebas.project.CanGetCamp("git.use", out bool b) && b){
+							setString(getStringRef(1), tables["true"][0]);
+						}else{
+							setString(getStringRef(1), tables["false"][0]);
+						}
 					}else{
-						setString(getStringRef(1), tables["false"][0]);
+						setString(getStringRef(1), "");
 					}
 					break;
 					
 					case "project.remoteSet":
-					Tebas.localRemoteSet(getString(1), getString(2));
+					if(type == ScriptType.Template){
+						Tebas.localRemoteSet(getString(1), getString(2));
+					}
 					break;
 					
 					case "project.remoteUrl":
-					setString(getStringRef(1), GitHelper.getRemoteUrl(getString(2)));
+					if(type == ScriptType.Template || type == ScriptType.Plugin){
+						setString(getStringRef(1), GitHelper.getRemoteUrl(getString(2)));
+					}
 					break;
 					
 					case "project.remoteDelete":
-					Tebas.localRemoteDelete(getString(1));
+					if(type == ScriptType.Template){
+						Tebas.localRemoteDelete(getString(1));
+					}
 					break;
 					
 					case "project.remoteList":
-					tables[getTableRef(1)] = GitHelper.getAllRemotes();
+					if(type == ScriptType.Template || type == ScriptType.Plugin){
+						tables[getTableRef(1)] = GitHelper.getAllRemotes();
+					}
 					break;
 					
 					case "project.remoteExists":
-					setString(getStringRef(1), (GitHelper.remoteExists(getString(2)) ? tables["true"][0] : tables["false"][0]));
+					if(type == ScriptType.Template || type == ScriptType.Plugin){
+						setString(getStringRef(1), (GitHelper.remoteExists(getString(2)) ? tables["true"][0] : tables["false"][0]));
+					}else{
+						setString(getStringRef(1), "");
+					}
 					break;
 					
 					case "project.getCurrentGitBranch":
-					setString(getStringRef(1), GitHelper.getBranch());
+					if(type == ScriptType.Template || type == ScriptType.Plugin){
+						setString(getStringRef(1), GitHelper.getBranch());
+					}else{
+						setString(getStringRef(1), "");
+					}
 					break;
 					
 					case "shared.read":
@@ -701,7 +890,9 @@ public class Script{
 					break;
 					
 					case "tebas.commit":
-					Tebas.localCommit(getString(1));
+					if(type == ScriptType.Template || type == ScriptType.Plugin){
+						Tebas.localCommit(getString(1));
+					}
 					break;
 					
 					case "tebas.getDefaultGitBranch":
@@ -709,15 +900,21 @@ public class Script{
 					break;
 					
 					case "tebas.push":
-					Tebas.localPush(getString(1));
+					if(type == ScriptType.Template || type == ScriptType.Plugin){
+						Tebas.localPush(getString(1));
+					}
 					break;
 					
 					case "tebas.pull":
-					Tebas.localPull(getString(1));
+					if(type == ScriptType.Template || type == ScriptType.Plugin){
+						Tebas.localPull(getString(1));
+					}
 					break;
 					
 					case "tebas.add":
-					Tebas.localAdd();
+					if(type == ScriptType.Template || type == ScriptType.Plugin){
+						Tebas.localAdd();
+					}
 					break;
 					
 					case "tebas.script":
@@ -753,54 +950,116 @@ public class Script{
 					break;
 					
 					case "while":
-					if(s.getArg(2) != "{"){
-						throw new TebasScriptError("Incorrect while loop: missing {");
-					}
-					if(tables["true"].Contains(getString(1))){
-						flow.Push(new FlowComponent(FlowType.While, lp, flowLevel));
-						flowLevel++;
-					}else{
-						lp++;
-						searchEndBlock();
+					try{
+						if(s.getArg(2) != "{"){
+							throw new TebasScriptError("Incorrect while loop: missing {");
+						}
+						if(tables["true"].Contains(getString(1))){
+							flow.Push(new FlowComponent(FlowType.While, lp, flowLevel));
+							flowLevel++;
+						}else{
+							lp++;
+							searchEndBlock();
+						}
+					}catch(Exception e){
+						int max = s.getNumOfArgs() + 1;
+						for(int i = 1; i < max; i++){
+							if(s.getArg(i) == "{"){
+								flow.Push(new FlowComponent(FlowType.Error, lp, flowLevel));
+								break;
+							}
+						}
+						throw e;
 					}
 					break;
 					
 					case "while!":
-					if(s.getArg(2) != "{"){
-						throw new TebasScriptError("Incorrect while! loop: missing {");
-					}
-					if(!tables["true"].Contains(getString(1))){
-						flow.Push(new FlowComponent(FlowType.While, lp, flowLevel));
-						flowLevel++;
-					}else{
-						lp++;
-						searchEndBlock();
+					try{
+						if(s.getArg(2) != "{"){
+							throw new TebasScriptError("Incorrect while! loop: missing {");
+						}
+						if(!tables["true"].Contains(getString(1))){
+							flow.Push(new FlowComponent(FlowType.While, lp, flowLevel));
+							flowLevel++;
+						}else{
+							lp++;
+							searchEndBlock();
+						}
+					}catch(Exception e){
+						int max = s.getNumOfArgs() + 1;
+						for(int i = 1; i < max; i++){
+							if(s.getArg(i) == "{"){
+								flow.Push(new FlowComponent(FlowType.Error, lp, flowLevel));
+								break;
+							}
+						}
+						throw e;
 					}
 					break;
 					
 					case "do":
-					if(s.getArg(2) != "{"){
-						throw new TebasScriptError("Incorrect do loop: missing {");
+					try{
+						if(s.getArg(1) != "{"){
+							int max = s.getNumOfArgs() + 1;
+							for(int i = 1; i < max; i++){
+								if(s.getArg(i) == "{"){
+									flow.Push(new FlowComponent(FlowType.Error, lp, flowLevel));
+									break;
+								}
+							}
+							throw new TebasScriptError("Incorrect do loop: missing {");
+						}
+						
+						flow.Push(new FlowComponent(FlowType.Do, lp, flowLevel));
+						flowLevel++;
+					}catch(Exception e){
+						int max = s.getNumOfArgs() + 1;
+						for(int i = 1; i < max; i++){
+							if(s.getArg(i) == "{"){
+								flow.Push(new FlowComponent(FlowType.Error, lp, flowLevel));
+								break;
+							}
+						}
+						throw e;
 					}
-					
-					flow.Push(new FlowComponent(FlowType.Do, lp, flowLevel));
-					flowLevel++;
 					break;
 					
-					case "do!":
-					if(s.getArg(2) != "{"){
-						throw new TebasScriptError("Incorrect do! loop: missing {");
+					case "for":
+					try{
+						if(s.getArg(3) != "{"){
+							throw new TebasScriptError("Incorrect for loop: missing {");
+						}
+						if(int.TryParse(getString(1), out int l)){
+							setString(getStringRef(1), (l + 1).ToString());
+						}else{
+							setString(getStringRef(1), "0");
+						}
+						
+						if(int.TryParse(getString(1), out int f1) && int.TryParse(getString(2), out int f2) && f1 < f2){
+							flow.Push(new FlowComponent(FlowType.For, lp, flowLevel));
+							flowLevel++;
+						}else{
+							lp++;
+							searchEndBlock();
+						}
+					}catch(Exception e){
+						int max = s.getNumOfArgs() + 1;
+						for(int i = 1; i < max; i++){
+							if(s.getArg(i) == "{"){
+								flow.Push(new FlowComponent(FlowType.Error, lp, flowLevel));
+								break;
+							}
+						}
+						throw e;
 					}
-					
-					flow.Push(new FlowComponent(FlowType.DoNeg, lp, flowLevel));
-					flowLevel++;
 					break;
 					
 					case "continue":
-					while(true){
+					while(flow.Count > 0){
 						FlowComponent fc = flow.Pop();
-						if(fc.ft == FlowType.While || fc.ft == FlowType.Do || fc.ft == FlowType.DoNeg){
+						if(fc.ft == FlowType.While || fc.ft == FlowType.Do || fc.ft == FlowType.For){
 							flow.Push(fc);
+							flowLevel = fc.level + 1;
 							lp = fc.line;
 							lp++;
 							searchEndBlock();
@@ -808,51 +1067,76 @@ public class Script{
 							break;
 						}
 					}
+					flowLevel = 0;
 					break;
 					
 					case "break":
-					while(true){
+					while(flow.Count > 0){
 						FlowComponent fc = flow.Pop();
-						if(fc.ft == FlowType.While || fc.ft == FlowType.Do || fc.ft == FlowType.DoNeg){
+						if(fc.ft == FlowType.While || fc.ft == FlowType.Do || fc.ft == FlowType.For){
 							lp = fc.line;
+							flowLevel = fc.level;
 							lp++;
 							searchEndBlock();
 							break;
 						}
 					}
+					flowLevel = 0;
 					break;
 					
 					case "if":
-					if(s.getArg(2) != "{"){
-						throw new TebasScriptError("Incorrect if statement: missing {");
-					}
-					
-					if(tables["true"].Contains(getString(1))){
-						flow.Push(new FlowComponent(FlowType.If, lp, flowLevel));
-						flowLevel++;
-					}else{
-						flow.Push(new FlowComponent(FlowType.Else, lp, flowLevel));
-						flowLevel++;
-						lp++;
-						searchEndBlock();
-						lp--;
+					try{
+						if(s.getArg(2) != "{"){
+							throw new TebasScriptError("Incorrect if statement: missing {");
+						}
+						
+						if(tables["true"].Contains(getString(1))){
+							flow.Push(new FlowComponent(FlowType.If, lp, flowLevel));
+							flowLevel++;
+						}else{
+							flow.Push(new FlowComponent(FlowType.Else, lp, flowLevel));
+							flowLevel++;
+							lp++;
+							searchEndBlock();
+							lp--;
+						}
+					}catch(Exception e){
+						int max = s.getNumOfArgs() + 1;
+						for(int i = 1; i < max; i++){
+							if(s.getArg(i) == "{"){
+								flow.Push(new FlowComponent(FlowType.Error, lp, flowLevel));
+								break;
+							}
+						}
+						throw e;
 					}
 					break;
 					
 					case "if!":
-					if(s.getArg(2) != "{"){
-						throw new TebasScriptError("Incorrect if! statement: missing {");
-					}
-					
-					if(!tables["true"].Contains(getString(1))){
-						flow.Push(new FlowComponent(FlowType.If, lp, flowLevel));
-						flowLevel++;
-					}else{
-						flow.Push(new FlowComponent(FlowType.Else, lp, flowLevel));
-						flowLevel++;
-						lp++;
-						searchEndBlock();
-						lp--;
+					try{
+						if(s.getArg(2) != "{"){
+							throw new TebasScriptError("Incorrect if! statement: missing {");
+						}
+						
+						if(!tables["true"].Contains(getString(1))){
+							flow.Push(new FlowComponent(FlowType.If, lp, flowLevel));
+							flowLevel++;
+						}else{
+							flow.Push(new FlowComponent(FlowType.Else, lp, flowLevel));
+							flowLevel++;
+							lp++;
+							searchEndBlock();
+							lp--;
+						}
+					}catch(Exception e){
+						int max = s.getNumOfArgs() + 1;
+						for(int i = 1; i < max; i++){
+							if(s.getArg(i) == "{"){
+								flow.Push(new FlowComponent(FlowType.Error, lp, flowLevel));
+								break;
+							}
+						}
+						throw e;
 					}
 					break;
 					
@@ -876,11 +1160,24 @@ public class Script{
 					case "exit":
 					return;
 					
-					case "function": //Only execute body
-					return;
+					case "function": //Only execute outise program of the script, when found functions, exit
+					if(flowLevel == 0){
+						return;	
+					}else{
+						int max = s.getNumOfArgs() + 1;
+						for(int i = 1; i < max; i++){
+							if(s.getArg(i) == "{"){
+								flow.Push(new FlowComponent(FlowType.Error, lp, flowLevel));
+								break;
+							}
+						}
+						throw new TebasScriptError("Found internal function");
+					}
+					break;
+					
 					
 					case "return":
-					while(true){
+					while(flow.Count > 0){
 						FlowComponent fc = flow.Pop();
 						if(fc.ft == FlowType.Function){
 							Scope sco = scope.Pop();
@@ -888,32 +1185,40 @@ public class Script{
 								tables[sco.table] = sco.list;
 							}
 							lp = fc.line;
+							flowLevel = fc.level;
 							break;
 						}
 					}
+					flowLevel = 0;
 					break;
 					
 					case "}":
 					if(flow.Peek().ft == FlowType.While){
-						lp = flow.Peek().line - 1;
-						flow.Pop();
+						lp = flow.Pop().line - 1;
 						flowLevel--;
 					}else if(flow.Peek().ft == FlowType.Do){
 						FlowComponent fc = flow.Peek();
-						if(tables["true"].Contains(getStringAll(sentences[fc.line].getArg(1)))){
-							lp = fc.line;
-						}else{
-							flow.Pop();
-							flowLevel--;
+						if(!(s.getNumOfArgs() > 1) || (s.getArg(1) != "while" && s.getArg(1) != "while!")){
+							throw new TebasScriptError("Incorrect do statement: missing while or while!");
 						}
-					}else if(flow.Peek().ft == FlowType.DoNeg){
-						FlowComponent fc = flow.Peek();
-						if(!tables["true"].Contains(getStringAll(sentences[fc.line].getArg(1)))){
-							lp = fc.line;
+						if(s.getArg(1) == "while"){
+							if(tables["true"].Contains(getString(2))){
+								lp = fc.line;
+							}else{
+								flow.Pop();
+								flowLevel--;
+							}
 						}else{
-							flow.Pop();
-							flowLevel--;
+							if(!tables["true"].Contains(getString(2))){
+							lp = fc.line;
+							}else{
+								flow.Pop();
+								flowLevel--;
+							}
 						}
+					}else if(flow.Peek().ft == FlowType.For){
+						lp = flow.Pop().line - 1;
+						flowLevel--;
 					}else if(flow.Peek().ft == FlowType.If){
 						if(s.getNumOfArgs() > 1){
 							if(s.getArg(1) == "elseif"){
@@ -936,6 +1241,16 @@ public class Script{
 					}else if(flow.Peek().ft == FlowType.Else){
 						if(s.getNumOfArgs() > 1){
 							if(s.getArg(1) == "elseif"){
+								if(s.getArg(3) != "{"){
+									int max = s.getNumOfArgs() + 1;
+									for(int i = 2; i < max; i++){
+										if(s.getArg(i) == "{"){
+											flow.Push(new FlowComponent(FlowType.Error, lp, flowLevel));
+											break;
+										}
+									}
+									throw new TebasScriptError("Incorrect elseif statement: missing {");
+								}
 								if(tables["true"].Contains(getString(2))){
 									flow.Pop();
 									flow.Push(new FlowComponent(FlowType.If, lp, flowLevel));
@@ -946,6 +1261,16 @@ public class Script{
 									lp--;
 								}
 							}else if(s.getArg(1) == "elseif!"){
+								if(s.getArg(3) != "{"){
+									int max = s.getNumOfArgs() + 1;
+									for(int i = 2; i < max; i++){
+										if(s.getArg(i) == "{"){
+											flow.Push(new FlowComponent(FlowType.Error, lp, flowLevel));
+											break;
+										}
+									}
+									throw new TebasScriptError("Incorrect elseif! statement: missing {");
+								}
 								if(!tables["true"].Contains(getString(2))){
 									flow.Pop();
 									flow.Push(new FlowComponent(FlowType.If, lp, flowLevel));
@@ -975,7 +1300,11 @@ public class Script{
 							scope.Push(new Scope(sp.table, scoped));
 						}
 						
+						flowLevel = flow.Peek().level;
 						lp = flow.Pop().line;
+					}else if(flow.Peek().ft == FlowType.Error){
+						flow.Pop();
+						flowLevel--;
 					}
 					break;
 				}
@@ -1238,6 +1567,31 @@ public class Script{
 		return false;
 	}
 	
+	bool getIndex(string s, int tl, out int n){
+		if(int.TryParse(s, out int u)){
+			if(u < 0){
+				u = tl + u;
+			}
+			
+			n = u;
+			return true;
+		}
+		
+		if(s == "random"){
+			n = rand.Next(tl);
+			return true;
+		}
+		
+		if(s == "center"){
+			n = tl;
+			n /= 2;
+			return true;
+		}
+		
+		n = -1;
+		return false;
+	}
+	
 	void setError(string message){
 		tables["error"] = new List<string>();
 		
@@ -1305,7 +1659,7 @@ public class Script{
 				return Tebas.workingDirectory + s.Substring(1);
 			}
 			return "";
-		}else if(s.StartsWith("T")){
+		}else if((type == ScriptType.Template || type == ScriptType.TemplateGlobal) && s.StartsWith("T")){
 			if(Tebas.templateDirectory != null){
 				return Tebas.templateDirectory + s.Substring(1);
 			}
@@ -1321,7 +1675,7 @@ public class Script{
 				return Tebas.workingDirectory + s.Substring(1);
 			}
 			return "";
-		}else if(s.StartsWith("T")){
+		}else if((type == ScriptType.Template || type == ScriptType.TemplateGlobal) && s.StartsWith("T")){
 			if(Tebas.templateDirectory != null){
 				return Tebas.templateDirectory + s.Substring(1);
 			}
@@ -1380,10 +1734,10 @@ public class Script{
 			return Tebas.workingDirectory;
 			
 			case "td":
-			return Tebas.templateDirectory;
+			return type == ScriptType.Template || type == ScriptType.TemplateGlobal ? Tebas.templateDirectory : "";
 			
 			case "pl":
-			return PluginHandler.runningPlugin;
+			return type == ScriptType.Plugin ? PluginHandler.runningPlugin : "";
 			
 			case "d":
 			return DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
@@ -1432,11 +1786,10 @@ public class Script{
 		if(!(Tebas.project is null)){
 			if(Tebas.project.CanGetCamp("resources." + n, out string v)){
 				Tebas.project.SetCamp("resources." + n, v + c);
-				Tebas.project.Save();
-			}else{
+			}else if(c != ""){
 				Tebas.project.SetCamp("resources." + n, c);
-				Tebas.project.Save();
 			}
+			Tebas.project.Save();
 		}
 	}
 }
@@ -1462,7 +1815,7 @@ struct stringRef{
 }
 
 enum FlowType{
-	If, Else, While, Do, DoNeg, Function
+	If, Else, While, Do, For, Function, Error
 }
 
 struct FlowComponent{
@@ -1475,4 +1828,8 @@ struct FlowComponent{
 		line = s;
 		level = l;
 	}
+}
+
+public enum ScriptType{
+	Template, TemplateGlobal, Plugin, Standalone
 }

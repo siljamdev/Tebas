@@ -27,7 +27,7 @@ class Tebas{
 	private static bool configInit;
 	private static bool localInit;
 	
-	public const string currentVersion = "0.5.2";
+	public const string currentVersion = "0.6.0";
 	
 	public static readonly CharFormat severeErrorCharFormat = new CharFormat(Color3.Red);
 	public static readonly CharFormat errorCharFormat = new CharFormat(new Color3("E54548"));
@@ -56,7 +56,9 @@ class Tebas{
 	
 	static void initialize(){
 		string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-		dep = new Dependencies(appDataPath + "/ashproject/tebas", true, new string[]{"templates"}, null);
+		dep = new Dependencies(appDataPath + "/ashproject/tebas", true, new string[]{"templates", "templates/blank", "plugins"}, null);
+		
+		TemplateHandler.initializeBlankTemplate();
 	}
 	
 	public static void initializeConfig(){
@@ -68,7 +70,8 @@ class Tebas{
 		
 		AshFileModel m = new AshFileModel(
 			new ModelInstance(ModelInstanceOperation.Type, "deletionConfirmationNeeded", true),
-			new ModelInstance(ModelInstanceOperation.Type, "scriptShowsName", false),
+			new ModelInstance(ModelInstanceOperation.Type, "script.showName", false),
+			new ModelInstance(ModelInstanceOperation.Type, "script.allowProcesses", (byte) 1), //0 is never, 1 is ask and 2 is always
 			new ModelInstance(ModelInstanceOperation.Type, "processShowsName", true),
 			new ModelInstance(ModelInstanceOperation.Type, "projectRecursiveSearch", true),
 			new ModelInstance(ModelInstanceOperation.Type, "useColors", true),
@@ -405,16 +408,17 @@ class Tebas{
 		switch(key){
 			case "list":
 			consoleOutput("List of config options:");
-			consoleOutput("  deleteConfirm     - If you have to confirm every deletion");
-			consoleOutput("  scriptLogName     - If template scripts will show the name of the script");
-			consoleOutput("  processLogName    - If external processes will show their name");
-			consoleOutput("  recursiveSearch   - If the 'project.tebas' file will be searched recurisvely upwards");
-			consoleOutput("  useColors         - Enable or disable completely ANSI coloring");
-			consoleOutput("  readme            - The default readme file for projects. Requires a file path");
-			consoleOutput("  gitignore         - The default .gitignore file for projects that use git. Requires a file path");
-			consoleOutput("  gitPath           - The path to the git executable");
-			consoleOutput("  gitDefaultBranch  - The default branch that will be used for all git related stuff");
-			consoleOutput("  gitAddOnCommit    - Automatically adds all changes when commiting");
+			consoleOutput("  deleteConfirm       - If you have to confirm every deletion");
+			consoleOutput("  scriptLogName       - If template scripts will show the name of the script");
+			consoleOutput("  scriptAllowProcess  - If scripts are allowed to execute processes. 3 possibilities: always, ask, never");
+			consoleOutput("  processLogName      - If external processes will show their name");
+			consoleOutput("  recursiveSearch     - If the 'project.tebas' file will be searched recurisvely upwards");
+			consoleOutput("  useColors           - Enable or disable completely ANSI coloring");
+			consoleOutput("  readme              - The default readme file for projects. Requires a file path");
+			consoleOutput("  gitignore           - The default .gitignore file for projects that use git. Requires a file path");
+			consoleOutput("  gitPath             - The path to the git executable");
+			consoleOutput("  gitDefaultBranch    - The default branch that will be used for all git related stuff");
+			consoleOutput("  gitAddOnCommit      - Automatically adds all changes when commiting");
 			break;
 			
 			case "deleteConfirm":
@@ -422,7 +426,14 @@ class Tebas{
 			break;
 			
 			case "scriptLogName":
-			setConfigTrueFalse("scriptShowsName", val);
+			setConfigTrueFalse("script.showName", val);
+			break;
+			
+			case "scriptAllowProcess":
+			val = val.ToLower();
+			config.SetCamp("script.allowProcesses", val == "never" ? 0 : (val == "always" ? 2 : 1));
+			config.Save();
+			consoleOutput("Config changed correctly");
 			break;
 			
 			case "processLogName":
@@ -480,8 +491,12 @@ class Tebas{
 				consoleOutput("  deleteConfirm: " + deleteConfirm);
 			}
 			
-			if(config.CanGetCamp("scriptShowsName", out bool scriptLogName)){
+			if(config.CanGetCamp("script.showName", out bool scriptLogName)){
 				consoleOutput("  scriptLogName: " + scriptLogName);
+			}
+			
+			if(config.CanGetCamp("script.allowProcesses", out bool scriptAllowProcess)){
+				consoleOutput("  scriptAllowProcess: " + scriptAllowProcess);
 			}
 			
 			if(config.CanGetCamp("processShowsName", out bool processLogName)){
@@ -615,6 +630,8 @@ class Tebas{
 		if(project.CanGetCamp("creationDate", out Date d)){
 			consoleOutput("Date of creation: " + d);
 		}
+		
+		consoleOutput("");
 		
 		
 		if(!TemplateHandler.exists(tn)){
@@ -946,8 +963,8 @@ class Tebas{
 		return true;
 	}
 	
-	//Standalone scripts
-	public static void runStandaloneScript(string filePath){
+	//Standalone scripts	
+	public static void runStandaloneScript(string filePath, IEnumerable<string> args = null){
 		filePath = StringHelper.removeQuotesSingle(filePath);
 		
 		if(!File.Exists(filePath)){
@@ -955,56 +972,8 @@ class Tebas{
 			return;
 		}
 		
-		AshFile te = template;
-		string t = tn;
-		string td = templateDirectory;
-		AshFile pj = project;
-		string p = pn;
-		
-		template = null;
-		tn = "";
-		templateDirectory = "";
-		project = null;
-		pn = "";
-		
-		Script s = new Script(Path.GetFileNameWithoutExtension(filePath), File.ReadAllText(filePath));
-		s.run(null);
-		
-		template = te;
-		tn = t;
-		templateDirectory = td;
-		project = pj;
-		pn = p;
-	}
-	
-	public static void runStandaloneScript(string filePath, IEnumerable<string> args){
-		filePath = StringHelper.removeQuotesSingle(filePath);
-		
-		if(!File.Exists(filePath)){
-			consoleError("File not found");
-			return;
-		}
-		
-		AshFile te = template;
-		string t = tn;
-		string td = templateDirectory;
-		AshFile pj = project;
-		string p = pn;
-		
-		template = null;
-		tn = "";
-		templateDirectory = "";
-		project = null;
-		pn = "";
-		
-		Script s = new Script(Path.GetFileNameWithoutExtension(filePath), File.ReadAllText(filePath));
+		Script s = new Script(Path.GetFileNameWithoutExtension(filePath), ScriptType.Standalone, File.ReadAllText(filePath));
 		s.run(args);
-		
-		template = te;
-		tn = t;
-		templateDirectory = td;
-		project = pj;
-		pn = p;
 	}
 	
 	//loop

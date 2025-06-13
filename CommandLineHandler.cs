@@ -1020,8 +1020,12 @@ public static class CommandLineHandler{
 			string s = args[clp];
 			clp++;
 			
+			if(!PluginHandler.exists(name)){
+				Tebas.consoleSevereError("Unknown plugin: " + name);
+			}
+			
 			if(!PluginHandler.runScript(name, s, args.Skip(clp))){
-				Tebas.consoleSevereError("Unknown script");
+				Tebas.consoleSevereError("Unknown script: " + s);
 				return;
 			}
 		}else if(name.StartsWith("@")){
@@ -1035,8 +1039,12 @@ public static class CommandLineHandler{
 			string s = args[clp];
 			clp++;
 			
+			if(!TemplateHandler.exists(name)){
+				Tebas.consoleSevereError("Unknown template: " + name);
+			}
+			
 			if(!TemplateHandler.runGlobal(name, s, args.Skip(clp))){
-				Tebas.consoleSevereError("Unknown global script");
+				Tebas.consoleSevereError("Unknown global script: " + s);
 				return;
 			}
 		}else{
