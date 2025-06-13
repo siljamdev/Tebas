@@ -706,7 +706,12 @@ public class Script{
 					break;
 					
 					case "folder.list":
-					tables[getTableRef(1)] = new List<string>(Directory.GetFiles(getPath(getString(2)), getString(3)));
+					string p33 = getPath(getString(2));
+					if(!Directory.Exists(p33)){
+						tables[getTableRef(1)] = new List<string>();
+						break;
+					}
+					tables[getTableRef(1)] = new List<string>(Directory.GetFiles(p33, getString(3)));
 					for(int i = 0; i < tables[getTableRef(1)].Count; i++){
 						if(tables[getTableRef(1)][i].StartsWith(Tebas.workingDirectory)){
 							tables[getTableRef(1)][i] = "W" + tables[getTableRef(1)][i].Substring(Tebas.workingDirectory.Length);
@@ -717,7 +722,12 @@ public class Script{
 					break;
 					
 					case "folder.listChild":
-					tables[getTableRef(1)] = new List<string>(Directory.GetFiles(getPath(getString(2)), getString(3), SearchOption.AllDirectories));
+					p33 = getPath(getString(2));
+					if(!Directory.Exists(p33)){
+						tables[getTableRef(1)] = new List<string>();
+						break;
+					}
+					tables[getTableRef(1)] = new List<string>(Directory.GetFiles(p33, getString(3), SearchOption.AllDirectories));
 					for(int i = 0; i < tables[getTableRef(1)].Count; i++){
 						if(tables[getTableRef(1)][i].StartsWith(Tebas.workingDirectory)){
 							tables[getTableRef(1)][i] = "W" + tables[getTableRef(1)][i].Substring(Tebas.workingDirectory.Length);
@@ -1688,7 +1698,11 @@ public class Script{
 	
 	bool fileExistsWildcard(string p){
 		if(p.Contains("*") || p.Contains("?")){
-			return Directory.GetFiles(Path.GetDirectoryName(p), Path.GetFileName(p)).Length > 0;
+			string p45 = Path.GetDirectoryName(p);
+			if(!Directory.Exists(p45)){
+				return false;
+			}
+			return Directory.GetFiles(p45, Path.GetFileName(p)).Length > 0;
 		}else{
 			return File.Exists(p);
 		}

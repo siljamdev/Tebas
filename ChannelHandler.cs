@@ -167,6 +167,9 @@ public static class ChannelHandler{
 		initialize();
 		
 		if(channels.CanGetCamp(name, out string path)){
+			if(!Directory.Exists(path)){
+				return new List<string>();
+			}
 			string[] directories = Directory.GetDirectories(path);
 			List<string> projects = new List<string>();
 			

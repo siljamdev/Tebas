@@ -20,7 +20,9 @@ public static class PluginHandler{
 	}
 	
 	public static List<string> getList(){
-		
+		if(!Directory.Exists(Tebas.dep.path + "/plugins")){
+			return new List<string>();
+		}
 		string[] pls = Directory.GetFiles(Tebas.dep.path + "/plugins", "*.tbplg");
 		
 		return pls.Select(Path.GetFileNameWithoutExtension).ToList();

@@ -168,6 +168,10 @@ public static class TemplateHandler{
 	public static List<string> getList(){
 		string dir = Tebas.dep.path + "/templates";
 		
+		if(!Directory.Exists(dir)){
+			return new List<string>();
+		}
+		
 		string[] directories = Directory.GetDirectories(dir);
 		
 		List<string> c = new List<string>();
