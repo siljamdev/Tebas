@@ -5,4 +5,4 @@ console.print "List of scripts:"
 console.print "add <license>          adds a LICENSE file to the project"
 console.print "list                   shows a list of licenses"
 console.print "import <path>          imports a new license. File name will be license name"
-//console.print "delete <license>       removes a license from the plugin" //Broken rn
+console.print "delete <license>       removes a license from the plugin" //(No longer) Broken

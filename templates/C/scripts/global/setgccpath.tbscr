@@ -16,8 +16,8 @@ if def.0 {
 
 string.set con.0 "0"
 
-do! con.0 {
-	console.ask def.2 "Enter the path to gcc.exe (leave empty for mantaning the path): "
+do {
+	console.ask def.2 "Enter the path to gcc executable (leave empty for mantaning the path): "
 	string.equal def.3 def.2 ""
 	if def.3 {
 		exit
@@ -25,7 +25,7 @@ do! con.0 {
 	table.add stack def.2
 	call tryPath
 	table.pop con.0 stack
-}
+} while! con.0
 
 call successWrite
 

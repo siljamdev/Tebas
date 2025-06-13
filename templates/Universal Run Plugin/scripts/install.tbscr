@@ -33,7 +33,7 @@ function handleFragRoom {
 	
 	string.set con.0 "0"
 	
-	do! con.0 {
+	do {
 		console.ask def.2 "Enter the path to Fragroom executable: "
 		string.equal def.3 def.2 ""
 		if def.3 {
@@ -42,7 +42,7 @@ function handleFragRoom {
 		table.add stack def.2
 		call tryPath
 		table.pop con.0 stack
-	}
+	} while! con.0
 	
 	call successFragRoom
 }
@@ -76,12 +76,12 @@ function handleBrowser {
 	
 	string.set con.0 "0"
 	
-	do! con.0 {
+	do {
 		console.ask def.2 "Enter the path to a browser executable: "
 		table.add stack def.2
 		call tryPath
 		table.pop con.0 stack
-	}
+	} while! con.0
 	
 	call successBrowser
 }
@@ -124,7 +124,7 @@ function handlePython {
 	
 	string.set con.0 "0"
 	
-	do! con.0 {
+	do {
 		console.ask def.2 "Enter the path to python executable: "
 		string.equal def.3 def.2 ""
 		if def.3 {
@@ -133,7 +133,7 @@ function handlePython {
 		table.add stack def.2
 		call tryPath
 		table.pop con.0 stack
-	}
+	} while! con.0
 	
 	call successPython
 }
@@ -142,7 +142,7 @@ function successFragRoom {
 	scope cont
 	table.pop cont.0 stack
 	
-	plugin.write %pl "fgromPath" cont.0
+	plugin.write "fgromPath" cont.0
 	
 	string.equal cont.1 cont.0 ""
 	if! cont.1 {
@@ -154,7 +154,7 @@ function successBrowser {
 	scope cont
 	table.pop cont.0 stack
 	
-	plugin.write %pl "browserPath" cont.0
+	plugin.write "browserPath" cont.0
 	
 	string.equal cont.1 cont.0 ""
 	if! cont.1 {
@@ -166,7 +166,7 @@ function successPython {
 	scope cont
 	table.pop cont.0 stack
 	
-	plugin.write %pl "pythonPath" cont.0
+	plugin.write "pythonPath" cont.0
 	
 	string.equal cont.1 cont.0 ""
 	if! cont.1 {

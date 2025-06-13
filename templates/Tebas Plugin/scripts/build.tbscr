@@ -1,4 +1,4 @@
-console.print "Compiling Tebas plugin"
+console.print "Building Tebas plugin"
 
 plugin.create %wd
 
@@ -16,4 +16,4 @@ if! def.1 {
 
 path.filenameNoExtension def.2 tem.0
 
-process.runDetached %tbx f"\"{%wd}/{def.2}.tbtem\""
+process.runDetached %tbx f"\"{%wd}/{def.2}.tbplg\""

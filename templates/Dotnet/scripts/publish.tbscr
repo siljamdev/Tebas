@@ -39,17 +39,12 @@ call setupNaming
 project.read targets.0 "publishTarget"
 string.split targets targets.0 [","]
 
-string.set t.1 "0"
-math.less t.2 t.1 targets.length
-while t.2 {
+for t.1 targets.length {
 	table.access t.3 targets t.1
 	
 	self.trim t.3
 	table.add stack t.3
 	call publish
-	
-	math.sumUp t.1 t.1
-	math.less t.2 t.1 targets.length
 }
 
 console.print "Publishing finished!"
@@ -102,14 +97,10 @@ function publish { //expects target platform in stack
 	if pdb.0 {
 		folder.list files f"W/releases/{def.0}/{pub.0}" "*.pdb"
 		
-		string.set pdb.1 "0"
-		math.less pdb.2 pdb.1 files.length
-		while pdb.2 {
+		string.set pdb.1 "-1"
+		for pdb.1 files.length {
 			table.access pdb.3 files pdb.1
 			file.delete pdb.3
-			
-			math.sumUp pdb.1 pdb.1
-			math.less pdb.2 pdb.1 files.length
 		}
 	}
 	
@@ -118,9 +109,8 @@ function publish { //expects target platform in stack
 	if isWindows.0 {
 		folder.list files f"W/releases/{def.0}/{pub.0}" "*.exe"
 		
-		string.set exe.1 "0"
-		math.less exe.2 exe.1 files.length
-		while exe.2 {
+		string.set exe.1 "-1"
+		for exe.1 files.length {
 			table.access exe.3 files exe.1
 			
 			path.filenameNoExtension exe.5 exe.3
@@ -132,9 +122,6 @@ function publish { //expects target platform in stack
 			self.replace exe.4 "@nam" %pn
 			
 			file.rename exe.3 f"W/releases/{def.0}/{pub.0}/{exe.4}.exe"
-			
-			math.sumUp exe.1 exe.1
-			math.less exe.2 exe.1 files.length
 		}
 	}
 	
@@ -155,17 +142,13 @@ function publish { //expects target platform in stack
 	if copyFiles.0 {
 		folder.list files f"W/releases/{def.0}/{pub.0}" "*"
 		
-		string.set exe.1 "0"
-		math.less exe.2 exe.1 files.length
-		while exe.2 {
+		string.set exe.1 "-1"
+		for exe.1 files.length {
 			table.access exe.3 files exe.1
 			
 			path.filename exe.4 exe.3
 			
 			file.copy exe.3 f"W/releases/{def.0}/{exe.4}"
-			
-			math.sumUp exe.1 exe.1
-			math.less exe.2 exe.1 files.length
 		}
 		
 		folder.delete f"W/releases/{def.0}/{pub.0}"

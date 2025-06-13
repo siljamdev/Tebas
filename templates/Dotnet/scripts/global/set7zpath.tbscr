@@ -20,7 +20,7 @@ function handle7zip {
 	
 	string.set con.0 "0"
 	
-	do! con.0 {
+	do {
 		console.ask def.2 "Enter the path to 7z executable (leave empty for mantaning the path): "
 		string.equal def.3 def.2 ""
 		if def.3 {
@@ -29,7 +29,7 @@ function handle7zip {
 		table.add stack def.2
 		call tryPath
 		table.pop con.0 stack
-	}
+	} while! con.0
 	
 	call success7zip
 }

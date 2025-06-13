@@ -4,10 +4,7 @@ template.read p.0 "gccPath"
 
 folder.listChild cFiles "W" "*.c" //Find all c files
 
-string.set lop.0 "0"
-math.less lop.1 lop.0 cFiles.length
-
-while lop.1 { //delete the starting "W/" part
+for lop.0 cFiles.length { //delete the starting "W/" part
 	//loop body
 	table.access lop.2 cFiles lop.0
 	string.count lop.3 lop.2
@@ -15,10 +12,6 @@ while lop.1 { //delete the starting "W/" part
 	math.subtract lop.3 lop.3 "2"
 	string.substring skibidi.0 lop.2 "2" lop.3
 	table.setAt cFiles lop.0 skibidi.0
-	
-	//for condition
-	math.sumUp lop.0 lop.0
-	math.less lop.1 lop.0 cFiles.length
 }
 
 table.join f.0 cFiles " " //Join all files

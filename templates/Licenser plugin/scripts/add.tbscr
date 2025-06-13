@@ -12,7 +12,7 @@ if def.0 {
 
 self.trim args.0
 
-plugin.read def.0 %pl "licenses"
+plugin.read def.0 "licenses"
 
 string.split tem def.0 [":"]
 
@@ -32,9 +32,9 @@ if def.0 {
 	}
 }
 
-plugin.read text.0 %pl f"text.{args.0}"
+plugin.read text.0 f"text.{args.0}"
 
-plugin.read a.0 %pl "author"
+plugin.read a.0 "author"
 
 self.replace text.0 "{author}" a.0
 

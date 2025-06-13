@@ -13,7 +13,7 @@ if! def.0 {
 	exit
 }
 
-plugin.read def.0 %pl "licenses"
+plugin.read def.0 "licenses"
 string.split tem def.0 [":"]
 
 path.filenameNoExtension def.1 args.0
@@ -28,11 +28,12 @@ if def.0 {
 table.add tem def.1
 
 table.join def.0 tem ":"
-plugin.write %pl "licenses" def.0
+plugin.write "licenses" def.0
 
 process.cmd f"copy \"{args.0}\" \"{%td}/temp.txt\""
 file.read txt.0 "T/temp.txt"
+file.delete "T/temp.txt"
 
-plugin.write %pl f"text.{def.1}" txt.0
+plugin.write f"text.{def.1}" txt.0
 
 console.print "License imported succesfully"

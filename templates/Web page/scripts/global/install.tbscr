@@ -28,12 +28,12 @@ if! def.0 {
 
 string.set con.0 "0"
 
-do! con.0 {
+do {
 	console.ask def.2 "Enter the path to a browser executable: "
 	table.add stack def.2
 	call tryPath
 	table.pop con.0 stack
-}
+} while! con.0
 
 call successWrite
 

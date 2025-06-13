@@ -1,4 +1,4 @@
-console.print "Compiling Tebas template"
+console.print "Building Tebas template"
 
 template.create %wd
 

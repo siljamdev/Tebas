@@ -4,13 +4,13 @@ self.lower def.1
 
 string.equal def.0 %tn "tbtem"
 if def.0 {
-	template.run "compile" ""
+	template.run "build" ""
 	exit
 }
 
 string.equal def.0 %tn "tbplg"
 if def.0 {
-	template.run "compile" ""
+	template.run "build" ""
 	exit
 }
 
@@ -28,7 +28,7 @@ if def.0 {
 //html file
 string.equal def.0 def.1 ".html"
 if def.0 {
-	plugin.read def.2 %pl "browserPath"
+	plugin.read def.2 "browserPath"
 	string.equal def.3 def.2 ""
 	if! def.3 {
 		process.runDetached def.2 f"\"{args.0}\""
@@ -63,7 +63,7 @@ if def.0 {
 //fragroom file
 string.equal def.0 def.1 ".fgrom"
 if def.0 {
-	plugin.read def.2 %pl "fgromPath"
+	plugin.read def.2 "fgromPath"
 	string.equal def.3 def.2 ""
 	if! def.3 {
 		process.runDetached def.2 f"\"{args.0}\""
@@ -74,7 +74,7 @@ if def.0 {
 //python file
 string.equal def.0 def.1 ".py"
 if def.0 {
-	plugin.read def.2 %pl "pythonPath"
+	plugin.read def.2 "pythonPath"
 	string.equal def.3 def.2 ""
 	if! def.3 {
 		process.runDetached def.2 f"\"{args.0}\""

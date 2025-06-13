@@ -1,0 +1,25 @@
+string.equal def.0 args.length "0"
+if def.0 {
+	console.print "This command needs a command line argument"
+	exit
+}
+
+self.trim args.0
+
+plugin.read def.0 "licenses"
+string.split tem def.0 [":"]
+
+table.contains def.0 tem args.0
+if! def.0 {
+	console.print f"There is no license called '{args.0}'"
+	exit
+}
+
+table.deleteAll tem args.0
+
+table.join def.0 tem ":"
+plugin.write "licenses" def.0
+
+plugin.write f"text.{args.0}" ""
+
+console.print "License deleted succesfully"
