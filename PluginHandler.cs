@@ -42,6 +42,8 @@ public static class PluginHandler{
 	}
 	
 	public static bool runScript(string plugin, string name, IEnumerable<string> args = null){
+		Tebas.initializeLocalSilent();
+		
 		if(!load(plugin)){
 			return false;
 		}

@@ -431,7 +431,7 @@ class Tebas{
 			
 			case "scriptAllowProcess":
 			val = val.ToLower();
-			config.SetCamp("script.allowProcesses", val == "never" ? 0 : (val == "always" ? 2 : 1));
+			config.SetCamp("script.allowProcesses", val == "never" ? (byte) 0 : (val == "always" ? (byte) 2 : (byte) 1));
 			config.Save();
 			consoleOutput("Config changed correctly");
 			break;
@@ -495,8 +495,8 @@ class Tebas{
 				consoleOutput("  scriptLogName: " + scriptLogName);
 			}
 			
-			if(config.CanGetCamp("script.allowProcesses", out bool scriptAllowProcess)){
-				consoleOutput("  scriptAllowProcess: " + scriptAllowProcess);
+			if(config.CanGetCamp("script.allowProcesses", out byte scriptAllowProcess)){
+				consoleOutput("  scriptAllowProcess: " + (scriptAllowProcess == 0 ? "never" : (scriptAllowProcess == 1 ? "ask" : (scriptAllowProcess == 2 ? "always" : "unknown"))));
 			}
 			
 			if(config.CanGetCamp("processShowsName", out bool processLogName)){

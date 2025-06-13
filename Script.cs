@@ -1164,14 +1164,15 @@ public class Script{
 					if(flowLevel == 0){
 						return;	
 					}else{
-						int max = s.getNumOfArgs() + 1;
+						/* int max = s.getNumOfArgs() + 1;
 						for(int i = 1; i < max; i++){
 							if(s.getArg(i) == "{"){
 								flow.Push(new FlowComponent(FlowType.Error, lp, flowLevel));
 								break;
 							}
 						}
-						throw new TebasScriptError("Found internal function");
+						throw new TebasScriptError("Found internal function"); */
+						return;
 					}
 					break;
 					
@@ -1327,7 +1328,7 @@ public class Script{
 	void searchEndBlock(){
 		int c = 1;
 		while(true){
-			if(sentences[lp].command == "if" || sentences[lp].command == "while" || sentences[lp].command == "do" || sentences[lp].command == "if!" || sentences[lp].command == "while!" || sentences[lp].command == "do!"){
+			if(sentences[lp].command == "if" || sentences[lp].command == "while" || sentences[lp].command == "do" || sentences[lp].command == "if!" || sentences[lp].command == "while!" || sentences[lp].command == "for"){
 				c++;
 			}else if(sentences[lp].command == "}"){
 				c--;
