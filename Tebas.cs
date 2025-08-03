@@ -27,7 +27,7 @@ class Tebas{
 	private static bool configInit;
 	private static bool localInit;
 	
-	public const string currentVersion = "0.6.0";
+	public const string currentVersion = "0.6.1";
 	
 	public static readonly CharFormat severeErrorCharFormat = new CharFormat(Color3.Red);
 	public static readonly CharFormat errorCharFormat = new CharFormat(new Color3("E54548"));

@@ -44,7 +44,8 @@ public static class StringHelper{
 			if(l[i] == '\\' && !previousEscapeCode){
 				previousEscapeCode = true;
 				continue;
-			}else{
+			}else if(previousEscapeCode){
+				c.Append('\\');
 				previousEscapeCode = false;
 			}
 			

@@ -91,6 +91,7 @@ public class Script{
 		
 		if(args != null){
 			tables["args"] = new List<string>(args);
+			//Console.WriteLine("Argument: " + (tables["args"].Count > 0 ? tables["args"][0] : "Nothing to see here"));
 		}
 		
 		tables["true"] = new List<string>();
