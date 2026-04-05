@@ -1,1 +1,0 @@
-mit:apachev2:bsdv3clause:cc0:gplv3:mplv2:unlicense

@@ -1,1 +1,0 @@
-Plugin aimed at letting users explore the contents of the Tebas shared storage

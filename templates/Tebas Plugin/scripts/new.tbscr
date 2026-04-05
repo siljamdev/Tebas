@@ -1,5 +1,0 @@
-console.print "New Tebas plugin"
-
-folder.create "W/scripts"
-folder.create "W/resources"
-file.create "W/description.txt"

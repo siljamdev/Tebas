@@ -1,1235 +1,644 @@
-using System;
+using System.Text;
+using System.Diagnostics;
+using AshLib.AshFiles;
 
-public static class CommandLineHandler{
-	
-	static int clp; //Command line pointer
-	
-	public static void process(string[] args){
-		
-		clp = 0;
-		
-		if(args.Length < 1){
-			commandHelp(args);
-			return;
+static class CommandLineHandler{
+	static int Main(string[] args){
+		try{
+			Tebas.initCore();
+		}catch(Exception e){
+			Tebas.reportAlways(e.ToString());
+			return 11;
 		}
 		
-		while(clp < args.Length && args[clp].StartsWith("-")){
-			string f = args[clp];
-			switch(f){
-				case "-q":
-				case "--quiet":
-					Tebas.quiet = true;
-					break;
-				case "-f":
-				case "--force":
-					Tebas.forced = true;
-					break;
-				case "-h":
-				case "--help":
-					commandHelp(args);
-					return;
-				case "-v":
-				case "--version":
-					commandVersion(args);
-					return;
-			}
-			clp++;
-		}
+		int n = 0;
 		
-		/* for(int i = 0; i < args.Length; i++){
-			args[i] = StringHelper.removeQuotesSingle(args[i]); //If i search it, this is the line
-		} */
-		
-		if(clp < args.Length && Path.GetExtension(args[clp]) == ".tbtem"){
-			TemplateHandler.install(args[clp], args.Skip(clp + 1));
-			waitAnyKey();
-			return;
-		}else if(clp < args.Length && Path.GetExtension(args[clp]) == ".tebas"){
-			Tebas.workingDirectory = Path.GetDirectoryName(args[clp]);
-			Tebas.localInfo();
-			waitAnyKey();
-			return;
-		}else if(clp < args.Length && Path.GetExtension(args[clp]) == ".tbplg"){
-			PluginHandler.install(args[clp], args.Skip(clp + 1));
-			waitAnyKey();
-			return;
-		}else if(clp < args.Length && Path.GetExtension(args[clp]) == ".tbscr"){
-			Tebas.runStandaloneScript(args[clp], args.Skip(clp + 1));
-			return;
-		}
-		
-		commands(args);
-	}
-	
-	//Body of the program, where it actually does things
-	static void commands(string[] args){		
-		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		switch(args[clp]){
-			case "project":
-			clp++;
-			commandsProject(args);
-			break;
-			
-			case "channel":
-			clp++;
-			commandsChannel(args);
-			break;
-			
-			case "template":
-			clp++;
-			commandsTemplate(args);
-			break;
-			
-			case "plugin":
-			clp++;
-			commandsPlugin(args);
-			break;
-			
-			case "global":
-			clp++;
-			commandsGlobal(args);
-			break;
-			
-			case "local":
-			clp++;
-			commandsLocal(args);
-			break;
-			
-			case "script": //Standalone script
-			clp++;
-			commandScript(args);
-			break;
-			
-			case "loop": //Run loop
-			clp++;
-			commandLoop(args);
-			break;
-			
-			case "help":
-			clp++;
-			commandHelp(args);
-			break;
-			
-			case "version":
-			clp++;
-			commandVersion(args);
-			break;
-			
-			default:
-			commandsProjectOrLocal(args);
-			break;
-		}
-	}
-	
-	static void commandsProject(string[] args){
-		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		switch(args[clp]){
-			case "new":
-			clp++;
-			commandProjectNew(args);
-			break;
-			
-			case "rename":
-			clp++;
-			commandProjectRename(args);
-			break;
-			
-			case "delete":
-			clp++;
-			commandProjectDelete(args);
-			break;
-			
-			default:
-			Tebas.consoleSevereError("Unknown command: " + args[clp]);
-			break;
-		}
-	}
-	
-	static void commandsChannel(string[] args){
-		if(!determineIfEnoughLength(1, args.Length)){
-			commandChannelList(args);
-			return;
-		}
-		
-		switch(args[clp]){
-			case "set":
-			clp++;
-			commandChannelSet(args);
-			break;
-			
-			case "rename":
-			clp++;
-			commandChannelRename(args);
-			break;
-			
-			case "delete":
-			clp++;
-			commandChannelDelete(args);
-			break;
-			
-			case "list":
-			clp++;
-			commandChannelList(args);
-			break;
-			
-			case "stats":
-			clp++;
-			commandChannelStats(args);
-			break;
-			
-			case "info":
-			clp++;
-			commandChannelInfo(args);
-			break;
-			
-			default:
-			commandChannelSet(args);
-			break;
-		}
-	}
-	
-	static void commandsTemplate(string[] args){
-		if(!determineIfEnoughLength(1, args.Length)){
-			commandTemplateList(args);
-			return;
-		}
-		
-		switch(args[clp]){
-			case "install":
-			clp++;
-			commandTemplateInstall(args);
-			break;
-			
-			case "uninstall":
-			clp++;
-			commandTemplateUninstall(args);
-			break;
-			
-			case "list":
-			clp++;
-			commandTemplateList(args);
-			break;
-			
-			case "info":
-			clp++;
-			commandTemplateInfo(args);
-			break;
-			
-			case "create":
-			clp++;
-			commandTemplateCreate(args);
-			break;
-			
-			default:
-			commandTryTemplateGlobalScript(args);
-			break;
-		}
-	}
-	
-	static void commandsPlugin(string[] args){
-		if(!determineIfEnoughLength(1, args.Length)){
-			commandPluginList(args);
-			return;
-		}
-		
-		switch(args[clp]){
-			case "install":
-			clp++;
-			commandPluginInstall(args);
-			break;
-			
-			case "uninstall":
-			clp++;
-			commandPluginUninstall(args);
-			break;
-			
-			case "info":
-			clp++;
-			commandPluginInfo(args);
-			break;
-			
-			case "list":
-			clp++;
-			commandPluginList(args);
-			break;
-			
-			case "create":
-			clp++;
-			commandPluginCreate(args);
-			break;
-			
-			default:
-			commandTryPluginScript(args);
-			break;
-		}
-	}
-	
-	static void commandsGlobal(string[] args){
-		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		switch(args[clp]){
-			case "config":
-			clp++;
-			commandGlobalConfig(args);
-			break;
-			
-			case "list":
-			clp++;
-			commandGlobalList(args);
-			break;
-			
-			case "stats":
-			clp++;
-			commandGlobalStats(args);
-			break;
-			
-			default:
-			Tebas.consoleSevereError("Unknown command: " + args[clp]);
-			break;
-		}
-	}
-	
-	static void commandsLocal(string[] args){
-		if(!determineIfEnoughLength(1, args.Length)){
-			commandLocalInfo(args);
-			return;
-		}
-		
-		switch(args[clp]){			
-			case "info":
-			clp++;
-			commandLocalInfo(args);
-			break;
-			
-			case "git":
-			clp++;
-			commandLocalGit(args);
-			break;
-			
-			case "usegit":
-			clp++;
-			commandLocalUseGit(args);
-			break;
-			
-			case "stopgit":
-			clp++;
-			commandLocalStopGit(args);
-			break;
-			
-			case "setbranch":
-			clp++;
-			commandLocalSetBranch(args);
-			break;
-			
-			case "stats":
-			clp++;
-			commandLocalStats(args);
-			break;
-			
-			case "remote":
-			clp++;
-			commandsLocalRemote(args);
-			break;
-			
-			case "commit":
-			clp++;
-			commandLocalCommit(args);
-			break;
-			
-			case "add":
-			clp++;
-			commandLocalAdd(args);
-			break;
-			
-			case "push":
-			clp++;
-			commandLocalPush(args);
-			break;
-			
-			case "pull":
-			clp++;
-			commandLocalPull(args);
-			break;
-			
-			case "init":
-			clp++;
-			commandLocalInit(args);
-			break;
-			
-			default:
-			commandTryScript(args);
-			break;
-		}
-	}
-	
-	static void commandsProjectOrLocal(string[] args){
-		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		switch(args[clp]){
-			case "new":
-			clp++;
-			commandProjectNew(args);
-			break;
-			
-			case "rename":
-			clp++;
-			commandProjectRename(args);
-			break;
-			
-			case "delete":
-			clp++;
-			commandProjectDelete(args);
-			break;
-			
-			case "info":
-			clp++;
-			commandLocalInfo(args);
-			break;
-			
-			case "git":
-			clp++;
-			commandLocalGit(args);
-			break;
-			
-			case "usegit":
-			clp++;
-			commandLocalUseGit(args);
-			break;
-			
-			case "stopgit":
-			clp++;
-			commandLocalStopGit(args);
-			break;
-			
-			case "setbranch":
-			clp++;
-			commandLocalSetBranch(args);
-			break;
-			
-			case "stats":
-			clp++;
-			commandLocalStats(args);
-			break;
-			
-			case "remote":
-			clp++;
-			commandsLocalRemote(args);
-			break;
-			
-			case "commit":
-			clp++;
-			commandLocalCommit(args);
-			break;
-			
-			case "add":
-			clp++;
-			commandLocalAdd(args);
-			break;
-			
-			case "push":
-			clp++;
-			commandLocalPush(args);
-			break;
-			
-			case "pull":
-			clp++;
-			commandLocalPull(args);
-			break;
-			
-			case "init":
-			clp++;
-			commandLocalInit(args);
-			break;
-			
-			default:
-			commandTryScriptOrPluginOrGlobal(args);
-			break;
-		}
-	}
-	
-	static void commandsLocalRemote(string[] args){
-		if(!determineIfEnoughLength(1, args.Length)){
-			commandLocalRemoteList(args);
-			return;
-		}
-		
-		switch(args[clp]){
-			case "list":
-			clp++;
-			commandLocalRemoteList(args);
-			break;
-			
-			case "set":
-			clp++;
-			commandLocalRemoteSet(args);
-			break;
-			
-			case "delete":
-			clp++;
-			commandLocalRemoteDelete(args);
-			break;
-			
-			case "rename":
-			clp++;
-			commandLocalRemoteRename(args);
-			break;
-			
-			default:
-			Tebas.consoleSevereError("Unknown command: " + args[clp]);
-			break;
-		}
-	}
-	
-	
-	//Individual commands
-	static void commandProjectNew(string[] args){
-		string channelName;
-		string templateName;
-		string projectName;
-		
-		if(!determineIfEnoughLength(2, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		if(args[clp].StartsWith("#")){ //get channel
-			channelName = ChannelHandler.fixName(args[clp]);
-			clp++;
-			
-			if(!determineIfEnoughLength(2, args.Length)){
-				Tebas.consoleSevereError("Not enough arguments");
-				return;
-			}
-		}else{
-			channelName = "default";
-		}
-		
-		templateName = TemplateHandler.fixName(args[clp]);
-		clp++;
-		
-		projectName = args[clp];
-		clp++;
-		
-		Tebas.projectNew(channelName, templateName, projectName);
-	}
-	
-	static void commandProjectRename(string[] args){
-		string channelName;
-		string oldName;
-		string newName;
-		
-		if(!determineIfEnoughLength(2, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		if(args[clp].StartsWith("#")){ //get channel
-			channelName = ChannelHandler.fixName(args[clp]);
-			clp++;
-			
-			if(!determineIfEnoughLength(2, args.Length)){
-				Tebas.consoleSevereError("Not enough arguments");
-				return;
-			}
-		}else{
-			channelName = "default";
-		}
-		
-		oldName = args[clp];
-		clp++;
-		
-		newName = args[clp];
-		clp++;
-		
-		Tebas.projectRename(channelName, oldName, newName);
-	}
-	
-	static void commandProjectDelete(string[] args){
-		string channelName;
-		string name;
-		
-		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		if(args[clp].StartsWith("#")){ //get channel
-			channelName = ChannelHandler.fixName(args[clp]);
-			clp++;
-			
-			if(!determineIfEnoughLength(2, args.Length)){
-				Tebas.consoleSevereError("Not enough arguments");
-				return;
-			}
-		}else{
-			channelName = "default";
-		}
-		
-		name = args[clp];
-		clp++;
-		
-		Tebas.projectDelete(channelName, name);
-	}
-	
-	//Channel
-	static void commandChannelSet(string[] args){
-		string name;
-		string v;
-		
-		if(!determineIfEnoughLength(2, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		name = ChannelHandler.fixName(args[clp]);
-		clp++;
-		
-		v = args[clp];
-		clp++;
-		
-		ChannelHandler.set(name, v);
-	}
-	
-	static void commandChannelRename(string[] args){
-		string oldName;
-		string newName;
-		
-		if(!determineIfEnoughLength(2, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		oldName = ChannelHandler.fixName(args[clp]);
-		clp++;
-		
-		newName = ChannelHandler.fixName(args[clp]);
-		clp++;
-		
-		ChannelHandler.rename(oldName, newName);
-	}
-	
-	static void commandChannelDelete(string[] args){
-		string name;
-		
-		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		name = ChannelHandler.fixName(args[clp]);
-		clp++;
-		
-		ChannelHandler.delete(name);
-	}
-	
-	static void commandChannelList(string[] args){		
-		ChannelHandler.list();
-	}
-	
-	static void commandChannelInfo(string[] args){
-		string name;
-		
-		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		name = ChannelHandler.fixName(args[clp]);
-		clp++;
-		
-		ChannelHandler.info(name);
-	}
-	
-	static void commandChannelStats(string[] args){
-		string name;
-		
-		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		name = ChannelHandler.fixName(args[clp]);
-		clp++;
-		
-		ChannelHandler.stats(name);
-	}
-	
-	//Template
-	static void commandTemplateInstall(string[] args){
-		string path;
-		
-		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		path = StringHelper.removeQuotesSingle(args[clp]);
-		clp++;
-		
-		TemplateHandler.install(path, args.Skip(clp));
-	}
-	
-	static void commandTemplateUninstall(string[] args){
-		string name;
-		
-		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		name = TemplateHandler.fixName(args[clp]);
-		clp++;
-		
-		TemplateHandler.uninstall(name);
-	}
-	
-	static void commandTemplateList(string[] args){
-		TemplateHandler.list();
-	}
-	
-	static void commandTemplateInfo(string[] args){
-		string name;
-		
-		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		name = TemplateHandler.fixName(args[clp]);
-		clp++;
-		
-		TemplateHandler.info(name);
-	}
-	
-	static void commandTemplateCreate(string[] args){
-		string path;
-		
-		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		path = StringHelper.removeQuotesSingle(args[clp]);
-		clp++;
-		
-		string? name = null;
-		bool? git = null;
-		bool? readme = null;
-		
-		if(determineIfEnoughLength(1, args.Length)){
-			name = args[clp];
-			clp++;
-			
-			if(determineIfEnoughLength(1, args.Length)){
-				git = args[clp].ToLower() == "true";
-				clp++;
+		//Update
+		if(args.Length == 2 && args[0] == "-u1"){
+			try{
+				waitUntilFileUnlocked(args[1]);
 				
-				if(determineIfEnoughLength(1, args.Length)){
-					readme = args[clp].ToLower() == "true";
-					clp++;
+				string o = Environment.ProcessPath;
+				File.Copy(o, args[1], true);
+				
+				Process.Start(args[1], "-u2 \"" + o + "\"");
+				Environment.Exit(0);
+				return 0;
+			}catch(Exception e){
+				Tebas.reportAlways(e.ToString());
+				return 50;
+			}
+		}
+		
+		//Update
+		if(args.Length == 2 && args[0] == "-u2"){
+			try{
+				waitUntilFileUnlocked(args[1]);
+				
+				File.Delete(args[1]);
+				
+				return 0;
+			}catch(Exception e){
+				Tebas.reportAlways(e.ToString());
+				return 50;
+			}
+		}
+		
+		//Version, help, double clicking
+		if(args.Length == 1){
+			switch(args[0].ToLower()){
+				case "--help":
+				case "-h":
+					printHelp();
+					return 0;
+				
+				case "--version":
+				case "-v":
+					printVersion();
+					return 0;
+			}
+			
+			int doAction(Func<string, int> act){
+				try{
+					Tebas.initSecond();
+				}catch(Exception e){
+					Tebas.reportAlways(e.ToString());
+					return 12;
+				}
+				
+				try{
+					return act(args[0]);
+				}catch(Exception e){
+					Tebas.reportAlways(e.ToString());
+					return 30;
 				}
 			}
+			
+			if(Path.GetExtension(args[0]).ToLower() == ".tbtem"){
+				return doAction(path => Template.installLocal(path) ? 0 : 25);
+			}else if(Path.GetExtension(args[0]).ToLower() == ".tbplg"){
+				return doAction(path => Plugin.installLocal(path) ? 0 : 25);
+			}else if(Path.GetExtension(args[0]).ToLower() == ".tebas" && File.Exists(args[0])){
+				return doAction(path => {
+					string dir = Path.GetDirectoryName(path);
+					Project p = Project.get(dir);
+					if(p == null){
+						Tebas.report("There is no project in '" + dir + "'");
+						return 21;
+					}
+					p.info();
+					return 0;
+				});
+			}
 		}
 		
-		CreatorUtility.template(path, name, git, readme);
-	}
-	
-	static void commandTryTemplateGlobalScript(string[] args){
-		string p;
-		string s;
+		string pluginName = null;
+		string pluginScript = null;
 		
-		if(!determineIfEnoughLength(2, args.Length)){
-			Tebas.consoleSevereError("Unknown command: " + args[clp - 1]);
-			return;
-		}
+		bool flags = true;
 		
-		p = TemplateHandler.fixName(args[clp]);
-		clp++;
-		
-		s = args[clp];
-		clp++;
-		
-		if(!TemplateHandler.runGlobal(p, s, args.Skip(clp))){
-			Tebas.consoleSevereError("Unknown command or script: " + s);
-			return;
-		}
-	}
-	
-	//Plugin
-	static void commandPluginInstall(string[] args){
-		string path;
-		
-		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		path = StringHelper.removeQuotesSingle(args[clp]);
-		clp++;
-		
-		PluginHandler.install(path, args.Skip(clp));
-	}
-	
-	static void commandPluginUninstall(string[] args){
-		string name;
-		
-		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		name = PluginHandler.fixName(args[clp]);
-		clp++;
-		
-		PluginHandler.uninstall(name);
-	}
-	
-	static void commandPluginInfo(string[] args){
-		string name;
-		
-		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		name = PluginHandler.fixName(args[clp]);
-		clp++;
-		
-		PluginHandler.info(name);
-	}
-	
-	static void commandPluginList(string[] args){
-		PluginHandler.list();
-	}
-	
-	static void commandTryPluginScript(string[] args){
-		string p;
-		string s;
-		
-		if(!determineIfEnoughLength(2, args.Length)){
-			Tebas.consoleSevereError("Unknown command: " + args[clp - 1]);
-			return;
-		}
-		
-		p = PluginHandler.fixName(args[clp]);
-		clp++;
-		
-		s = args[clp];
-		clp++;
-		
-		if(!PluginHandler.runScript(p, s, args.Skip(clp))){
-			Tebas.consoleSevereError("Unknown command or script: " + s);
-			return;
-		}
-	}
-	
-	static void commandPluginCreate(string[] args){
-		string path;
-		
-		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		path = StringHelper.removeQuotesSingle(args[clp]);
-		clp++;
-		
-		string? name = null;
-		
-		if(determineIfEnoughLength(1, args.Length)){
-			name = args[clp];
-			clp++;
-		}
-		
-		CreatorUtility.plugin(path, name);
-	}
-	
-	//Global
-	static void commandGlobalConfig(string[] args){
-		string key;
-		string v;
-		
-		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		key = args[clp];
-		clp++;
-		
-		if(key == "list" || key == "see"){
-			Tebas.globalConfig(key, null);
-			return;
-		}
-		
-		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		v = args[clp];
-		clp++;
-		
-		Tebas.globalConfig(key, v);
-	}
-	
-	static void commandGlobalList(string[] args){
-		Tebas.globalList();
-	}
-	
-	static void commandGlobalStats(string[] args){
-		Tebas.globalStats();
-	}
-	
-	//Local
-	static void commandLocalInfo(string[] args){
-		Tebas.localInfo();
-	}
-	
-	static void commandLocalGit(string[] args){
-		Tebas.localGit();
-	}
-	
-	static void commandLocalUseGit(string[] args){
-		Tebas.localGitStartUsing();
-	}
-	
-	static void commandLocalStopGit(string[] args){
-		Tebas.localGitStopUsing();
-	}
-	
-	static void commandLocalStats(string[] args){
-		Tebas.localStats();
-	}
-	
-	static void commandLocalAdd(string[] args){
-		Tebas.localAdd();
-	}
-	
-	static void commandLocalCommit(string[] args){
-		string m;
-		
-		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		m = args[clp];
-		clp++;
-		
-		Tebas.localCommit(m);
-	}
-	
-	static void commandLocalPush(string[] args){
-		if(args.Length > clp){
-			string m = args[clp];
-			clp++;
-		
-			Tebas.localPush(m);
-			return;
-		}
-		
-		Tebas.localPush(null);
-	}
-	
-	static void commandLocalPull(string[] args){
-		if(args.Length > clp){
-			string m = args[clp];
-			clp++;
-		
-			Tebas.localPull(m);
-			return;
-		}
-		
-		Tebas.localPull(null);
-	}
-	
-	static void commandLocalSetBranch(string[] args){
-		string branch;
-		
-		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		branch = args[clp];
-		clp++;
-		
-		Tebas.localSetBranch(branch);
-	}
-	
-	static void commandLocalInit(string[] args){
-		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		string t = TemplateHandler.fixName(args[clp]);
-		clp++;
-		
-		Tebas.localInitNew(t);
-	}
-	
-	static void commandTryScript(string[] args){
-		string v;
-		
-		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		v = args[clp];
-		clp++;
-		
-		Tebas.tryScript(v, args.Skip(clp));
-	}
-	
-	static void commandTryScriptOrPluginOrGlobal(string[] args){
-		string name;
-		
-		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		name = args[clp];
-		clp++;
-		
-		if(name.StartsWith("*")){
-			if(!determineIfEnoughLength(1, args.Length)){
-				Tebas.consoleSevereError("Missing script name");
-				return;
+		//Flags
+		while(flags && n < args.Length){
+			switch(args[n].ToLower()){
+				case "--quiet":
+				case "-q":
+					if(Tebas.quiet){
+						Tebas.reportAlways("Quiet already specified");
+					}else{
+						Tebas.quiet = true;
+					}
+				break;
+				
+				case "--forced":
+				case "-f":
+					if(Tebas.forced){
+						Tebas.reportAlways("Forced already specified");
+					}else{
+						Tebas.forced = true;
+					}
+				break;
+				
+				case "--no-hints":
+				case "-nh":
+					if(Tebas.noHints){
+						Tebas.reportAlways("No hints already specified");
+					}else{
+						Tebas.noHints = true;
+					}
+				break;
+				
+				case "--help":
+				case "-h":
+				case "--version":
+				case "-v":
+					Tebas.reportAlways("Help or version flags are expected to be the first and only ones");
+					return 2;
+				break;
+				
+				default:
+					flags = false;
+					continue; //Avoid n++
+				break;
 			}
 			
-			name = PluginHandler.fixName(name);
-			
-			string s = args[clp];
-			clp++;
-			
-			if(!PluginHandler.exists(name)){
-				Tebas.consoleSevereError("Unknown plugin: " + name);
+			n++;
+		}
+		
+		//No args
+		if(n >= args.Length){
+			printHelp();
+			return 0;
+		}
+		
+		//Commands
+		try{
+			return getRoot().handle(args.Skip(n).ToArray(), Tebas.reportAlways,
+			() => {
+				Console.OutputEncoding = Encoding.UTF8; //Russian chars didnt work
+				try{
+					Tebas.initSecond();
+					return 0;
+				}catch(Exception e){
+					Tebas.reportAlways(e.ToString());
+					return 12;
+				}
+			});
+		}catch(Exception e){
+			Tebas.reportAlways(e.ToString());
+			return 30;
+		}
+	}
+	
+	static CLINode getRoot(){
+		CLINode root = new CLINode("tebas");
+		
+		root.setArgs("script").setOptionalArgs().setAction(args => {
+			Project p = Tebas.tryGetLocal();
+			if(p == null){
+				Plugin t = Plugin.get(args[0]);
+				if(t == null){
+					Tebas.report("There is no local project in this folder, and plugin '" + args[0] + "' is not installed. Use -h to see a list of commands if you meant something else");
+					return 21;
+				}
+				if(args.Length < 2){
+					Tebas.report("Too few arguments. At least 1 extra ('script') was expected after 'tebas <plugin>'");
+					return 1;
+				}
+				if(!t.tryRunGlobal(args[1], args.Skip(2), true)){
+					Tebas.report("Unknown plugin script or global");
+					return 23;
+				}
+				return 0;
+			}
+			if(!p.tryRunScriptOrGlobal(args[0], args.Skip(1), true)){
+				Plugin t = Plugin.get(args[0]);
+				if(t == null){
+					Tebas.report("Unknown template script or global, and plugin '" + args[0] + "' is not installed. Use -h to see a list of commands if you meant something else");
+					return 23;
+				}
+				if(args.Length < 2){
+					Tebas.report("Too few arguments. At least 1 extra ('script') was expected after 'tebas <plugin>'");
+					return 1;
+				}
+				if(!p.tryRunPluginScriptOrGlobal(t, args[1], args.Skip(2), true)){
+					Tebas.report("Unknown plugin script or global");
+					return 23;
+				}
+				return 0;
+			}
+			return 0;
+		}).hideHelp();
+		
+		root.chain("projects").setAction(args => {
+			Project.list();
+			return 0;
+		}).setDescription("See a list of all recorded projects");
+		
+		#region template
+		root.chain("template").chain("list").setAction(args => {
+			Template.list();
+			return 0;
+		}).setDescription("See a list of installed templates");
+		
+		root.chain("template").chain("info").setArgs("name").setAction(args => {
+			Template t = Template.get(args[0]);
+			if(t == null){
+				Tebas.report("The template '" + args[0] + "' is not installed");
+				return 22;
+			}
+			t.info();
+			return 0;
+		}).setDescription("Get info on a template");
+		
+		root.chain("template").chain("install").setArgs("path").setAction(args => {
+			if(!File.Exists(args[0])){
+				Tebas.report("That file does not exist: '" + args[0] + "'");
+				return 25;
+			}
+			AshFile t = new AshFile(args[0]);
+			return Template.install(t) ? 0 : 25;
+		}).setDescription("Install a template from a file");
+		
+		root.chain("template").chain("uninstall").setArgs("name").setAction(args => {
+			Template t = Template.get(args[0]);
+			if(t == null){
+				Tebas.report("The template '" + args[0] + "' is not installed");
+				return 22;
+			}
+			return t.uninstall() ? 0 : 25;
+		}).setDescription("Uninstall a template");
+		
+		root.chain("template").chain("permission").setAction(args => {
+			Tebas.output("Permission key list:");
+			foreach((string p, string desc) in Tebas.validPermissions){
+				Tebas.output("  " + p + ": " + desc);
+			}
+			return 0;
+		}).setDescription("See a list of valid permission keys");
+		
+		root.chain("template").chain("permission").chain("set").setArgs("name", "key", "allow|disallow").setAction(args => {
+			Template t = Template.get(args[0]);
+			if(t == null){
+				Tebas.report("The template '" + args[0] + "' is not installed");
+				return 22;
+			}
+			if(args[2].ToUpper() != "ALLOW" && args[2].ToUpper() != "DISALLOW"){
+				Tebas.reportAlways("Please use 'allow' or 'disallow' for value");
+				return 8;
+			}
+			return t.setPermission(args[1], args[2].ToUpper() == "ALLOW") ? 0 : 24;
+		}).setDescription("Set a permission for a template");
+		
+		root.chain("template").chain("permission").chain("reset").setArgs("name").setAction(args => {
+			Template t = Template.get(args[0]);
+			if(t == null){
+				Tebas.report("The template '" + args[0] + "' is not installed");
+				return 22;
 			}
 			
-			if(!PluginHandler.runScript(name, s, args.Skip(clp))){
-				Tebas.consoleSevereError("Unknown script: " + s);
-				return;
+			t.resetPermissions();
+			return 0;
+		}).setDescription("Reset all permissions for a template");
+		
+		root.chain("template").chain("build").setArgs("directory").setAction(args => {
+			return Template.build(args[0], args[0]) ? 0 : 25;
+		}).setDescription("Build a template from source from a directory");
+		
+		root.chain("template").chain("global").setArgs("name", "script").setOptionalArgs().setAction(args => {
+			Template t = Template.get(args[0]);
+			if(t == null){
+				Tebas.report("The template '" + args[0] + "' is not installed");
+				return 22;
 			}
-		}else if(name.StartsWith("@")){
-			if(!determineIfEnoughLength(1, args.Length)){
-				Tebas.consoleSevereError("Missing script name");
-				return;
+			if(!t.tryRunGlobal(args[1], args.Skip(2), true)){
+				Tebas.report("Unknown template global");
+				return 23;
+			}
+			return 0;
+		}).setDescription("Run a global script");
+		#endregion
+		
+		#region plugin
+		root.chain("plugin").chain("list").setAction(args => {
+			Plugin.list();
+			return 0;
+		}).setDescription("See a list of installed plugins");
+		
+		root.chain("plugin").chain("info").setArgs("name").setAction(args => {
+			Plugin t = Plugin.get(args[0]);
+			if(t == null){
+				Tebas.report("The plugin '" + args[0] + "' is not installed");
+				return 22;
+			}
+			t.info();
+			return 0;
+		}).setDescription("Get info on a plugin");
+		
+		root.chain("plugin").chain("install").setArgs("path").setAction(args => {
+			if(!File.Exists(args[0])){
+				Tebas.report("That file does not exist: '" + args[0] + "'");
+				return 25;
+			}
+			AshFile t = new AshFile(args[0]);
+			return Plugin.install(t) ? 0 : 25;
+		}).setDescription("Install a plugin from a file");
+		
+		root.chain("plugin").chain("uninstall").setArgs("name").setAction(args => {
+			Plugin t = Plugin.get(args[0]);
+			if(t == null){
+				Tebas.report("The plugin '" + args[0] + "' is not installed");
+				return 22;
+			}
+			return t.uninstall() ? 0 : 25;
+		}).setDescription("Uninstall a plugin");
+		
+		root.chain("plugin").chain("permission").setAction(args => {
+			Tebas.output("Permission key list:");
+			foreach((string p, string desc) in Tebas.validPermissions){
+				Tebas.output("  " + p + ": " + desc);
+			}
+			return 0;
+		}).setDescription("See a list of valid permission keys");
+		
+		root.chain("plugin").chain("permission").chain("set").setArgs("name", "key", "allow|disallow").setAction(args => {
+			Plugin t = Plugin.get(args[0]);
+			if(t == null){
+				Tebas.report("The plugin '" + args[0] + "' is not installed");
+				return 22;
+			}
+			if(args[2].ToUpper() != "ALLOW" && args[2].ToUpper() != "DISALLOW"){
+				Tebas.reportAlways("Please use 'allow' or 'disallow' for value");
+				return 8;
+			}
+			return t.setPermission(args[1], args[2].ToUpper() == "ALLOW") ? 0 : 24;
+		}).setDescription("Set a permission for a plugin");
+		
+		root.chain("plugin").chain("permission").chain("reset").setArgs("name").setAction(args => {
+			Plugin t = Plugin.get(args[0]);
+			if(t == null){
+				Tebas.report("The plugin '" + args[0] + "' is not installed");
+				return 22;
 			}
 			
-			name = TemplateHandler.fixName(name);
-			
-			string s = args[clp];
-			clp++;
-			
-			if(!TemplateHandler.exists(name)){
-				Tebas.consoleSevereError("Unknown template: " + name);
+			t.resetPermissions();
+			return 0;
+		}).setDescription("Reset all permissions for a plugin");
+		
+		root.chain("plugin").chain("build").setArgs("directory").setAction(args => {
+			return Plugin.build(args[0], args[0]) ? 0 : 25;
+		}).setDescription("Build a plugin from source from a directory");
+		
+		root.chain("plugin").chain("global").setArgs("name", "script").setOptionalArgs().setAction(args => {
+			Plugin t = Plugin.get(args[0]);
+			if(t == null){
+				Tebas.report("The plugin '" + args[0] + "' is not installed");
+				return 22;
+			}
+			if(!t.tryRunGlobal(args[1], args.Skip(2), true)){
+				Tebas.report("Unknown plugin global");
+				return 23;
+			}
+			return 0;
+		}).setDescription("Run a global script");
+		
+		root.chain("plugin").chain("run").setArgs("name", "script").setOptionalArgs().setAction(args => {
+			Project p = Tebas.getLocal();
+			if(p == null){
+				return 21;
 			}
 			
-			if(!TemplateHandler.runGlobal(name, s, args.Skip(clp))){
-				Tebas.consoleSevereError("Unknown global script: " + s);
-				return;
+			Plugin t = Plugin.get(args[0]);
+			if(t == null){
+				Tebas.report("The plugin '" + args[0] + "' is not installed");
+				return 22;
+			}
+			
+			if(!p.tryRunPluginScript(t, args[1], args.Skip(2))){
+				Tebas.report("Unknown plugin script");
+				return 23;
+			}
+			return 0;
+		}).setDescription("Run a plugin script locally");
+		#endregion
+		
+		root.chain("init").setArgs("template").setAction(args => {
+			Template t = Template.get(args[0]);
+			if(t == null){
+				Tebas.report("The template '" + args[0] + "' is not installed");
+				return 22;
+			}
+			return Project.create(Directory.GetCurrentDirectory(), t) ? 0 : 26;
+		}).setDescription("Initialize a new project in the current directory");
+		
+		root.chain("info").setAction(args => {
+			Project p = Tebas.getLocal();
+			if(p == null){
+				return 21;
+			}
+			p.info();
+			return 0;
+		}).setDescription("Get info on the local project");
+		
+		#region config
+		root.chain("config").setAction(args => {
+			Tebas.listConfig();
+			return 0;
+		}).setDescription("See a list of config options");
+		
+		root.chain("config").chain("set").setArgs("key", "value").setAction(args => {
+			return Tebas.setConfig(args[0], args[1]) ? 0 : 24;
+		}).setDescription("Set config values");
+		
+		root.chain("config").chain("see").setAction(args => {
+			Tebas.seeConfig();
+			return 0;
+		}).setDescription("See current config values");
+		
+		root.chain("config").chain("reset").setAction(args => {
+			Tebas.resetConfig();
+			return 0;
+		}).setDescription("Reset the config");
+		#endregion
+		
+		root.chain("update").setAction(args => {
+			return Tebas.update() ? 0 : 50;
+		}).setDescription("Attempt to update Tebas");
+		
+		root.chain("cleanup").setAction(args => {
+			Tebas.cleanupAll();
+			return 0;
+		}).setDescription("Cleanup and update everything");
+		
+		return root;
+	}
+	
+	static void printVersion(){
+		Console.WriteLine("Tebas project manager, created by Siljam");
+		Console.WriteLine("  Version: v" + BuildInfo.Version);
+		Console.WriteLine("  Built on: " + BuildInfo.BuildDate);
+		Console.WriteLine("  GitHub repo: " + BuildInfo.RepoUrl);
+	}
+	
+	static void printHelp(){
+		Console.WriteLine("Tebas CLI help");
+		Console.WriteLine();
+		Console.WriteLine("Usage: tebas [flags] <command>");
+		Console.WriteLine();
+		Console.WriteLine("Flags:");
+		Console.WriteLine("  -q");
+		Console.WriteLine("  --quiet       Show no output");
+		Console.WriteLine("  -f");
+		Console.WriteLine("  --forced      Skip confirmations");
+		Console.WriteLine("  -nh");
+		Console.WriteLine("  --no-hints    Show no hints");
+		Console.WriteLine("  -v");
+		Console.WriteLine("  --version     Show current version");
+		Console.WriteLine("  -h");
+		Console.WriteLine("  --help        Show help");
+		Console.WriteLine();
+		Console.WriteLine("Commands:");
+		Console.Write(getRoot().help());
+		Console.WriteLine("      <script> [args]    Run a template script or global locally");
+		Console.WriteLine("      <plugin> <script> [args]    Run a plugin script or global locally");
+	}
+	
+	static void waitUntilFileUnlocked(string path){
+		while(true){
+			try{
+				using(File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None)){
+					break;
+				}
+			}catch{
+				Thread.Sleep(100);
+			}
+		}
+	}
+}
+
+//Lil helper class
+class CLINode{
+	public string command {get;}
+	public int extraArgs => extraArgsNames.Length;
+	public string[] extraArgsNames;
+	public string description {get; private set;} 
+	
+	public bool optionalArgs {get; private set;}
+	
+	public List<CLINode> children {get;} = new();
+	public Func<string[], int>? action;
+	
+	public bool showHelp = true;
+	
+	public CLINode(string n){
+		command = n;
+		extraArgsNames = Array.Empty<string>();
+	}
+	
+	public CLINode setArgs(params string[] n){
+		if(n != null){
+			extraArgsNames = n;
+		}
+		
+		return this;
+	}
+	
+	public CLINode setOptionalArgs(){
+		optionalArgs = true;
+		
+		return this;
+	}
+	
+	public CLINode chain(string n){
+		CLINode f = children.Find(h => h.command == n);
+		if(f != null){
+			return f;
+		}
+		
+		CLINode c = new CLINode(n);
+		children.Add(c);
+		return c;
+	}
+	
+	public CLINode setAction(Func<string[], int>? f){
+		action = f;
+		
+		return this;
+	}
+	
+	public CLINode setDescription(string d){
+		description = d;
+		
+		return this;
+	}
+	
+	public CLINode hideHelp(){
+		showHelp = false;
+		return this;
+	}
+	
+	public string help(int indent = 0, int len = 0){
+		string tab = new string(' ', indent);
+		StringBuilder sb = new();
+		sb.Append(tab);
+		sb.Append(command);
+		if(showHelp && action != null){
+			foreach(string n in extraArgsNames){
+				sb.Append(" <" + n + ">");
+			}
+			
+			if(optionalArgs){
+				sb.Append(" [args]");
+			}
+			
+			if(description != null){
+				sb.Append(new string(' ', Math.Max(0, len - helpLen())) + "    " + description);
+			}
+		}
+		
+		sb.Append(Environment.NewLine);
+		
+		int l = 0;
+		foreach(CLINode c in children){
+			l = Math.Max(l, c.helpLen());
+		}
+		
+		foreach(CLINode c in children){
+			sb.Append(c.help(indent + 6, l));
+		}
+		
+		return sb.ToString();
+	}
+	
+	int helpLen(){
+		if(!showHelp){
+			return command.Length;
+		}
+		return command.Length + (action == null ? 0 : extraArgsNames.Select(h => h.Length + 3).Sum() + (optionalArgs ? 7 : 0));
+	}
+	
+	public int handle(string[] args, Action<string> report, Func<int>? onMatch){
+		if(args.Length == 0){
+			if(action != null){
+				if(extraArgs == 0){
+					int m1 = onMatch?.Invoke() ?? 0;
+					if(m1 != 0){
+						return m1;
+					}
+					return action?.Invoke(Array.Empty<string>()) ?? 0;
+				}else{
+					report(extraArgs + " extra arguments(" + string.Join(", ", extraArgsNames.Select(h => "'" + h + "'")) + ") were expected after '" + command + "'");
+					return 1;
+				}
+			}else{
+				report("Expected another command after '" + command + "'");
+				return 1;
+			}
+		}
+		
+		CLINode c = children.Find(h => h.command == args[0]);
+		if(c != null){
+			return c.handle(args.Skip(1).ToArray(), report, onMatch);
+		}else if(action != null){
+			if(args.Length == extraArgs || (args.Length > extraArgs && optionalArgs)){
+				int m1 = onMatch?.Invoke() ?? 0;
+				if(m1 != 0){
+					return m1;
+				}
+				return action?.Invoke(args) ?? 0;
+			}else if(args.Length < extraArgs){
+				report("Too few arguments. At least " + (extraArgs - args.Length) + " extra (" + string.Join(", ", extraArgsNames.Skip(args.Length).Select(h => "'" + h + "'")) + ") were expected after '" + command + "'");
+				return 1;
+			}else{
+				if(extraArgs == 0){
+					report("Too many arguments. No more were expected after '" + command + "'");
+				}else{
+					report("Too many arguments. Only " + extraArgs + " were expected after '" + command + "'");
+				}
+				return 1;
 			}
 		}else{
-			Tebas.tryScript(name, args.Skip(clp));
-		}
-	}
-	
-	//local config remote
-	
-	static void commandLocalRemoteList(string[] args){
-		Tebas.localRemoteList();
-	}
-	
-	static void commandLocalRemoteSet(string[] args){
-		string n;
-		string u;
-		
-		if(!determineIfEnoughLength(2, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		n = args[clp];
-		clp++;
-		
-		u = args[clp];
-		clp++;
-		
-		Tebas.localRemoteSet(n, u);
-	}
-	
-	static void commandLocalRemoteDelete(string[] args){
-		string n;
-		
-		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		n = args[clp];
-		clp++;
-		
-		Tebas.localRemoteDelete(n);
-	}
-	
-	static void commandLocalRemoteRename(string[] args){
-		string n;
-		string u;
-		
-		if(!determineIfEnoughLength(2, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		n = args[clp];
-		clp++;
-		
-		u = args[clp];
-		clp++;
-		
-		Tebas.localRemoteRename(n, u);
-	}
-	
-	static void commandScript(string[] args){
-		string f;
-		if(!determineIfEnoughLength(1, args.Length)){
-			Tebas.consoleSevereError("Not enough arguments");
-			return;
-		}
-		
-		f = StringHelper.removeQuotesSingle(args[clp]);
-		clp++;
-		
-		Tebas.runStandaloneScript(f, args.Skip(clp));
-	}
-	
-	static void commandLoop(string[] args){
-		Tebas.loop();
-	}
-	
-	static void commandVersion(string[] args){
-		Tebas.version();
-	}
-	
-	static void commandHelp(string[] args){
-		Tebas.consoleOutput("--Tebas project manager--");
-		Tebas.consoleOutput("Help for CLI:");
-		Tebas.consoleOutput("");
-		Tebas.consoleOutput("Usage:");
-		Tebas.consoleOutput("  tebas [flags] <section> <subcommand1> <subcommand2>...");
-		Tebas.consoleOutput("Flags:");
-		Tebas.consoleOutput("  --quiet, -q      Make app quiet, where the console output is minimal");
-		Tebas.consoleOutput("  --force, -f      Make it forced. This only affects certain actions that usually need confirmation, like deletions");
-		Tebas.consoleOutput("  --help, -h       Show this menu");
-		Tebas.consoleOutput("  --version, -v    Show the current tebas version");
-		Tebas.consoleOutput("");
-		Tebas.consoleOutput("Sections:");
-		Tebas.consoleOutput("");
-		Tebas.consoleOutput("version  Shows the current Tebas version");
-		Tebas.consoleOutput("");
-		Tebas.consoleOutput("loop  Enters a state where you can write as many commands as wanted");
-		Tebas.consoleOutput("");
-		Tebas.consoleOutput("channel");
-		Tebas.consoleOutput(" Manages channels(folders where projects are). This section can be executed anywhere");
-		Tebas.consoleOutput("        <name> <path>            Followed by any name and a folder path, will create or set that channel");
-		Tebas.consoleOutput("        delete <name>            Deletes that channel");
-		Tebas.consoleOutput("        rename <name> <newname>  Renames that channel");
-		Tebas.consoleOutput("        list                     Shows a list of all channels");
-		Tebas.consoleOutput("        info <name>              Shows info on a specific channel");
-		Tebas.consoleOutput("        stats <name>             Shows stats on a specific channel. Mainly total number of code lines");
-		Tebas.consoleOutput("");
-		Tebas.consoleOutput("template");
-		Tebas.consoleOutput(" Manages the templates (templates for projects). This section can be executed anywhere");
-		Tebas.consoleOutput("         install <path> [args]                      Installs the template from a file (.tbtem)");
-		Tebas.consoleOutput("         uninstall <name>                           Deletes that template");
-		Tebas.consoleOutput("         list                                       Shows list of all templates installed");
-		Tebas.consoleOutput("         info <name>                                Shows info on a specific template");
-		Tebas.consoleOutput("         create <path> [name] [useGit] [addReadme]  Create a template using the creator utility. Last two optional arguments must be 'true' or 'false'");
-		Tebas.consoleOutput("         <name> <script> [args]                     Attempts to run a global script of that template");
-		Tebas.consoleOutput("");
-		Tebas.consoleOutput("<@template name> <script> [args]   Another way to run a global template script");
-		Tebas.consoleOutput("");
-		Tebas.consoleOutput("plugin");
-		Tebas.consoleOutput(" Manages the plugins. This section can be executed anywhere");
-		Tebas.consoleOutput("       install <path> [args]   Installs the plugin from a file (.tbplg)");
-		Tebas.consoleOutput("       uninstall <name>        Deletes that plugin");
-		Tebas.consoleOutput("       list                    Shows list of all plugins installed");
-		Tebas.consoleOutput("       info <name>             Shows info on a specific plugin");
-		Tebas.consoleOutput("       create <path> [name]    Create a plugin using the creator utility");
-		Tebas.consoleOutput("       <name> <script> [args]  Attempts to run a script of that plugin");
-		Tebas.consoleOutput("");
-		Tebas.consoleOutput("<*plugin name> <script> [args]   Another way to run a plugin script");
-		Tebas.consoleOutput("");
-		Tebas.consoleOutput("script");
-		Tebas.consoleOutput(" Lets you run a plugin, just for the fun of it. All enviroment variables are empty but the working directory");
-		Tebas.consoleOutput("       <script src path> [args]   Attempts to run a script from a file");
-		Tebas.consoleOutput("");
-		Tebas.consoleOutput("global");
-		Tebas.consoleOutput(" Manages global things. This section can be executed anywhere");
-		Tebas.consoleOutput("       config                Manages the global config. This has more options:");
-		Tebas.consoleOutput("              <key> <value>  Changes the global config");
-		Tebas.consoleOutput("              list           Shows a list of all keys");
-		Tebas.consoleOutput("              see            Shows the config current values");
-		Tebas.consoleOutput("       list                  Shows list of all of the projects");
-		Tebas.consoleOutput("       stats                 Shows the stats of all the projects");
-		Tebas.consoleOutput("");
-		Tebas.consoleOutput("project");
-		Tebas.consoleOutput(" Manages projects. This section can be executed anywhere, and the project keyword can be skipped entirely (For example, instead of 'tebas project new', 'tebas new'");
-		Tebas.consoleOutput("        new [#channel] <template> <name>    Creates a new project. The channel can be skipped, and the default one will be used. To specify the channel, precede its name with '#'");
-		Tebas.consoleOutput("        delete [#channel] <name>            Deletes a project. The channel can be skipped, and the default one will be used. To specify the channel, precede its name with '#'");
-		Tebas.consoleOutput("        rename [#channel] <name> <newname>  Renames a project. The channel can be skipped, and the default one will be used. To specify the channel, precede its name with '#'");
-		Tebas.consoleOutput("");
-		Tebas.consoleOutput("local");
-		Tebas.consoleOutput(" Manages the local project. This section must be executed in a folder containing a project, and the local keyword can be skipped entirely (For example, instead of 'tebas local info', 'tebas info'");
-		Tebas.consoleOutput("      git                 The equivalent of doing 'git status'");
-		Tebas.consoleOutput("      usegit              Starts using git in the current project");
-		Tebas.consoleOutput("      stopgit             Stops using git in the current project");
-		Tebas.consoleOutput("      setbranch <branch>  Sets the git working branch");
-		Tebas.consoleOutput("      push [remote]       The equivalent of doing 'git push'. If there is only one remote, you dont need to specify it");
-		Tebas.consoleOutput("      pull [remote]       The equivalent of doing 'git pull'. If there is only one remote, you dont need to specify it");
-		Tebas.consoleOutput("      add                 The equivalent of doing 'git add .'");
-		Tebas.consoleOutput("      commit <message>    The equivalent of doing 'git commit'");
-		Tebas.consoleOutput("      remote              Manages git remotes. This has more options:");
-		Tebas.consoleOutput("             set <name> <URL>         Sets or creates a remote");
-		Tebas.consoleOutput("             delete <name>            Deletes a remote");
-		Tebas.consoleOutput("             rename <name> <newname>  Deletes a remote");
-		Tebas.consoleOutput("             list                     Shows a list of all remotes");
-		Tebas.consoleOutput("      init <template>     Creates a new project directly in the local folder. Useful for creating projects outside of channels");
-		Tebas.consoleOutput("      info                Shows info on the current project");
-		Tebas.consoleOutput("      stats               Shows stats on the current project");
-		Tebas.consoleOutput("      <script> [args]     Attempts to run a script of the current template");
-	}
-	
-	//utilitie
-	static bool determineIfEnoughLength(int n, int l){
-		if(clp + n - 1 >= l){
-			return false;
-		}
-		return true;
-	}
-	
-	static void waitAnyKey(){
-		if(Tebas.isConsoleInteractive()){
-			Console.WriteLine("Press any key to continue");
-			Console.ReadKey();
+			report("Unknown command: '" + args[0] + "'. Use -h to see a list of commands");
+			return 2;
 		}
 	}
 }

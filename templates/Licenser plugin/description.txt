@@ -1,1 +1,0 @@
-Plugin that helps you add LICENSE files faster.

@@ -1,7 +1,0 @@
-math.greater def.1 args.length "0"
-if def.1 {
-	plugin.write "author" args.0
-} else {
-	console.ask def.0 "What is your author/company name?: "
-	plugin.write "author" def.0
-}

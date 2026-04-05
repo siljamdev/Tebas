@@ -1,1 +1,0 @@
-Template aimed at web development.

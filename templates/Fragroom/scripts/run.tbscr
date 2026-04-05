@@ -1,5 +1,0 @@
-template.read def.0 "fgromPath" //0
-
-self.removeQuotes args.0
-
-process.run def.0 args.0
