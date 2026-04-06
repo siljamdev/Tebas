@@ -1,7 +1,7 @@
 # Tebas
 <img src="res/icon.png" width="200"/>
 
-Tebas is a project manager based on templates & plugins
+Tebas is a project manager based on templates & plugins  
 **Tebas is still in development, so expect breaking changes**
 
 ## Usage
