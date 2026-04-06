@@ -71,7 +71,7 @@ class Plugin{
 	
 	public static bool installLocal(string path){
 		if(!File.Exists(path)){
-			Tebas.report("That file does not exist: '" + path + "'");
+			Tebas.report("File does not exist: '" + path + "'");
 			return false;
 		}
 		AshFile t = new AshFile(path);
@@ -177,7 +177,7 @@ class Plugin{
 			return false;
 		}
 		
-		AshFile t = new AshFile(outPath + "/" + name + ".tbplg");
+		AshFile t = new AshFile(Path.Combine(outPath, name + ".tbplg"));
 		
 		t.Set("name", name);
 		t.Set("version", BuildInfo.Version);
@@ -196,29 +196,9 @@ class Plugin{
 		
 		bool hadError = false;
 		
-		if(Directory.Exists(path + "/scripts")){
-			string[] scripts = Directory.GetFiles(path + "/scripts", "*.tbs", SearchOption.TopDirectoryOnly);
-			
-			foreach(string s in scripts){
-				string n = Path.GetFileNameWithoutExtension(s);
-				if(!Tebas.isValidScriptName(n)){
-					hadError = true;
-					continue;
-				}
-				
-				string code = File.ReadAllText(s);
-				
-				try{
-					ResolvedImport r = TableScript.SourceAsImport("plugins/BUILD/scripts/" + n, code, Tebas.pluginReport);
-					
-					t.Set("scripts." + n, code);
-				}catch(TabScriptException x){
-					hadError = true;
-					continue;
-				}
-			}
-		}
+		Dictionary<string, ResolvedImport> imports = new();
 		
+		//Globals
 		if(Directory.Exists(path + "/globals")){
 			string[] scripts = Directory.GetFiles(path + "/globals", "*.tbs", SearchOption.TopDirectoryOnly);
 			
@@ -235,6 +215,7 @@ class Plugin{
 					ResolvedImport r = TableScript.SourceAsImport("plugins/BUILD/globals/" + n, code, Tebas.pluginReport);
 					
 					t.Set("globals." + n, code);
+					imports["globals." + n] = r;
 				}catch(TabScriptException x){
 					hadError = true;
 					continue;
@@ -242,6 +223,32 @@ class Plugin{
 			}
 		}
 		
+		//Scripts
+		if(Directory.Exists(path + "/scripts")){
+			string[] scripts = Directory.GetFiles(path + "/scripts", "*.tbs", SearchOption.TopDirectoryOnly);
+			
+			foreach(string s in scripts){
+				string n = Path.GetFileNameWithoutExtension(s);
+				if(!Tebas.isValidScriptName(n)){
+					hadError = true;
+					continue;
+				}
+				
+				string code = File.ReadAllText(s);
+				
+				try{
+					ResolvedImport r = TableScript.SourceAsImport("plugins/BUILD/scripts/" + n, code, Tebas.pluginReport);
+					
+					t.Set("scripts." + n, code);
+					imports["scripts." + n] = r;
+				}catch(TabScriptException x){
+					hadError = true;
+					continue;
+				}
+			}
+		}
+		
+		//Utils
 		if(Directory.Exists(path + "/utils")){
 			string[] scripts = Directory.GetFiles(path + "/utils", "*.tbs", SearchOption.TopDirectoryOnly);
 			
@@ -258,11 +265,36 @@ class Plugin{
 					ResolvedImport r = TableScript.SourceAsImport("plugins/BUILD/utils/" + n, code, Tebas.pluginReport);
 					
 					t.Set("utils." + n, code);
+					imports["utils." + n] = r;
 				}catch(TabScriptException x){
 					hadError = true;
 					continue;
 				}
 			}
+		}
+		
+		//Globals
+		PluginDummyImportResolver gres = new(imports);
+		foreach(ResolvedImport r in imports.Where(kvp => kvp.Key.StartsWith("globals.")).Select(kvp => kvp.Value)){
+			try{
+				TableScript s = TableScript.FromImport(r, gres, Tebas.pluginReport);
+			}catch(TabScriptException x){
+				hadError = true;
+			}
+		}
+		
+		//Scripts
+		PluginScriptDummyImportResolver sres = new(imports);
+		foreach(ResolvedImport r in imports.Where(kvp => kvp.Key.StartsWith("scripts.")).Select(kvp => kvp.Value)){
+			try{
+				TableScript s = TableScript.FromImport(r, sres, Tebas.pluginReport);
+			}catch(TabScriptException x){
+				hadError = true;
+			}
+		}
+		
+		if(hadError){
+			return false;
 		}
 		
 		if(Directory.Exists(path + "/resources")){
@@ -274,13 +306,9 @@ class Plugin{
 			}
 		}
 		
-		if(hadError){
-			return false;
-		}else{
-			t.Save();
-			Tebas.output("Built plugin saved to '" + t.path + "'");
-			return true;
-		}
+		t.Save();
+		Tebas.output("Built plugin saved to '" + t.path + "'");
+		return true;
 	}
 	
 	static bool buildGetFile(string path, string file, out string content){

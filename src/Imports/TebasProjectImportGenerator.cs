@@ -5,6 +5,33 @@ using AshLib.Formatting;
 using TabScript;
 
 class TebasProjectImportGenerator{
+	static ResolvedImport _dummy = null;
+	public static ResolvedImport GenerateDummy(){
+		if(_dummy == null){
+			TebasProjectImportGenerator d = new TebasProjectImportGenerator(null);
+			FunctionStmt[] _compiledIndependentFuncs = Library.BuildLibrary("tebasproject", d.independentFunctions).functions;
+			
+			//Install
+			bool templateInstallLocal(string path){
+				return false;
+			}
+			bool pluginInstallLocal(string path){
+				return false;
+			}
+			
+			ProcessExecuter px = ProcessExecuter.Dummy;
+			FileUnit fu = FileUnit.Dummy;
+			
+			(string name, Delegate func, string description)[] nonIndependentFunctions = new (string, Delegate, string)[]{
+				("templateInstallLocal", templateInstallLocal, "Install a template from a file in the project path"),
+				("pluginInstallLocal", pluginInstallLocal, "Install a plugin from a file in the project path"),
+			}.Concat(px.NamedFunctions).Concat(fu.NamedFunctions).ToArray();
+			
+			_dummy = new ResolvedImport("tebasproject", null, null, _compiledIndependentFuncs.Concat(Library.BuildLibrary("tebasproject", nonIndependentFunctions).functions).ToArray());
+		}
+		return _dummy;
+	}
+	
 	static bool hasSeenInstallHint = false;
 	
 	(Delegate func, string description)[] independentFunctions => new (Delegate, string)[]{
@@ -24,6 +51,9 @@ class TebasProjectImportGenerator{
 		(setResource, "Set a project resource"),
 		(appendResource, "Append to a project resource"),
 		(getAllResourceKeys, "Get all keys with a value in project resources"),
+		
+		(templateBuild, "Build a template from source in a directory in the project path"),
+		(pluginBuild, "Build a plugin from source in a directory in the project path"),
 		
 		(cleanup, "Cleanup this project"),
 	};
@@ -91,7 +121,7 @@ class TebasProjectImportGenerator{
 		(string name, Delegate func, string description)[] nonIndependentFunctions = new (string, Delegate, string)[]{
 			("templateInstallLocal", templateInstallLocal, "Install a template from a file in the project path"),
 			("pluginInstallLocal", pluginInstallLocal, "Install a plugin from a file in the project path"),
-		}.Concat(px.NamedFunctions).Concat(fu.NamedFunctions).ToArray(); //Add process funcs
+		}.Concat(px.NamedFunctions).Concat(fu.NamedFunctions).ToArray(); //Add process & file funcs
 		
 		return new ResolvedImport("tebasproject", null, null, _compiledIndependentFuncs.Concat(Library.BuildLibrary("tebasproject", nonIndependentFunctions).functions).ToArray());
 	}
@@ -157,13 +187,22 @@ class TebasProjectImportGenerator{
 		return new Table(proj.getAllResourceKeys());
 	}
 	
+	//Build
+	bool templateBuild(string sourceDirectory, string outDirectory){
+		return Template.build(getPath() + "/" + sourceDirectory, getPath() + "/" + outDirectory);
+	}
+	
+	bool pluginBuild(string sourceDirectory, string outDirectory){
+		return Plugin.build(getPath() + "/" + sourceDirectory, getPath() + "/" + outDirectory);
+	}
+	
 	void cleanup(){
 		proj.cleanupInstance();
 	}
 	
 	static void displayInstallhint(){
 		if(!hasSeenInstallHint){
-			Tebas.hint("To skip this, do 'tebas <template|plugin> permission set <name> skipInstallationConfirmation allow'");
+			Tebas.hint("To skip this, do 'tebas <template|plugin> permission <name> skipInstallationConfirmation allow'");
 			hasSeenInstallHint = true;
 		}
 	}

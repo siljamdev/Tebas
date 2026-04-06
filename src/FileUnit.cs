@@ -3,11 +3,19 @@ using TabScript;
 
 class FileUnit{
 	#region static
+	static FileUnit _dummy = null;
+	public static FileUnit Dummy{get{
+		if(_dummy == null){
+			_dummy = new FileUnit(null, null, null, false, k => false);
+		}
+		return _dummy;
+	}}
+	
 	static bool hasSeenFileHint = false;
 	
 	static void displayFilehint(){
 		if(!hasSeenFileHint){
-			Tebas.hint("To skip this, do 'tebas <template|plugin> permission set <name> skipFileConfirmation allow'");
+			Tebas.hint("To skip this, do 'tebas <template|plugin> permission <name> skipFileConfirmation allow'");
 			hasSeenFileHint = true;
 		}
 	}
@@ -58,7 +66,7 @@ class FileUnit{
 		hasPermission = hp;
 		askConfirmation = hasPermission != null;
 		
-		if(Tebas.config.GetValue<bool>("scriptShowLabel")){
+		if(Tebas.config.GetValue<bool>("script.showLabel")){
 			report = x => Tebas.labelReport("FILE", isPlugin ? Palette.plugin : Palette.template, x.GetType() + ": " + x.Message);
 		}else{
 			report = x => Tebas.report(x.GetType() + ": " + x.Message);
@@ -86,7 +94,7 @@ class FileUnit{
 			return false;
 		}
 		
-		if(!askConfirmation || Tebas.config.GetValue<bool>("scriptAllowAllFileOperations") || hasPermission("skipFileConfirmation")){
+		if(!askConfirmation || Tebas.config.GetValue<bool>("script.allowAllFileOperations") || hasPermission("skipFileConfirmation")){
 			return true;
 		}
 		

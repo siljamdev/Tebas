@@ -86,7 +86,7 @@ class Template{
 	
 	public static bool installLocal(string path){
 		if(!File.Exists(path)){
-			Tebas.report("That file does not exist: '" + path + "'");
+			Tebas.report("File does not exist: '" + path + "'");
 			return false;
 		}
 		AshFile t = new AshFile(path);
@@ -193,7 +193,7 @@ class Template{
 			return false;
 		}
 		
-		AshFile t = new AshFile(outPath + "/" + name + ".tbtem");
+		AshFile t = new AshFile(Path.Combine(outPath, name + ".tbtem"));
 		
 		t.Set("name", name);
 		t.Set("version", BuildInfo.Version);
@@ -212,29 +212,9 @@ class Template{
 		
 		bool hadError = false;
 		
-		if(Directory.Exists(path + "/scripts")){
-			string[] scripts = Directory.GetFiles(path + "/scripts", "*.tbs", SearchOption.TopDirectoryOnly);
-			
-			foreach(string s in scripts){
-				string n = Path.GetFileNameWithoutExtension(s);
-				if(!Tebas.isValidScriptName(n)){
-					hadError = true;
-					continue;
-				}
-				
-				string code = File.ReadAllText(s);
-				
-				try{
-					ResolvedImport r = TableScript.SourceAsImport("templates/BUILD/scripts/" + n, code, Tebas.templateReport);
-					
-					t.Set("scripts." + n, code);
-				}catch(TabScriptException x){
-					hadError = true;
-					continue;
-				}
-			}
-		}
+		Dictionary<string, ResolvedImport> imports = new();
 		
+		//Globals
 		if(Directory.Exists(path + "/globals")){
 			string[] scripts = Directory.GetFiles(path + "/globals", "*.tbs", SearchOption.TopDirectoryOnly);
 			
@@ -251,6 +231,7 @@ class Template{
 					ResolvedImport r = TableScript.SourceAsImport("templates/BUILD/globals/" + n, code, Tebas.templateReport);
 					
 					t.Set("globals." + n, code);
+					imports["globals." + n] = r;
 				}catch(TabScriptException x){
 					hadError = true;
 					continue;
@@ -258,6 +239,44 @@ class Template{
 			}
 		}
 		
+		//Scripts
+		if(Directory.Exists(path + "/scripts")){
+			string[] scripts = Directory.GetFiles(path + "/scripts", "*.tbs", SearchOption.TopDirectoryOnly);
+			
+			foreach(string s in scripts){
+				string n = Path.GetFileNameWithoutExtension(s);
+				if(!Tebas.isValidScriptName(n)){
+					hadError = true;
+					continue;
+				}
+				
+				string code = File.ReadAllText(s);
+				
+				try{
+					ResolvedImport r = TableScript.SourceAsImport("templates/BUILD/scripts/" + n, code, Tebas.templateReport);
+					
+					t.Set("scripts." + n, code);
+					imports["scripts." + n] = r;
+				}catch(TabScriptException x){
+					hadError = true;
+					continue;
+				}
+			}
+		}
+		
+		//Properties
+		if(buildGetFile(path, "properties.tbs", out string prop)){
+			try{
+				ResolvedImport r = TableScript.SourceAsImport("templates/BUILD/properties", prop, Tebas.templateReport);
+				
+				t.Set("properties", prop);
+				imports["properties"] = r;
+			}catch(TabScriptException x){
+				hadError = true;
+			}
+		}
+		
+		//Utils
 		if(Directory.Exists(path + "/utils")){
 			string[] scripts = Directory.GetFiles(path + "/utils", "*.tbs", SearchOption.TopDirectoryOnly);
 			
@@ -274,6 +293,7 @@ class Template{
 					ResolvedImport r = TableScript.SourceAsImport("templates/BUILD/utils/" + n, code, Tebas.templateReport);
 					
 					t.Set("utils." + n, code);
+					imports["utils." + n] = r;
 				}catch(TabScriptException x){
 					hadError = true;
 					continue;
@@ -281,14 +301,38 @@ class Template{
 			}
 		}
 		
-		if(buildGetFile(path, "properties.tbs", out string prop)){
+		//Globals
+		TemplateDummyImportResolver gres = new(imports);
+		foreach(ResolvedImport r in imports.Where(kvp => kvp.Key.StartsWith("globals.")).Select(kvp => kvp.Value)){
 			try{
-				ResolvedImport r = TableScript.SourceAsImport("templates/BUILD/properties", prop, Tebas.templateReport);
-				
-				t.Set("properties", prop);
+				TableScript s = TableScript.FromImport(r, gres, Tebas.templateReport);
 			}catch(TabScriptException x){
 				hadError = true;
 			}
+		}
+		
+		//Scripts
+		TemplateScriptDummyImportResolver sres = new(imports);
+		foreach(ResolvedImport r in imports.Where(kvp => kvp.Key.StartsWith("scripts.")).Select(kvp => kvp.Value)){
+			try{
+				TableScript s = TableScript.FromImport(r, sres, Tebas.templateReport);
+			}catch(TabScriptException x){
+				hadError = true;
+			}
+		}
+		
+		//Properties
+		if(imports.TryGetValue("properties", out ResolvedImport r2)){
+			try{
+				TableScript s = TableScript.FromImport(r2, sres, Tebas.templateReport);
+			}catch(TabScriptException x){
+				hadError = true;
+			}
+		}
+		
+		
+		if(hadError){
+			return false;
 		}
 		
 		if(Directory.Exists(path + "/resources")){
@@ -300,13 +344,9 @@ class Template{
 			}
 		}
 		
-		if(hadError){
-			return false;
-		}else{
-			t.Save();
-			Tebas.output("Built template saved to '" + t.path + "'");
-			return true;
-		}
+		t.Save();
+		Tebas.output("Built template saved to '" + t.path + "'");
+		return true;
 	}
 	
 	static bool buildGetFile(string path, string file, out string content){

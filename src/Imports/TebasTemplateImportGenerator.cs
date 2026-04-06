@@ -4,6 +4,14 @@ using AshLib.Formatting;
 using TabScript;
 
 class TebasTemplateImportGenerator{
+	static TebasTemplateImportGenerator _dummy = null;
+	public static TebasTemplateImportGenerator Dummy{get{
+		if(_dummy == null){
+			_dummy = new TebasTemplateImportGenerator();
+		}
+		return _dummy;
+	}}
+	
 	(Delegate func, string description)[] AllFunctions => new (Delegate, string)[]{
 		(getPath, "Get the template path"),
 		(getName, "Get the template name"),
@@ -33,6 +41,12 @@ class TebasTemplateImportGenerator{
 		
 		px = new ProcessExecuter(getPath(), "template", false, hasPermission);
 		fu = new FileUnit(getPath(), "template", "t.tbtem", false, null);
+	}
+	
+	//Dummy
+	private TebasTemplateImportGenerator(){
+		px = ProcessExecuter.Dummy;
+		fu = FileUnit.Dummy;
 	}
 	
 	public ResolvedImport Generate(){

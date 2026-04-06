@@ -6,11 +6,20 @@ using TabScript.StandardLibraries;
 
 class ProcessExecuter{
 	#region static
+	static ProcessExecuter _dummy = null;
+	public static ProcessExecuter Dummy{get{
+		if(_dummy == null){
+			_dummy = new ProcessExecuter(null, null, false, k => false);
+		}
+		return _dummy;
+	}}
+	
+	
 	static bool hasSeenProcessHint = false;
 	
 	static void displayProcesshint(){
 		if(!hasSeenProcessHint){
-			Tebas.hint("To skip this, do 'tebas <template|plugin> permission set <name> skipProcessConfirmation allow'");
+			Tebas.hint("To skip this, do 'tebas <template|plugin> permission <name> skipProcessConfirmation allow'");
 			hasSeenProcessHint = true;
 		}
 	}
@@ -38,7 +47,7 @@ class ProcessExecuter{
 		("runProcessDetached", runProcessDetached, "Run a process detached in the " + pathName + " path, not printing its output"),
 		("runProcessWithOutput", runProcessWithOutput, "Run a process in the " + pathName + " path, and get its output as a stdlist list [stdout, stderr, exitcode]. Exitcode is a stdnum num"),
 		("runProcessWithExitCode", runProcessWithExitCode, "Run a process in the " + pathName + " path, and get its exit code"),
-		("open", open, "Open an url, folder or file in the " + pathName + " path"),
+		("open", open, "Open a url, folder or file in the " + pathName + " path"),
 	};
 	
 	public (Delegate func, string description)[] Functions => NamedFunctions.Select(t => (t.func, t.description)).ToArray();
@@ -54,7 +63,7 @@ class ProcessExecuter{
 		pathName = name;
 		hasPermission = hp;
 		
-		if(Tebas.config.GetValue<bool>("scriptShowLabel")){
+		if(Tebas.config.GetValue<bool>("script.showLabel")){
 			report = x => Tebas.labelReport("PROCESS", isPlugin ? Palette.plugin : Palette.template, x.GetType() + ": " + x.Message);
 		}else{
 			report = x => Tebas.report(x.GetType() + ": " + x.Message);
@@ -74,7 +83,7 @@ class ProcessExecuter{
 			return false;
 		}
 		
-		if(Tebas.config.GetValue<bool>("scriptAllowAllProcesses") || hasPermission("skipProcessConfirmation")){
+		if(Tebas.config.GetValue<bool>("script.allowAllProcesses") || hasPermission("skipProcessConfirmation")){
 			return true;
 		}
 		
@@ -113,7 +122,7 @@ class ProcessExecuter{
 			//Figure out actions
 			Action<string> stdout;
 			Action<string> stderr;
-			if(Tebas.config.GetValue<bool>("processShowLabel")){
+			if(Tebas.config.GetValue<bool>("process.showLabel")){
 				stdout = t => Tebas.labelOutput(name, Palette.process, t);
 				stderr = t => Tebas.labelReport(name, Palette.process, t);
 			}else{
@@ -251,15 +260,15 @@ class ProcessExecuter{
 		}
 	}
 	
-	public bool open(string url){
-		if(!processAllowed(url, basePath, null)){
+	public bool open(string target){
+		if(!processAllowed(target, basePath, null)){
 			return false;
 		}
 		
 		try{
 			if(OperatingSystem.IsWindows()){
 				Process.Start(new ProcessStartInfo{
-					FileName = url,
+					FileName = target,
 					WorkingDirectory = basePath,
 					UseShellExecute = true
 				});
@@ -267,14 +276,14 @@ class ProcessExecuter{
 			}else if(OperatingSystem.IsLinux()){
 				Process.Start(new ProcessStartInfo{
 					FileName = "xdg-open",
-					Arguments = url,
+					Arguments = target,
 					WorkingDirectory = basePath,
 				});
 				return true;
 			}else if(OperatingSystem.IsMacOS()){
 				Process.Start(new ProcessStartInfo{
 					FileName = "open",
-					Arguments = url,
+					Arguments = target,
 					WorkingDirectory = basePath,
 				});
 				return true;

@@ -4,25 +4,30 @@ using AshLib.Formatting;
 using TabScript;
 using TabScript.StandardLibraries;
 
-class TebasImportGenerator{	
+class TebasImportGenerator{
+	static TebasImportGenerator _dummy = null;
+	public static TebasImportGenerator Dummy{get{
+		if(_dummy == null){
+			_dummy = new TebasImportGenerator(false, "");
+		}
+		return _dummy;
+	}}
+	
 	static (Delegate func, string description)[] staticFunctions => new (Delegate, string)[]{
-		(getAllProjectsPaths, "Get the paths to all projects"),
-		(projectExists, "Check if project exists in a path"),
-		(getProjectName, "Get the name of the project in a path if it exists"),
-		(getProjectTemplateName, "Get the name of the template used in a project, based on its path"),
-		(getProjectProperty, "Get a property of a project, based on its path"),
+		(getAllProjectsPaths, "Get the paths to all project directories"),
+		(projectExists, "Check if project exists in a directory"),
+		(getProjectTemplateName, "Get the name of the template used in a project, based on its directory"),
+		(getProjectProperty, "Get a property of a project, based on its directory"),
 		(projectsCleanup, "Cleanup projects"),
 		
 		(getAllTemplateNames, "Get the names of all installed templates"),
 		(templateInstalled, "Check if template is installed"),
 		(templateRunGlobal, "Attempt to run a global script of a template"),
-		(templateBuild, "Build a template from source in a directory"),
 		(templatesCleanup, "Cleanup templates"),
 		
 		(getAllPluginNames, "Get the names of all installed plugins"),
 		(pluginInstalled, "Check if plugin is installed"),
 		(pluginRunGlobal, "Attempt to run a global script of a plugin"),
-		(pluginBuild, "Build a plugin from source in a directory"),
 		(pluginsCleanup, "Cleanup plugins"),
 		
 		(getShared, "Get shared resource"),
@@ -35,10 +40,12 @@ class TebasImportGenerator{
 		(getPathFilename, "Get file name with extension of a file path"),
 		(getPathFilenameNoExtension, "Get file name without extension of a file path"),
 		(getPathDirectory, "Get parent directory of a path"),
+		(getPathSeparator, "Get default OS separator of paths"),
 		
 		(getAllPermissionKeys, "Get all valid permission keys"),
 		(getAllConfigKeys, "Get all valid config keys"),
 		(getConfigValue, "Get value for a config key"),
+		(getVersion, "Get Tebas version"),
 		(cleanupAll, "Cleanup everything in Tebas"),
 	};
 	
@@ -52,7 +59,7 @@ class TebasImportGenerator{
 	
 	(Delegate func, string description)[] instanceFunctions => new (Delegate, string)[]{
 		(print, "Print to Standard Output"),
-		(printColor, "Print to Standard Output with color"),
+		(printColor, "Print to Standard Output with color(hexadecimal)"),
 		(error, "Print to Standard Error"),
 		(input, "Read from Standard Input"),
 	};
@@ -68,7 +75,7 @@ class TebasImportGenerator{
 		label = n.ToUpper();
 		isPlugin = isP;
 		
-		showLabel = Tebas.config.GetValue<bool>("scriptShowLabel");
+		showLabel = Tebas.config.GetValue<bool>("script.showLabel");
 	}
 	
 	public ResolvedImport Generate(){
@@ -128,10 +135,6 @@ class TebasImportGenerator{
 		return Project.exists(directory);
 	}
 	
-	static string getProjectName(string directory){
-		return Project.exists(directory) ? Path.GetFileName(directory) : "";
-	}
-	
 	static string getProjectTemplateName(string directory){
 		return Project.get(directory)?.templateName ?? "";
 	}
@@ -156,10 +159,6 @@ class TebasImportGenerator{
 		return Template.get(name)?.tryRunGlobal(global, args.contents) ?? false;
 	}
 	
-	static bool templateBuild(string sourceDirectory, string outDirectory){
-		return Template.build(sourceDirectory, outDirectory);
-	}
-	
 	static void templatesCleanup(){
 		Template.cleanup();
 	}
@@ -174,10 +173,6 @@ class TebasImportGenerator{
 	
 	static bool pluginRunGlobal(string name, string global, Table args){
 		return Plugin.get(name)?.tryRunGlobal(global, args.contents) ?? false;
-	}
-	
-	static bool pluginBuild(string sourceDirectory, string outDirectory){
-		return Plugin.build(sourceDirectory, outDirectory);
 	}
 	
 	static void pluginsCleanup(){
@@ -220,6 +215,10 @@ class TebasImportGenerator{
 		return Path.GetDirectoryName(path);
 	}
 	
+	static string getPathSeparator(){
+		return Path.DirectorySeparatorChar.ToString();
+	}
+	
 	static Table getAllPermissionKeys(){
 		return new Table(Tebas.validPermissions.Select(t => t.key).ToArray());
 	}
@@ -233,6 +232,10 @@ class TebasImportGenerator{
 			return Tebas.config.GetValue(key).ToString();
 		}
 		return "";
+	}
+	
+	static string getVersion(){
+		return "v" + BuildInfo.Version;
 	}
 	
 	static void cleanupAll(){

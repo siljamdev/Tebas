@@ -4,6 +4,14 @@ using AshLib.Formatting;
 using TabScript;
 
 class TebasPluginImportGenerator{
+	static TebasPluginImportGenerator _dummy = null;
+	public static TebasPluginImportGenerator Dummy{get{
+		if(_dummy == null){
+			_dummy = new TebasPluginImportGenerator();
+		}
+		return _dummy;
+	}}
+	
 	(Delegate func, string description)[] AllFunctions => new (Delegate, string)[]{
 		(getPath, "Get the plugin path"),
 		(getName, "Get the plugin name"),
@@ -33,6 +41,12 @@ class TebasPluginImportGenerator{
 		
 		px = new ProcessExecuter(getPath(), "plugin", true, hasPermission);
 		fu = new FileUnit(getPath(), "plugin", "p.tbplg", true, null);
+	}
+	
+	//Dummy
+	private TebasPluginImportGenerator(){
+		px = ProcessExecuter.Dummy;
+		fu = FileUnit.Dummy;
 	}
 	
 	public ResolvedImport Generate(){

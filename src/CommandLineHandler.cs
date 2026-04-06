@@ -56,6 +56,11 @@ static class CommandLineHandler{
 				case "-v":
 					printVersion();
 					return 0;
+				
+				case "--version-short":
+				case "-vs":
+					printVersionShort();
+					return 0;
 			}
 			
 			int doAction(Func<string, int> act){
@@ -131,6 +136,8 @@ static class CommandLineHandler{
 				case "-h":
 				case "--version":
 				case "-v":
+				case "--version-short":
+				case "-vs":
 					Tebas.reportAlways("Help or version flags are expected to be the first and only ones");
 					return 2;
 				break;
@@ -172,7 +179,7 @@ static class CommandLineHandler{
 	static CLINode getRoot(){
 		CLINode root = new CLINode("tebas");
 		
-		root.setArgs("script").setOptionalArgs().setAction(args => {
+		root.setArgs("script").setOptionalArgs("args").setAction(args => {
 			Project p = Tebas.tryGetLocal();
 			if(p == null){
 				Plugin t = Plugin.get(args[0]);
@@ -181,7 +188,7 @@ static class CommandLineHandler{
 					return 21;
 				}
 				if(args.Length < 2){
-					Tebas.report("Too few arguments. At least 1 extra ('script') was expected after 'tebas <plugin>'");
+					Tebas.reportAlways("Too few arguments. At least 1 extra ('script') was expected after 'tebas <plugin>'");
 					return 1;
 				}
 				if(!t.tryRunGlobal(args[1], args.Skip(2), true)){
@@ -189,15 +196,14 @@ static class CommandLineHandler{
 					return 23;
 				}
 				return 0;
-			}
-			if(!p.tryRunScriptOrGlobal(args[0], args.Skip(1), true)){
+			}else if(!p.tryRunScriptOrGlobal(args[0], args.Skip(1), true)){
 				Plugin t = Plugin.get(args[0]);
 				if(t == null){
 					Tebas.report("Unknown template script or global, and plugin '" + args[0] + "' is not installed. Use -h to see a list of commands if you meant something else");
 					return 23;
 				}
 				if(args.Length < 2){
-					Tebas.report("Too few arguments. At least 1 extra ('script') was expected after 'tebas <plugin>'");
+					Tebas.reportAlways("Too few arguments. At least 1 extra ('script') was expected after 'tebas <plugin>'");
 					return 1;
 				}
 				if(!p.tryRunPluginScriptOrGlobal(t, args[1], args.Skip(2), true)){
@@ -230,14 +236,17 @@ static class CommandLineHandler{
 			return 0;
 		}).setDescription("Get info on a template");
 		
-		root.chain("template").chain("install").setArgs("path").setAction(args => {
-			if(!File.Exists(args[0])){
-				Tebas.report("That file does not exist: '" + args[0] + "'");
-				return 25;
+		root.chain("template").chain("install").setArgs("path|name").setAction(args => {
+			if(!RegistryDownloader.use || File.Exists(args[0])){
+				return Template.installLocal(args[0]) ? 0 : 25;
+			}else{
+				AshFile t = RegistryDownloader.downloadTemplate(args[0]);
+				if(t == null){
+					return 25;
+				}
+				return Template.install(t) ? 0 : 25;
 			}
-			AshFile t = new AshFile(args[0]);
-			return Template.install(t) ? 0 : 25;
-		}).setDescription("Install a template from a file");
+		}).setDescription("Install a template from a file or from registry");
 		
 		root.chain("template").chain("uninstall").setArgs("name").setAction(args => {
 			Template t = Template.get(args[0]);
@@ -248,15 +257,7 @@ static class CommandLineHandler{
 			return t.uninstall() ? 0 : 25;
 		}).setDescription("Uninstall a template");
 		
-		root.chain("template").chain("permission").setAction(args => {
-			Tebas.output("Permission key list:");
-			foreach((string p, string desc) in Tebas.validPermissions){
-				Tebas.output("  " + p + ": " + desc);
-			}
-			return 0;
-		}).setDescription("See a list of valid permission keys");
-		
-		root.chain("template").chain("permission").chain("set").setArgs("name", "key", "allow|disallow").setAction(args => {
+		root.chain("template").chain("permission").setArgs("name", "key", "allow|disallow").setAction(args => {
 			Template t = Template.get(args[0]);
 			if(t == null){
 				Tebas.report("The template '" + args[0] + "' is not installed");
@@ -269,6 +270,14 @@ static class CommandLineHandler{
 			return t.setPermission(args[1], args[2].ToUpper() == "ALLOW") ? 0 : 24;
 		}).setDescription("Set a permission for a template");
 		
+		root.chain("template").chain("permission").chain("list").setAction(args => {
+			Tebas.output("Permission key list:");
+			foreach((string p, string desc) in Tebas.validPermissions){
+				Tebas.output("  " + p + ": " + desc);
+			}
+			return 0;
+		}).setDescription("See a list of valid permission keys");
+		
 		root.chain("template").chain("permission").chain("reset").setArgs("name").setAction(args => {
 			Template t = Template.get(args[0]);
 			if(t == null){
@@ -280,11 +289,18 @@ static class CommandLineHandler{
 			return 0;
 		}).setDescription("Reset all permissions for a template");
 		
-		root.chain("template").chain("build").setArgs("directory").setAction(args => {
-			return Template.build(args[0], args[0]) ? 0 : 25;
-		}).setDescription("Build a template from source from a directory");
+		root.chain("template").chain("build").setArgs("directory").setOptionalArgs("outputDirectory").setAction(args => {
+			if(args.Length == 1){
+				return Template.build(args[0], args[0]) ? 0 : 25;
+			}else if(args.Length == 2){
+				return Template.build(args[0], args[1]) ? 0 : 25;
+			}else{
+				Tebas.reportAlways("Too many arguments. Only 2 were expected after 'build'");
+				return 1;
+			}
+		}).setDescription("Build a template from source");
 		
-		root.chain("template").chain("global").setArgs("name", "script").setOptionalArgs().setAction(args => {
+		root.chain("template").chain("global").setArgs("name", "script").setOptionalArgs("args").setAction(args => {
 			Template t = Template.get(args[0]);
 			if(t == null){
 				Tebas.report("The template '" + args[0] + "' is not installed");
@@ -314,14 +330,17 @@ static class CommandLineHandler{
 			return 0;
 		}).setDescription("Get info on a plugin");
 		
-		root.chain("plugin").chain("install").setArgs("path").setAction(args => {
-			if(!File.Exists(args[0])){
-				Tebas.report("That file does not exist: '" + args[0] + "'");
-				return 25;
+		root.chain("plugin").chain("install").setArgs("path|name").setAction(args => {
+			if(!RegistryDownloader.use || File.Exists(args[0])){
+				return Plugin.installLocal(args[0]) ? 0 : 25;
+			}else{
+				AshFile t = RegistryDownloader.downloadPlugin(args[0]);
+				if(t == null){
+					return 25;
+				}
+				return Plugin.install(t) ? 0 : 25;
 			}
-			AshFile t = new AshFile(args[0]);
-			return Plugin.install(t) ? 0 : 25;
-		}).setDescription("Install a plugin from a file");
+		}).setDescription("Install a plugin from a file or from registry");
 		
 		root.chain("plugin").chain("uninstall").setArgs("name").setAction(args => {
 			Plugin t = Plugin.get(args[0]);
@@ -332,15 +351,7 @@ static class CommandLineHandler{
 			return t.uninstall() ? 0 : 25;
 		}).setDescription("Uninstall a plugin");
 		
-		root.chain("plugin").chain("permission").setAction(args => {
-			Tebas.output("Permission key list:");
-			foreach((string p, string desc) in Tebas.validPermissions){
-				Tebas.output("  " + p + ": " + desc);
-			}
-			return 0;
-		}).setDescription("See a list of valid permission keys");
-		
-		root.chain("plugin").chain("permission").chain("set").setArgs("name", "key", "allow|disallow").setAction(args => {
+		root.chain("plugin").chain("permission").setArgs("name", "key", "allow|disallow").setAction(args => {
 			Plugin t = Plugin.get(args[0]);
 			if(t == null){
 				Tebas.report("The plugin '" + args[0] + "' is not installed");
@@ -353,6 +364,14 @@ static class CommandLineHandler{
 			return t.setPermission(args[1], args[2].ToUpper() == "ALLOW") ? 0 : 24;
 		}).setDescription("Set a permission for a plugin");
 		
+		root.chain("plugin").chain("permission").chain("list").setAction(args => {
+			Tebas.output("Permission key list:");
+			foreach((string p, string desc) in Tebas.validPermissions){
+				Tebas.output("  " + p + ": " + desc);
+			}
+			return 0;
+		}).setDescription("See a list of valid permission keys");
+		
 		root.chain("plugin").chain("permission").chain("reset").setArgs("name").setAction(args => {
 			Plugin t = Plugin.get(args[0]);
 			if(t == null){
@@ -364,11 +383,18 @@ static class CommandLineHandler{
 			return 0;
 		}).setDescription("Reset all permissions for a plugin");
 		
-		root.chain("plugin").chain("build").setArgs("directory").setAction(args => {
-			return Plugin.build(args[0], args[0]) ? 0 : 25;
-		}).setDescription("Build a plugin from source from a directory");
+		root.chain("plugin").chain("build").setArgs("directory").setOptionalArgs("outputDirectory").setAction(args => {
+			if(args.Length == 1){
+				return Plugin.build(args[0], args[0]) ? 0 : 25;
+			}else if(args.Length == 2){
+				return Plugin.build(args[0], args[1]) ? 0 : 25;
+			}else{
+				Tebas.reportAlways("Too many arguments. Only 2 were expected after 'build'");
+				return 1;
+			}
+		}).setDescription("Build a plugin from source");
 		
-		root.chain("plugin").chain("global").setArgs("name", "script").setOptionalArgs().setAction(args => {
+		root.chain("plugin").chain("global").setArgs("name", "script").setOptionalArgs("args").setAction(args => {
 			Plugin t = Plugin.get(args[0]);
 			if(t == null){
 				Tebas.report("The plugin '" + args[0] + "' is not installed");
@@ -381,7 +407,7 @@ static class CommandLineHandler{
 			return 0;
 		}).setDescription("Run a global script");
 		
-		root.chain("plugin").chain("run").setArgs("name", "script").setOptionalArgs().setAction(args => {
+		root.chain("plugin").chain("run").setArgs("name", "script").setOptionalArgs("args").setAction(args => {
 			Project p = Tebas.getLocal();
 			if(p == null){
 				return 21;
@@ -420,14 +446,14 @@ static class CommandLineHandler{
 		}).setDescription("Get info on the local project");
 		
 		#region config
-		root.chain("config").setAction(args => {
+		root.chain("config").setArgs("key", "value").setAction(args => {
+			return Tebas.setConfig(args[0], args[1]) ? 0 : 24;
+		}).setDescription("Set config values");
+		
+		root.chain("config").chain("list").setAction(args => {
 			Tebas.listConfig();
 			return 0;
 		}).setDescription("See a list of config options");
-		
-		root.chain("config").chain("set").setArgs("key", "value").setAction(args => {
-			return Tebas.setConfig(args[0], args[1]) ? 0 : 24;
-		}).setDescription("Set config values");
 		
 		root.chain("config").chain("see").setAction(args => {
 			Tebas.seeConfig();
@@ -447,7 +473,7 @@ static class CommandLineHandler{
 		root.chain("cleanup").setAction(args => {
 			Tebas.cleanupAll();
 			return 0;
-		}).setDescription("Cleanup and update everything");
+		}).setDescription("Cleanup everything");
 		
 		return root;
 	}
@@ -459,6 +485,10 @@ static class CommandLineHandler{
 		Console.WriteLine("  GitHub repo: " + BuildInfo.RepoUrl);
 	}
 	
+	static void printVersionShort(){
+		Console.WriteLine("v" + BuildInfo.Version);
+	}
+	
 	static void printHelp(){
 		Console.WriteLine("Tebas CLI help");
 		Console.WriteLine();
@@ -466,19 +496,21 @@ static class CommandLineHandler{
 		Console.WriteLine();
 		Console.WriteLine("Flags:");
 		Console.WriteLine("  -q");
-		Console.WriteLine("  --quiet       Show no output");
+		Console.WriteLine("  --quiet             Show no output");
 		Console.WriteLine("  -f");
-		Console.WriteLine("  --forced      Skip confirmations");
+		Console.WriteLine("  --forced            Skip confirmations");
 		Console.WriteLine("  -nh");
-		Console.WriteLine("  --no-hints    Show no hints");
+		Console.WriteLine("  --no-hints          Show no hints");
 		Console.WriteLine("  -v");
-		Console.WriteLine("  --version     Show current version");
+		Console.WriteLine("  --version           Show current version and build info and exit");
+		Console.WriteLine("  -vs");
+		Console.WriteLine("  --version-short     Show only current version and exit");
 		Console.WriteLine("  -h");
-		Console.WriteLine("  --help        Show help");
+		Console.WriteLine("  --help              Show help and exit");
 		Console.WriteLine();
 		Console.WriteLine("Commands:");
 		Console.Write(getRoot().help());
-		Console.WriteLine("      <script> [args]    Run a template script or global locally");
+		Console.WriteLine("      <script> [args]             Run a template script or global locally");
 		Console.WriteLine("      <plugin> <script> [args]    Run a plugin script or global locally");
 	}
 	
@@ -502,7 +534,8 @@ class CLINode{
 	public string[] extraArgsNames;
 	public string description {get; private set;} 
 	
-	public bool optionalArgs {get; private set;}
+	public bool hasOptionalArgs => optionalArgs != null;
+	public string optionalArgs {get; private set;} = null;
 	
 	public List<CLINode> children {get;} = new();
 	public Func<string[], int>? action;
@@ -522,8 +555,8 @@ class CLINode{
 		return this;
 	}
 	
-	public CLINode setOptionalArgs(){
-		optionalArgs = true;
+	public CLINode setOptionalArgs(string name){
+		optionalArgs = name;
 		
 		return this;
 	}
@@ -566,8 +599,8 @@ class CLINode{
 				sb.Append(" <" + n + ">");
 			}
 			
-			if(optionalArgs){
-				sb.Append(" [args]");
+			if(hasOptionalArgs){
+				sb.Append(" [" + optionalArgs + "]");
 			}
 			
 			if(description != null){
@@ -593,7 +626,7 @@ class CLINode{
 		if(!showHelp){
 			return command.Length;
 		}
-		return command.Length + (action == null ? 0 : extraArgsNames.Select(h => h.Length + 3).Sum() + (optionalArgs ? 7 : 0));
+		return command.Length + (action == null ? 0 : extraArgsNames.Select(h => h.Length + 3).Sum() + (hasOptionalArgs ? (3 + optionalArgs.Length) : 0));
 	}
 	
 	public int handle(string[] args, Action<string> report, Func<int>? onMatch){
@@ -619,7 +652,7 @@ class CLINode{
 		if(c != null){
 			return c.handle(args.Skip(1).ToArray(), report, onMatch);
 		}else if(action != null){
-			if(args.Length == extraArgs || (args.Length > extraArgs && optionalArgs)){
+			if(args.Length == extraArgs || (args.Length > extraArgs && hasOptionalArgs)){
 				int m1 = onMatch?.Invoke() ?? 0;
 				if(m1 != 0){
 					return m1;

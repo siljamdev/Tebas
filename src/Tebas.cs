@@ -15,7 +15,7 @@ static class Tebas{
 	public static AshFile config;
 	
 	public static void initCore(){
-		string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+		string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData).Replace('\\', '/');
 		dep = new Dependencies(appDataPath + "/ashproject/tebasDEV", true, new string[]{"templates", "plugins"}, null);
 		
 		initConfig();
@@ -41,11 +41,13 @@ static class Tebas{
 	//These appear in options
 	public static readonly (string key, object value, string description)[] configurableOptions = new (string key, object value, string description)[]{
 		("searchProjectInParent", true, "Search for local project file in parent directories recursively"),
+		("script.showLabel", true, "Show script source in its output"),
+		("script.allowAllProcesses", false, "Allow all templates and plugins to execute whatever process without confirmation. DANGEROUS"),
+		("script.allowAllFileOperations", false, "Allow all templates and plugins to modify project files without confirmation. DANGEROUS"),
+		("process.showLabel", true, "Show process name in its output"),
+		("registry.use", true, "Try to install from registry"),
+		("registry.url", "https://github.com/siljamdev/Tebas-Registry", "Url of the template and plugin registry"),
 		("useColors", true, "Use colored console output when possible"),
-		("scriptShowLabel", true, "Show script name in its output"),
-		("processShowLabel", true, "Show process label (its name) in its output"),
-		("scriptAllowAllProcesses", false, "Allow all templates and plugins to execute whatever process without confirmation. DANGEROUS"),
-		("scriptAllowAllFileOperations", false, "Allow all templates and plugins to modify project files without confirmation. DANGEROUS"),
 	};
 	
 	//These do not appear in options
@@ -81,12 +83,10 @@ static class Tebas{
 		config.Save();
 		
 		//Load config if needed goes here
-		
-		output("Reset config");
 	}
 	
 	public static void listConfig(){
-		output("List of config options:");
+		output("List of config keys:");
 		foreach((string key, object value, string description) in configurableOptions){
 			output("  " + key + ": " + description);
 		}
@@ -295,12 +295,12 @@ static class Tebas{
 			return true;
 		}
 		
-		try{
-			string assetName = "tebas_" + BuildInfo.Runtime;
-			string url = BuildInfo.RepoUrl.TrimEnd('/') + "/releases/latest/download/" + assetName;
-			
+		try{			
 			string currentExe = Environment.ProcessPath!;		
 			string tempExe = Path.Combine(Path.GetDirectoryName(currentExe), Path.GetFileNameWithoutExtension(currentExe) + ".new" + Path.GetExtension(currentExe));
+			
+			string assetName = "tebas_" + BuildInfo.Runtime + Path.GetExtension(currentExe);
+			string url = BuildInfo.RepoUrl.TrimEnd('/') + "/releases/latest/download/" + assetName;
 			
 			using var client = new HttpClient();
 			client.DefaultRequestHeaders.UserAgent.ParseAdd("TebasUpdate");
@@ -308,18 +308,32 @@ static class Tebas{
 			using var stream = client.GetStreamAsync(url).GetAwaiter().GetResult();
 			using var file = File.Create(tempExe);
 			stream.CopyTo(file);
+			file.Dispose();
 			
 			if(!OperatingSystem.IsWindows()){
 				File.SetUnixFileMode(tempExe, UnixFileMode.UserExecute | UnixFileMode.UserRead | UnixFileMode.UserWrite);
 			}
 			
-			output("Updated succesfully");
+			waitUntilFileUnlocked(tempExe);
 			Process.Start(tempExe, "-u1 \"" + currentExe + "\"");
 			Environment.Exit(0);
+			output("Updated succesfully");
 			return true;
 		}catch(Exception e){
 			report(e.ToString());
 			return false;
+		}
+	}
+	
+	static void waitUntilFileUnlocked(string path){
+		while(true){
+			try{
+				using(File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None)){
+					break;
+				}
+			}catch{
+				Thread.Sleep(100);
+			}
 		}
 	}
 	
