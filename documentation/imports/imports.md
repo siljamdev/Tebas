@@ -9,10 +9,10 @@ In Tebas, all the [TableScript default libraries](https://siljamdev.github.io/Ta
 On top of that, template/plugin scripts can import each other:  
 |import|Availability|What is imported|
 |---|---|---|
-|global.<name>|All template/plugin scripts, globals, utils and properties|All the functions marked export of that global script|
-|utils.<name>|All template/plugin scripts, globals, utils and properties|All the functions marked export of that util script|
-|scripts.<name>|All template/plugin scripts, utils(when added from scripts) and properties|All the functions marked export of that script|
-|properties|All template scripts and utils(when added from scripts)|All the functions marked export of the properties script|
+|`global.<name>`|All template/plugin scripts, globals, utils and properties|All the functions marked export of that global script|
+|`utils.<name>`|All template/plugin scripts, globals, utils and properties|All the functions marked export of that util script|
+|`scripts.<name>`|All template/plugin scripts, utils(when added from scripts) and properties|All the functions marked export of that script|
+|`properties`|All template scripts and utils(when added from scripts)|All the functions marked export of the properties script|
 
 The purpose of utils is just that, to be imported into other scripts. They are not runnable, they only have functions that other scripts can import. They can be used to avoid repetition.  
 

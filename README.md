@@ -24,7 +24,7 @@ They are user made. They are files with the `.tbplg` extension. You can double c
 Install plugins directly from the [Official Tebas Registry](https://github.com/siljamdev/Tebas-Registry).
 
 ## Installation
-You can install Tebas for Windows, Linux and MacOS with the portable executable from the [releases](https://github.com/siljamdev/Tebas/releases/latest).  
+You can install Tebas for Windows, Linux and MacOS with the portable executables from the [releases](https://github.com/siljamdev/Tebas/releases/latest).  
 
 ## License
 This software is licensed under the [MIT License](./LICENSE).

@@ -21,8 +21,8 @@ Keep script/global names **short** and **descriptive**. If two words are necessa
 If your template/plugin needs some data, like the path to an executable, try getting it from shared resources. Here is a list of standards:  
 |Shared resources key|Value|
 |---|---|
-|author|Author name|
-|paths.<name>|Path to an executable. For example, `paths.git` or `paths.browser`|
+|`author`|Author name|
+|`paths.<name>`|Path to an executable. For example, `paths.git` or `paths.browser`|
 
 ## Help global
 Templates and plugins should have a `help` global script. The [tbtem](https://github.com/siljamdev/Tebas-Registry/tree/main/templates/tbtem) and [tbplg](https://github.com/siljamdev/Tebas-Registry/tree/main/templates/tbplg) templates automatically add it to the globals folder on init.  
@@ -37,6 +37,7 @@ It should take either 1 or 2 arguments: `<key> <value>`:
 |list||Display a list of valid keys and what they do|
 |see||Display the current config values|
 |key|value|Set the config|
+
 For keys that represent booleans, accept as value true, t, false and f.  
 The [tbtem](https://github.com/siljamdev/Tebas-Registry/tree/main/templates/tbtem) template has a script (`add-tconfig`) that adds a tconfig global ready to be used.  
 The [tbplg](https://github.com/siljamdev/Tebas-Registry/tree/main/templates/tbplg) template has a script (`add-config`) that adds a config global ready to be used.  
@@ -55,6 +56,7 @@ Properties to implement:
 ### [stats](https://github.com/siljamdev/Tebas-Registry/tree/main/plugins/stats) plugin
 Properties to implement:
 - `stats.codeLines`: Lines of code in the project as a stdnum num. The template is responsible for counting them
+
 Scripts to implement:
 - `stats`: Script that will be called when the plugin script `stats` is called
 
