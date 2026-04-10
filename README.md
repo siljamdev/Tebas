@@ -2,7 +2,7 @@
 <img src="res/icon.png" width="200"/>
 
 Tebas is a project manager based on templates & plugins  
-**Tebas is still in development, so expect breaking changes**
+**Tebas is still in development, so expect breaking changes**  
 
 ## Usage
 Tebas is a command based utility to handle projects. Its strength is [user-made templates and plugins](https://github.com/siljamdev/Tebas-Registry), which provide the useful functionalities.  
@@ -25,6 +25,7 @@ Install plugins directly from the [Official Tebas Registry](https://github.com/s
 
 ## Installation
 You can install Tebas for Windows, Linux and MacOS with the portable executables from the [releases](https://github.com/siljamdev/Tebas/releases/latest).  
+Once you have it installed, you can update it using `tebas update`.  
 
 ## License
 This software is licensed under the [MIT License](./LICENSE).
