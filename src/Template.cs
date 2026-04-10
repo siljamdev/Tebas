@@ -230,7 +230,7 @@ class Template{
 				try{
 					ResolvedImport r = TableScript.SourceAsImport("templates/BUILD/globals/" + n, code, Tebas.templateReport);
 					
-					t.Set("globals." + n, code);
+					t.Set("globals." + n, r.Optimize().ToCompactString());
 					imports["globals." + n] = r;
 				}catch(TabScriptException x){
 					hadError = true;
@@ -255,7 +255,7 @@ class Template{
 				try{
 					ResolvedImport r = TableScript.SourceAsImport("templates/BUILD/scripts/" + n, code, Tebas.templateReport);
 					
-					t.Set("scripts." + n, code);
+					t.Set("scripts." + n, r.Optimize().ToCompactString());
 					imports["scripts." + n] = r;
 				}catch(TabScriptException x){
 					hadError = true;
@@ -269,7 +269,7 @@ class Template{
 			try{
 				ResolvedImport r = TableScript.SourceAsImport("templates/BUILD/properties", prop, Tebas.templateReport);
 				
-				t.Set("properties", prop);
+				t.Set("properties", r.Optimize().ToCompactString());
 				imports["properties"] = r;
 			}catch(TabScriptException x){
 				hadError = true;
@@ -292,7 +292,7 @@ class Template{
 				try{
 					ResolvedImport r = TableScript.SourceAsImport("templates/BUILD/utils/" + n, code, Tebas.templateReport);
 					
-					t.Set("utils." + n, code);
+					t.Set("utils." + n, r.Optimize().ToCompactString());
 					imports["utils." + n] = r;
 				}catch(TabScriptException x){
 					hadError = true;
@@ -342,6 +342,11 @@ class Template{
 				string n = Path.GetFileNameWithoutExtension(s);
 				t.Set("resources." + n, File.ReadAllText(s));
 			}
+		}
+		
+		string parent = Path.GetDirectoryName(t.path);
+		if(parent != null){
+			Directory.CreateDirectory(parent);
 		}
 		
 		t.Save();

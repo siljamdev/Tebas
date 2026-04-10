@@ -7,6 +7,8 @@ class TebasDummyImportResolver : StandardImportResolver{
 		switch(import){
 			case "stdlib": //Custom stdlib
 				return TebasImportResolver.stdlibImport;
+			case "paths":
+				return PathsImport.AsImport;
 			case "tebas":
 				return TebasImportGenerator.Dummy.Generate();
 			case "tebasproject":

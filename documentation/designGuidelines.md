@@ -12,7 +12,8 @@ If a script is going to delete a user-made file or do any other destructive oper
 Also, be aware that for example on init, if the user already has files there, they might be overridden and the user's progress lost. Check for existing files first!  
 
 ## Arguments
-It is preferred for scripts/globals to have CLI arguments than interactive prompts. This makes it possible to automate many tasks.
+It is preferred for scripts/globals to have CLI arguments than interactive prompts. This makes it possible to automate many tasks.  
+Also, argument length enforcing is encouraged. If `args` has an incorrect length, the scriot should display an error to the user(using `tebas::error`) and then `exit;`.  
 
 ## Script names
 Keep script/global names **short** and **descriptive**. If two words are necessary, a *verb-noun* name is preferred, such as: `set-remote` or `list-tags`.  

@@ -25,6 +25,8 @@ class TebasImportResolver : StandardImportResolver{
 		switch(import){
 			case "stdlib": //Custom stdlib
 				return stdlibImport;
+			case "paths":
+				return PathsImport.AsImport;
 			case "tebas":
 				return tgen.Generate();
 			case "tebasproject":

@@ -7,17 +7,20 @@ In Tebas, all the [TableScript default libraries](https://siljamdev.github.io/Ta
 
 ## Context imports
 On top of that, template/plugin scripts can import each other:  
-|import|Availability|What is imported|
-|---|---|---|
-|`global.<name>`|All template/plugin scripts, globals, utils and properties|All the functions marked export of that global script|
-|`utils.<name>`|All template/plugin scripts, globals, utils and properties|All the functions marked export of that util script|
-|`scripts.<name>`|All template/plugin scripts, utils(when added from scripts) and properties|All the functions marked export of that script|
-|`properties`|All template scripts and utils(when added from scripts)|All the functions marked export of the properties script|
+|import|Imports as|Availability|What is imported|
+|---|---|---|---|
+|`globals.<name>`|`globals_<name>`|All template/plugin scripts, globals, utils and properties|All the functions marked export of that global script|
+|`utils.<name>`|`utils_<name>`|All template/plugin scripts, globals, utils and properties|All the functions marked export of that util script|
+|`scripts.<name>`|`scripts_<name>`|All template/plugin scripts, utils(when added from scripts) and properties|All the functions marked export of that script|
+|`properties`|`properties`|All template scripts and utils(when added from scripts)|All the functions marked export of the properties script|
 
-The purpose of utils is just that, to be imported into other scripts. They are not runnable, they only have functions that other scripts can import. They can be used to avoid repetition.  
+The purpose of utils is just to be imported into other scripts. They are not runnable, they only have functions that other scripts can import. They can be used to avoid repetition.  
 
 ---
-**Tebas provides another 4 imports**:  
+**Tebas provides another 5 imports**:  
+
+## paths import
+This import is available in all scripts, globals, utils and properties. More info [here](./pathsImport.md).  
 
 ## tebas import
 This import is available in all scripts, globals, utils and properties. More info [here](./tebasImport.md).  

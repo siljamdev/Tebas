@@ -21,8 +21,6 @@ static class Tebas{
 		initConfig();
 		
 		Palette.init();
-		
-		//Console.WriteLine(fetchLatestVersion());
 	}
 	
 	public static void initSecond(){
@@ -295,11 +293,13 @@ static class Tebas{
 			return true;
 		}
 		
-		try{			
+		output("New version found: " + ver);
+		try{
 			string currentExe = Environment.ProcessPath!;		
 			string tempExe = Path.Combine(Path.GetDirectoryName(currentExe), Path.GetFileNameWithoutExtension(currentExe) + ".new" + Path.GetExtension(currentExe));
 			
-			string assetName = "tebas_" + BuildInfo.Runtime + Path.GetExtension(currentExe);
+			bool needsDotExe = BuildInfo.Runtime.StartsWith("win");
+			string assetName = "tebas_" + BuildInfo.Runtime + (needsDotExe ? ".exe" : "");
 			string url = BuildInfo.RepoUrl.TrimEnd('/') + "/releases/latest/download/" + assetName;
 			
 			using var client = new HttpClient();

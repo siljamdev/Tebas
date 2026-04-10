@@ -214,7 +214,7 @@ class Plugin{
 				try{
 					ResolvedImport r = TableScript.SourceAsImport("plugins/BUILD/globals/" + n, code, Tebas.pluginReport);
 					
-					t.Set("globals." + n, code);
+					t.Set("globals." + n, r.Optimize().ToCompactString());
 					imports["globals." + n] = r;
 				}catch(TabScriptException x){
 					hadError = true;
@@ -239,7 +239,7 @@ class Plugin{
 				try{
 					ResolvedImport r = TableScript.SourceAsImport("plugins/BUILD/scripts/" + n, code, Tebas.pluginReport);
 					
-					t.Set("scripts." + n, code);
+					t.Set("scripts." + n, r.Optimize().ToCompactString());
 					imports["scripts." + n] = r;
 				}catch(TabScriptException x){
 					hadError = true;
@@ -264,7 +264,7 @@ class Plugin{
 				try{
 					ResolvedImport r = TableScript.SourceAsImport("plugins/BUILD/utils/" + n, code, Tebas.pluginReport);
 					
-					t.Set("utils." + n, code);
+					t.Set("utils." + n, r.Optimize().ToCompactString());
 					imports["utils." + n] = r;
 				}catch(TabScriptException x){
 					hadError = true;
@@ -304,6 +304,11 @@ class Plugin{
 				string n = Path.GetFileNameWithoutExtension(s);
 				t.Set("resources." + n, File.ReadAllText(s));
 			}
+		}
+		
+		string parent = Path.GetDirectoryName(t.path);
+		if(parent != null){
+			Directory.CreateDirectory(parent);
 		}
 		
 		t.Save();

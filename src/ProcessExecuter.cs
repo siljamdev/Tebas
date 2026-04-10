@@ -43,11 +43,11 @@ class ProcessExecuter{
 	#endregion
 	
 	public (string name, Delegate func, string description)[] NamedFunctions => new (string, Delegate, string)[]{
-		("runProcess", runProcess, "Run a process in the " + pathName + " path, printing its output"),
-		("runProcessDetached", runProcessDetached, "Run a process detached in the " + pathName + " path, not printing its output"),
-		("runProcessWithOutput", runProcessWithOutput, "Run a process in the " + pathName + " path, and get its output as a stdlist list [stdout, stderr, exitcode]. Exitcode is a stdnum num"),
-		("runProcessWithExitCode", runProcessWithExitCode, "Run a process in the " + pathName + " path, and get its exit code"),
-		("open", open, "Open a url, folder or file in the " + pathName + " path"),
+		("runProcess", runProcess, "Run a process in the " + pathName + " path, printing its output. Returns false if any error occurred"),
+		("runProcessDetached", runProcessDetached, "Run a process detached in the " + pathName + " path, not printing its output. Returns false if any error occurred"),
+		("runProcessWithOutput", runProcessWithOutput, "Run a process in the " + pathName + " path, and get its output as a stdlist list [stdout, stderr, exitcode]. Exitcode is a stdnum num. If any error occurred, an empty table will be returned"),
+		("runProcessWithExitCode", runProcessWithExitCode, "Run a process in the " + pathName + " path, and get its exit code as a stdnum num. If any error occurred, an empty table will be returned"),
+		("open", open, "Open a url, folder or file in the " + pathName + " path. Returns false if any error occurred"),
 	};
 	
 	public (Delegate func, string description)[] Functions => NamedFunctions.Select(t => (t.func, t.description)).ToArray();
@@ -188,7 +188,7 @@ class ProcessExecuter{
 	
 	public Table runProcessWithOutput(string command, string directory, Table arguments){
 		if(!processAllowed(command, directory, arguments)){
-			return StdList.Build(new Table(), new Table(), new Table("-1"));
+			return new Table(0);
 		}
 		
 		directory = getFinalPath(directory);
@@ -223,13 +223,13 @@ class ProcessExecuter{
 			return StdList.Build(new Table(o), new Table(e), new Table(process.ExitCode.ToString()));
 		}catch(Exception e){
 			report(e);
-			return StdList.Build(new Table(), new Table(), new Table("-1"));
+			return new Table(0);
 		}
 	}
 	
-	public int runProcessWithExitCode(string command, string directory, Table arguments){
+	public Table runProcessWithExitCode(string command, string directory, Table arguments){
 		if(!processAllowed(command, directory, arguments)){
-			return -1;
+			return new Table(0);
 		}
 		
 		directory = getFinalPath(directory);
@@ -253,10 +253,10 @@ class ProcessExecuter{
 			
 			// Wait for the process to exit
 			process.WaitForExit();
-			return process.ExitCode;
+			return new Table(process.ExitCode.ToString());
 		}catch(Exception e){
 			report(e);
-			return -1;
+			return new Table(0);
 		}
 	}
 	

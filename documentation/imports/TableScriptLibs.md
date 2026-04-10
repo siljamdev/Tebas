@@ -22,7 +22,8 @@ export function stdlib::deleteEmpty(self){ EXTERN; } //Delete all 0-length eleme
 export function stdlib::reverse(self){ EXTERN; } //Reverse the order of a table
 export function stdlib::shuffle(self){ EXTERN; } //Shuffle randomly the order of a table
 export function stdlib::repeat(self, times){ EXTERN; } //Repeat some elements x times
-export function stdlib::getOS(){ EXTERN; } //Get the operating system, either 'windows', 'linux', or 'macos'
+export function stdlib::getMaxLength(){ EXTERN; } //Get the maximum table length
+export function stdlib::getOS(){ EXTERN; } //Get the operating system, either 'windows', 'linux', 'macos' or ''
 export function stdlib::getDate(){ EXTERN; } //Get date and hour in [yy, MM, dd, hh, mm, ss] format
 export function stdlib::sleep(ms){ EXTERN; } //Sleep x miliseconds
 ```

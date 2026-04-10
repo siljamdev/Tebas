@@ -14,33 +14,27 @@ class TebasImportGenerator{
 	}}
 	
 	static (Delegate func, string description)[] staticFunctions => new (Delegate, string)[]{
-		(getAllProjectsPaths, "Get the paths to all project directories"),
+		(getAllProjectsPaths, "Get the directory paths to all projects"),
 		(projectExists, "Check if project exists in a directory"),
-		(getProjectTemplateName, "Get the name of the template used in a project, based on its directory"),
-		(getProjectProperty, "Get a property of a project, based on its directory"),
+		(getProjectTemplateName, "Get the name of the template used in a project, based on its directory. Returns an empty string if no project exists in that directory"),
+		(getProjectProperty, "Get a property of a project, based on its directory. Returns an empty table if no project exists in that directory"),
 		(projectsCleanup, "Cleanup projects"),
 		
 		(getAllTemplateNames, "Get the names of all installed templates"),
-		(templateInstalled, "Check if template is installed"),
-		(templateRunGlobal, "Attempt to run a global script of a template"),
+		(templateInstalled, "Check if a template is installed"),
+		(templateRunGlobal, "Attempt to run a global script of a template. Returns true if the operation was successful"),
 		(templatesCleanup, "Cleanup templates"),
 		
 		(getAllPluginNames, "Get the names of all installed plugins"),
-		(pluginInstalled, "Check if plugin is installed"),
-		(pluginRunGlobal, "Attempt to run a global script of a plugin"),
+		(pluginInstalled, "Check if a plugin is installed"),
+		(pluginRunGlobal, "Attempt to run a global script of a plugin. Returns true if the operation was successful"),
 		(pluginsCleanup, "Cleanup plugins"),
 		
 		(getShared, "Get shared resource"),
 		(setShared, "Set shared resource"),
-		(appendShared, "Append to a shared resource"),
+		(appendShared, "Append to the end of a shared resource"),
 		(getAllSharedKeys, "Get all keys with a value in shared resources"),
-		(sharedCleanup, "Cleanup shared resources"),
-		
-		(getPathExtension, "Get extension of a file path"),
-		(getPathFilename, "Get file name with extension of a file path"),
-		(getPathFilenameNoExtension, "Get file name without extension of a file path"),
-		(getPathDirectory, "Get parent directory of a path"),
-		(getPathSeparator, "Get default OS separator of paths"),
+		(sharedCleanup, "Cleanup shared resources: cleans internal invalid or empty values"),
 		
 		(getAllPermissionKeys, "Get all valid permission keys"),
 		(getAllConfigKeys, "Get all valid config keys"),
@@ -197,26 +191,6 @@ class TebasImportGenerator{
 	
 	static void sharedCleanup(){
 		SharedHandler.cleanup();
-	}
-	
-	static string getPathExtension(string path){
-		return Path.GetExtension(path);
-	}
-	
-	static string getPathFilename(string path){
-		return Path.GetFileName(path);
-	}
-	
-	static string getPathFilenameNoExtension(string path){
-		return Path.GetFileNameWithoutExtension(path);
-	}
-	
-	static string getPathDirectory(string path){
-		return Path.GetDirectoryName(path);
-	}
-	
-	static string getPathSeparator(){
-		return Path.DirectorySeparatorChar.ToString();
 	}
 	
 	static Table getAllPermissionKeys(){

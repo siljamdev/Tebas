@@ -22,25 +22,25 @@ class FileUnit{
 	#endregion
 	
 	public (string name, Delegate func, string description)[] NamedFunctions => new (string, Delegate, string)[]{
-		("fileExists", fileExists, "Checks if a file exists in the " + pathName + " path"),
+		("fileExists", fileExists, "Returns true if a file exists in the " + pathName + " path"),
 		("fileRead", fileRead, "Reads whole text of a file in the " + pathName + " path"),
-		("fileReadLines", fileReadLines, "Reads text lines of a file in the " + pathName + " path"),
-		("fileWrite", fileWrite, "Writes whole content to a file in the " + pathName + " path"),
-		("fileWriteLines", fileWriteLines, "Writes whole lines to a file in the " + pathName + " path"),
-		("fileAppend", fileAppend, "Appends content to the end of a file in the " + pathName + " path"),
-		("fileAppendLines", fileAppendLines, "Appends lines to the end of a file in the " + pathName + " path"),
-		("fileDelete", fileDelete, "Deletes a file in the " + pathName + " path"),
-		("fileMove", fileMove, "Moves a file to a new location in the " + pathName + " path"),
-		("fileCopy", fileCopy, "Copies a file to another location in the " + pathName + " path"),
-		("fileSize", fileSize, "Get the size in bytes as a stdnum num of a file in the " + pathName + " path"),
+		("fileReadLines", fileReadLines, "Returns lines of text of a file in the " + pathName + " path"),
+		("fileWrite", fileWrite, "Writes whole content to a file in the " + pathName + " path. Returns true if the operation was successful"),
+		("fileWriteLines", fileWriteLines, "Writes whole lines to a file in the " + pathName + " path. Returns true if the operation was successful"),
+		("fileAppend", fileAppend, "Appends content to the end of a file in the " + pathName + " path. Returns true if the operation was successful"),
+		("fileAppendLines", fileAppendLines, "Appends lines to the end of a file in the " + pathName + " path. Returns true if the operation was successful"),
+		("fileDelete", fileDelete, "Deletes a file in the " + pathName + " path. Returns true if the operation was successful"),
+		("fileMove", fileMove, "Moves a file to a new location in the " + pathName + " path. Returns true if the operation was successful"),
+		("fileCopy", fileCopy, "Copies a file to another location in the " + pathName + " path. Returns true if the operation was successful"),
+		("fileSize", fileSize, "Get the size in bytes as a stdnum num of a file in the " + pathName + " path. Returns an empty string if any error occurred"),
 		
-		("folderExists", folderExists, "Checks if a folder exists in the " + pathName + " path"),
-		("folderCreate", folderCreate, "Create a folder in the " + pathName + " path"),
-		("folderDelete", folderDelete, "Delete a folder in the " + pathName + " path"),
-		("folderMove", folderMove, "Move a folder to a new location in the " + pathName + " path"),
-		("folderListFiles", folderListFiles, "Get all file paths in the top directory of a folder in the " + pathName + " path"),
-		("folderListChildFiles", folderListChildFiles, "Get all file paths in all directories of a folder in the " + pathName + " path"),
-		("folderListFolders", folderListFolders, "Get all subfolder paths in a folder in the " + pathName + " path"),
+		("folderExists", folderExists, "Returns true if a folder exists in the " + pathName + " path"),
+		("folderCreate", folderCreate, "Create a folder in the " + pathName + " path. Returns true if the operation was successful"),
+		("folderDelete", folderDelete, "Delete a folder in the " + pathName + " path. Returns true if the operation was successful"),
+		("folderMove", folderMove, "Move a folder to a new location in the " + pathName + " path. Returns true if the operation was successful"),
+		("folderListFiles", folderListFiles, "Get all file paths in the top directory of a folder in the " + pathName + " path. Returns a table with length -1 if any error occurred"),
+		("folderListChildFiles", folderListChildFiles, "Get all file paths in all directories of a folder in the " + pathName + " path. Returns a table with length -1 if any error occurred"),
+		("folderListFolders", folderListFolders, "Get all subfolder paths in a folder in the " + pathName + " path. Returns a table with length -1 if any error occurred"),
 	};
 	
 	public (Delegate func, string description)[] Functions => NamedFunctions.Select(t => (t.func, t.description)).ToArray();

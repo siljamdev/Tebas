@@ -38,24 +38,23 @@ class TebasProjectImportGenerator{
 		(getPath, "Get the project path"),
 		(getName, "Get the project name"),
 		(getCreationDate, "Get the date and hour of creation in [yy, MM, dd, hh, mm, ss] format"),
-		(getTemplateName, "Get the used template name"),
+		(getTemplateName, "Get the name of the template used in the project"),
 		
-		(runScriptOrGlobal, "Run a script or a template global"),
-		(runScript, "Run a script"),
-		(runPluginScriptOrGlobal, "Run a plugin script or a plugin global"),
-		(runPluginScript, "Run a plugin script"),
+		(runScriptOrGlobal, "Run a template script or global. Returns true if the operation was successful"),
+		(runScript, "Run a template script. Returns true if the operation was successful"),
+		(runPluginScriptOrGlobal, "Run a plugin script or global. Returns true if the operation was successful"),
+		(runPluginScript, "Run a plugin script. Returns true if the operation was successful"),
 		
-		(getProperty, "Get a project property"),
+		(getProperty, "Get a project property or an empty table if not implemented"),
+		(cleanup, "Cleanup this project: cleans internal invalid or empty values"),
 		
 		(getResource, "Get a project resource"),
 		(setResource, "Set a project resource"),
-		(appendResource, "Append to a project resource"),
+		(appendResource, "Append to the end of a project resource"),
 		(getAllResourceKeys, "Get all keys with a value in project resources"),
 		
-		(templateBuild, "Build a template from source in a directory in the project path"),
-		(pluginBuild, "Build a plugin from source in a directory in the project path"),
-		
-		(cleanup, "Cleanup this project"),
+		(templateBuild, "Build a template from source in a directory in the project path. Returns true if the operation was successful"),
+		(pluginBuild, "Build a plugin from source in a directory in the project path. Returns true if the operation was successful"),
 	};
 	
 	Project proj;

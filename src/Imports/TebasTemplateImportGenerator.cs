@@ -15,19 +15,19 @@ class TebasTemplateImportGenerator{
 	(Delegate func, string description)[] AllFunctions => new (Delegate, string)[]{
 		(getPath, "Get the template path"),
 		(getName, "Get the template name"),
-		(getAuthor, "Get the template author if possible"),
-		(getDescription, "Get the template description if possible"),
+		(getAuthor, "Get the template author if possible, or an empty string"),
+		(getDescription, "Get the template description if possible, or an empty string"),
 		(getAllScripts, "Get all script names"),
 		(getAllGlobals, "Get all global script names"),
 		
-		(runGlobal, "Run a global script"),
+		(runGlobal, "Run a global script. Returns true if the operation was successful"),
+		
+		(hasPermission, "Check if the template has a permission"),
+		(cleanup, "Cleanup this template: cleans internal invalid or empty values"),
 		
 		(getResource, "Get a template resource"),
 		(setResource, "Set a template resource"),
-		(appendResource, "Append to a template resource"),
-		
-		(hasPermission, "Get if the template has a permission"),
-		(cleanup, "Cleanup this template"),
+		(appendResource, "Append to the end of a template resource"),
 	};
 	
 	Template template;
