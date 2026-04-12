@@ -1,7 +1,7 @@
 # Design guidelines for template & plugin creation
 
-In this document, the recommended design guidelines for creating [Tebas](https://github.com/siljamdev/Tebas) templates and plugins will be exposed.  
-**Disclaimer**: These guidelines are the ones I follow designing the templates and plugins available in the [Official Tebas Registry](https://github.com/siljamdev/Tebas-Registry)
+In this document, the recommended design guidelines for creating Tebas templates and plugins will be exposed.  
+**Disclaimer**: These guidelines are the ones I follow designing the templates and plugins available in the [Official Tebas Registry](https://github.com/siljamdev/Tebas-Registry).  
 
 ## Workspace bounds
 You should NEVER touch or change files that fall outside of the project/template/plugin working area.  
@@ -56,7 +56,7 @@ Properties to implement:
 
 ### [stats](https://github.com/siljamdev/Tebas-Registry/tree/main/plugins/stats) plugin
 Properties to implement:
-- `stats.codeLines`: Lines of code in the project as a stdnum num. The template is responsible for counting them
+- `stats.codeLines`: Lines of code in the project as a [stdnum](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdNum.html) num. The template is responsible for counting them
 
 Scripts to implement:
 - `stats`: Script that will be called when the plugin script `stats` is called

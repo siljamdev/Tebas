@@ -7,7 +7,7 @@ In Tebas, all the [TableScript default libraries](https://siljamdev.github.io/Ta
 
 ## Context imports
 On top of that, template/plugin scripts can import each other:  
-|import|Imports as|Availability|What is imported|
+|import|Imported as|Availability|What is imported|
 |---|---|---|---|
 |`globals.<name>`|`globals_<name>`|All template/plugin scripts, globals, utils and properties|All the functions marked export of that global script|
 |`utils.<name>`|`utils_<name>`|All template/plugin scripts, globals, utils and properties|All the functions marked export of that util script|
