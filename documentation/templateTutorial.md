@@ -68,7 +68,7 @@ import tebastemplate;
 
 //Previous template resources
 tab pr = tebastemplate::getResource("browserPath");
-if pr.length > 0{
+if pr > 0{
 	print("Browser executable path gotten from previous template resources");
 	testProcess(pr);
 	exit;
@@ -86,7 +86,7 @@ If we consult the [desing guidelines](./designGuidelines.md), we can see it tell
 ```
 //Shared resources
 tab sr = tebas::getShared("paths.browser");
-if sr.length > 0{
+if sr > 0{
 	tebastemplate::setResource("browserPath", sr);
 	print("Browser executable path gotten from shared resources");
 	testProcess(sr);
@@ -102,7 +102,7 @@ import tebastemplate;
 
 //Previous template resources
 tab pr = tebastemplate::getResource("browserPath");
-if pr.length > 0{
+if pr > 0{
 	print("Browser executable path gotten from previous template resources");
 	testProcess(pr);
 	exit;
@@ -110,7 +110,7 @@ if pr.length > 0{
 
 //Shared resources
 tab sr = tebas::getShared("paths.browser");
-if sr.length > 0{
+if sr > 0{
 	tebastemplate::setResource("browserPath", sr);
 	print("Browser executable path gotten from shared resources");
 	testProcess(sr);
