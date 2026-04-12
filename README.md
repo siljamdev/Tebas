@@ -34,6 +34,7 @@ This software is licensed under the [MIT License](./LICENSE).
 If you want to develop templates or plugins, first of all familiarize yourself with the [TableScript](https://github.com/siljamdev/TableScript) scripting language.  
 Then, read about the [imports](./documentation/imports/imports.md) that are available in Tebas scripts.  
 Also, try to keep in mind the [design guidelines](./documentation/designGuidelines.md).  
+You can follow this step-by-step [tutorial](./documentation/templateTutorial.md) for creating a template, it will help you understand the workflow better.  
 Once you have developed a working template/plugin, make a PR to the [Official Tebas Registry](https://github.com/siljamdev/Tebas-Registry).  
 
 ### Templates
