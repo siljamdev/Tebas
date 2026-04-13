@@ -45,6 +45,7 @@ static class Tebas{
 		("process.showLabel", true, "Show process name in its output"),
 		("registry.use", true, "Try to install from registry"),
 		("registry.url", "https://github.com/siljamdev/Tebas-Registry", "Url of the template and plugin registry"),
+		("noHints", false, "Never show hints"),
 		("useColors", true, "Use colored console output when possible"),
 	};
 	
@@ -474,11 +475,9 @@ static class Tebas{
 	
 	//Hints
 	public static void hint(string t){
-		if(noHints){
-			return;
+		if(!noHints && !config.GetValue<bool>("noHints")){
+			output(t, Palette.warn);
 		}
-		
-		output(t, Palette.warn);
 	}
 	#endregion
 }

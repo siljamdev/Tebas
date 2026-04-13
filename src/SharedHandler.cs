@@ -31,7 +31,7 @@ public static class SharedHandler{
 		if(shared.TryGetValue(key, out string s)){
 			return s;
 		}
-		return "";
+		return null;
 	}
 	
 	public static string[] getAll(){

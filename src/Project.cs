@@ -274,7 +274,7 @@ class Project{
 		if(file.TryGetValue("resources." + key, out string s)){
 			return s;
 		}
-		return "";
+		return null;
 	}
 	
 	public void setResource(string key, string value){

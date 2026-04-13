@@ -64,7 +64,7 @@ Before running, the user must confirm to run the process. The user can skip this
 ```
 export function tebastemplate::runProcess(command, directory, arguments)
 ```
-Returns bool as table, takes as arguments: table as string, table as string, table. Run a process in the template path, printing its output. Returns false if any error occurred
+Returns bool as table, takes as arguments: table as string, table as string, table. Run a process in the template path, printing its output. Returns its exit code as a [stdnum](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdNum.html) num. If any error occurred, an empty table will be returned
 ```
 export function tebastemplate::runProcessDetached(command, directory, arguments)
 ```
@@ -74,9 +74,9 @@ export function tebastemplate::runProcessWithOutput(command, directory, argument
 ```
 Returns table, takes as arguments: table as string, table as string, table. Run a process in the template path, and get its output as a [stdlist](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdList.html) list [stdout, stderr, exitcode]. Exitcode is a [stdnum](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdNum.html) num. If any error occurred, an empty table will be returned
 ```
-export function tebastemplate::runProcessWithExitCode(command, directory, arguments)
+export function tebastemplate::runProcessSilent(command, directory, arguments)
 ```
-Returns table, takes as arguments: table as string, table as string, table. Run a process in the template path, and get its exit code as a [stdnum](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdNum.html) num. If any error occurred, an empty table will be returned
+Returns table, takes as arguments: table as string, table as string, table. Run a process in the template path, not printing its output. Returns its exit code as a [stdnum](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdNum.html) num. If any error occurred, an empty table will be returned
 ```
 export function tebastemplate::open(target)
 ```

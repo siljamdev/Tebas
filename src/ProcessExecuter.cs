@@ -43,10 +43,10 @@ class ProcessExecuter{
 	#endregion
 	
 	public (string name, Delegate func, string description)[] NamedFunctions => new (string, Delegate, string)[]{
-		("runProcess", runProcess, "Run a process in the " + pathName + " path, printing its output. Returns false if any error occurred"),
+		("runProcess", runProcess, "Run a process in the " + pathName + " path, printing its output. Returns its exit code as a stdnum num. If any error occurred, an empty table will be returned"),
 		("runProcessDetached", runProcessDetached, "Run a process detached in the " + pathName + " path, not printing its output. Returns false if any error occurred"),
 		("runProcessWithOutput", runProcessWithOutput, "Run a process in the " + pathName + " path, and get its output as a stdlist list [stdout, stderr, exitcode]. Exitcode is a stdnum num. If any error occurred, an empty table will be returned"),
-		("runProcessWithExitCode", runProcessWithExitCode, "Run a process in the " + pathName + " path, and get its exit code as a stdnum num. If any error occurred, an empty table will be returned"),
+		("runProcessSilent", runProcessSilent, "Run a process in the " + pathName + " path, not printing its output. Returns its exit code as a stdnum num. If any error occurred, an empty table will be returned"),
 		("open", open, "Open a url, folder or file in the " + pathName + " path. Returns false if any error occurred"),
 	};
 	
@@ -93,9 +93,9 @@ class ProcessExecuter{
 		return Tebas.askConfirmation("Do you want to run '" + n + "'?");
 	}
 	
-	public bool runProcess(string command, string directory, Table arguments){
+	public Table runProcess(string command, string directory, Table arguments){
 		if(!processAllowed(command, directory, arguments)){
-			return false;
+			return new Table(0);
 		}
 		
 		directory = getFinalPath(directory);
@@ -152,10 +152,10 @@ class ProcessExecuter{
 		
 			// Wait for the process to exit
 			process.WaitForExit();
-			return true;
+			return new Table(process.ExitCode.ToString());
 		}catch(Exception e){
 			report(e);
-			return false;
+			return new Table(0);
 		}
 	}
 	
@@ -227,7 +227,7 @@ class ProcessExecuter{
 		}
 	}
 	
-	public Table runProcessWithExitCode(string command, string directory, Table arguments){
+	public Table runProcessSilent(string command, string directory, Table arguments){
 		if(!processAllowed(command, directory, arguments)){
 			return new Table(0);
 		}

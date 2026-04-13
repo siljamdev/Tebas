@@ -16,7 +16,7 @@ The steps to follow are:
 Now, we will have our folder populated with a bunch of files. Let's modify some of them.  
 In `name.txt`, we should write `html`, because its the name of the template.  
 In `author.txt`, we should write our author name (in my case siljam).  
-In `description.txt`, we should write a meaningful description for our template. I will write `Template that helps you create web projects with html files.`.  
+In `description.txt`, we should write a meaningful description for our template. I will write `Template that helps you create web projects with html files`.  
 
 Now, we have succesfully set everything up and we are ready to start writing code.
 
@@ -24,7 +24,7 @@ Now, we have succesfully set everything up and we are ready to start writing cod
 As we established earlier, we will use a browser to open the html files.  
 To run the browser, we will need its path. We will get it in the install script, and save in the template resources with the key `browserPath`.  
 We go to the `globals` folder and create a new file, `install.tbs`.  
-Lets start with its code:
+Let's start with its code:
 ```
 import stdlib;
 import tebas;
@@ -82,7 +82,7 @@ testProcess(m);
 
 If the resource exists(`length > 0`), we dont need to ask the user, and exit prematurely. We also log what we did so the user knows what happened.  
 
-If we consult the [desing guidelines](./designGuidelines.md), we can see it tells us to try and get data from the shared resources, and there is a standard for executable paths. So we can try getting the browser path from there:
+If we consult the [design guidelines](./designGuidelines.md), we can see it tells us to try and get data from the shared resources, and there is a standard for executable paths. So we can try getting the browser path from there:
 ```
 //Shared resources
 tab sr = tebas::getShared("paths.browser");
@@ -139,7 +139,7 @@ function testProcess(path){
 With this, we have a working install script.  
 
 ## 4. Config script
-But the user might want to change this path without having to reinstall the template(even though its impossible). Thats why we will create a `tconfig` global script as defined by the [desing guidelines](./designGuidelines.md).  
+But the user might want to change this path without having to reinstall the template. That is why we will create a `tconfig` global script as defined by the [design guidelines](./designGuidelines.md).  
 We can run `tebas add-tconfig` to create this script. After it is created, we just have to fill in the gaps(keys and description):
 ```
 import stdlib;
@@ -198,13 +198,13 @@ tebastemplate::setResource(args.0, args.1);
 This config is pretty solid and enough for our template. We could even delete the true/false values part, but we will not in case we need to expand the template in the future.  
 
 ## 5. Init script
-Now lets create the script that will run when we do `tebas init html`. We want to create all the necessary files so the user can start coding directly, so we will add some files to the project: `index.html`, `style.css`, `script.js`.  
+Now lets create the script that will run when we do `tebas init html`. We want to create all the necessary files so the user can start coding directly, so we will add some files to the project: `index.html`, `style.css` and `script.js`.  
 The contents of these file will be a blank and basic web page ready to be modified.  
 We need to add this empty content to the template resources. We go to the `resources` folder and create a `index.html` file containg:
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	
@@ -212,10 +212,10 @@ We need to add this empty content to the template resources. We go to the `resou
 	<script src="script.js"></script>
 	
     <title>Hello World</title>
-</head>
-<body>
+  </head>
+  <body>
 	Hello World!
-</body>
+  </body>
 </html>
 ```
 
@@ -235,8 +235,8 @@ Finally, we create a JavaScript file, `script.js`, containing:
 console.log("Hello World!");
 ```
 
-These 3 resources will be available to as with the keys `index`, `style` and `script`.  
-Lets create the init script. We go into the `scripts` folder and create the file `init.tbs`.  
+These 3 resources will be available to us with the keys `index`, `style` and `script`.  
+Let's create the init script. We go into the `scripts` folder and create the file `init.tbs`.  
 In it, we will write:
 ```
 import stdlib;
@@ -255,8 +255,8 @@ function createFile(path, content){
 }
 ```
 
-We are helped by the `createFile` function, that does not write to a file if it already exists. This follows the [desing guidelines](./designGuidelines.md).  
-But what if the user already has a html project there? We should check for the existance of html files before creating everything new:
+We are helped by the `createFile` function, that does not write to a file if it already exists. This follows the [design guidelines](./designGuidelines.md).  
+But what if the user already has a html project there? We should check for the existance of any html files before creating everything from scratch:
 
 ```
 tab files = tebasproject::folderListFiles("", "*.html");
@@ -289,7 +289,7 @@ function createFile(path, content){
 ```
 
 ## 6. Run script
-To conform with the standard of the [unirun](https://github.com/siljamdev/Tebas-Registry/tree/main/plugins/unirun) we will add a run plugin.  
+To conform with the standard of the [unirun](https://github.com/siljamdev/Tebas-Registry/tree/main/plugins/unirun) plugin we will add a run script.  
 It will either take an argument to the file we want to run or no arguments.
 We will create, inside the `scripts` folder, a file called `run.tbs`, containg:
 ```
@@ -316,8 +316,8 @@ if args.length == 1{
 This script will run a file if passed, or search for it instead.  
 
 ## 7. Help script
-When we did the init, a global script was added in `globals/help.tbs`, as the [desing guidelines](./designGuidelines.md) stipulates.  
-Lets modify it so it shows everything correctly:
+When we did the init, a global script was added in `globals/help.tbs`, as the [design guidelines](./designGuidelines.md) stipulates.  
+Let's modify it so it shows everything correctly:
 ```
 import stdlib;
 import tebas;
@@ -334,13 +334,15 @@ print("Scripts:");
 print("  run [file]    Runs the web page in the browser");
 print("Globals:");
 print("  tconfig <key> <value>    Change the config. Use list as key to get all valid keys, and see to see the current config");
-print("  help    This help menu");
+print("  help                     This help menu");
 print("");
 print("This template helps you with local web page development (html files)");
 ```
 
+You don't have to include install or init scripts here, because they are not runnable.  
+
 ## 8. Properties
-The [desing guidelines](./designGuidelines.md) recommend implementing properties for common plugins. We will implement those for the [stats](https://github.com/siljamdev/Tebas-Registry/tree/main/plugins/stats) plugin.  
+The [design guidelines](./designGuidelines.md) recommend implementing properties for common plugins. We will implement those for the [stats](https://github.com/siljamdev/Tebas-Registry/tree/main/plugins/stats) plugin.  
 We need to modify the `properties.tbs` file that was created on init. The key we need to implement is `stats.codeLines`:
 ```
 import stdlib;
@@ -382,4 +384,4 @@ This way, everything works.
 ## 9. Building
 Lets ensure everything works well. Running `tebas build` should tell you if any errors happened.  
 If the build is succesfull, congratulations! You have succesfully created a template. Now, try creating whatever you want.  
-This html template can be found in the [Official Tebas Registry](https://github.com/siljamdev/Tebas-Registry), [here](https://github.com/siljamdev/Tebas-Registry/tree/main/templates/html).  
+This html template's source can be found in the [here](https://github.com/siljamdev/Tebas-Registry/tree/main/templates/html).  
