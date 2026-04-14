@@ -2,7 +2,7 @@
 <img src="res/icon.png" width="200"/>
 
 Tebas is a project manager based on templates & plugins  
-**Tebas is still in development, so expect breaking changes**  
+**Tebas v1.0.0 is still in beta development, so expect breaking changes**  
 
 ## Usage
 Tebas is a command based utility to handle projects. Its strength is [user-made templates and plugins](https://github.com/siljamdev/Tebas-Registry), which provide the useful functionalities.  

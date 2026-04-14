@@ -39,7 +39,7 @@ Here, we ask the user for the browser executable path and save it in the templat
 We can test if a process is actually runnable:
 ```
 function testProcess(path){
-	tab num = tebastemplate::runProcessWithExitCode(path, "", ["-h"]);
+	tab num = tebastemplate::runProcessSilent(path, "", ["-h"]);
 	
 	if num.length == 0{
 		error("'" + path + "' does not seem to be a runnable process");
@@ -125,7 +125,7 @@ if testProcess(m){
 }
 
 function testProcess(path){
-	tab num = tebastemplate::runProcessWithExitCode(path, "", ["-h"]);
+	tab num = tebastemplate::runProcessSilent(path, "", ["-h"]);
 	
 	if num.length == 0{
 		error("'" + path + "' does not seem to be a runnable process");
