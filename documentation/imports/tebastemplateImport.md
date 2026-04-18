@@ -64,7 +64,7 @@ Before running, the user must confirm to run the process. The user can skip this
 ```
 export function tebastemplate::runProcess(command, directory, arguments)
 ```
-Returns bool as table, takes as arguments: table as string, table as string, table. Run a process in the template path, printing its output. Returns its exit code as a [stdnum](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdNum.html) num. If any error occurred, an empty table will be returned
+Returns string as table, takes as arguments: table as string, table as string, table. Run a process in the template path, printing its output. Returns its exit code as a [stdnum](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdNum.html) num. If any error occurred, an empty table will be returned
 ```
 export function tebastemplate::runProcessDetached(command, directory, arguments)
 ```
@@ -76,7 +76,7 @@ Returns table, takes as arguments: table as string, table as string, table. Run 
 ```
 export function tebastemplate::runProcessSilent(command, directory, arguments)
 ```
-Returns table, takes as arguments: table as string, table as string, table. Run a process in the template path, not printing its output. Returns its exit code as a [stdnum](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdNum.html) num. If any error occurred, an empty table will be returned
+Returns string as table, takes as arguments: table as string, table as string, table. Run a process in the template path, not printing its output. Returns its exit code as a [stdnum](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdNum.html) num. If any error occurred, an empty table will be returned
 ```
 export function tebastemplate::open(target)
 ```
@@ -93,7 +93,7 @@ Returns bool as table, takes as arguments: table as string. Returns true if a fi
 ```
 export function tebastemplate::fileRead(path)
 ```
-Returns table, takes as arguments: table as string. Reads whole text of a file in the template path
+Returns string as table, takes as arguments: table as string. Reads whole text of a file in the template path. Returns an empty table if any error occurred
 ```
 export function tebastemplate::fileReadLines(path)
 ```
@@ -129,7 +129,7 @@ Returns bool as table, takes as arguments: table as string, table as string. Cop
 ```
 export function tebastemplate::fileSize(path)
 ```
-Returns string as table, takes as arguments: table as string. Get the size in bytes as a [stdnum](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdNum.html) num of a file in the template path. Returns an empty string if any error occurred
+Returns string as table, takes as arguments: table as string. Get the size in bytes as a [stdnum](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdNum.html) num of a file in the template path. Returns an empty table if any error occurred
 ```
 export function tebastemplate::folderExists(path)
 ```

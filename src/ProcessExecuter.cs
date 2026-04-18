@@ -93,9 +93,9 @@ class ProcessExecuter{
 		return Tebas.askConfirmation("Do you want to run '" + n + "'?");
 	}
 	
-	public Table runProcess(string command, string directory, Table arguments){
+	public string runProcess(string command, string directory, Table arguments){
 		if(!processAllowed(command, directory, arguments)){
-			return new Table(0);
+			return null;
 		}
 		
 		directory = getFinalPath(directory);
@@ -152,10 +152,10 @@ class ProcessExecuter{
 		
 			// Wait for the process to exit
 			process.WaitForExit();
-			return new Table(process.ExitCode.ToString());
+			return process.ExitCode.ToString();
 		}catch(Exception e){
 			report(e);
-			return new Table(0);
+			return null;
 		}
 	}
 	
@@ -227,9 +227,9 @@ class ProcessExecuter{
 		}
 	}
 	
-	public Table runProcessSilent(string command, string directory, Table arguments){
+	public string runProcessSilent(string command, string directory, Table arguments){
 		if(!processAllowed(command, directory, arguments)){
-			return new Table(0);
+			return null;
 		}
 		
 		directory = getFinalPath(directory);
@@ -253,10 +253,10 @@ class ProcessExecuter{
 			
 			// Wait for the process to exit
 			process.WaitForExit();
-			return new Table(process.ExitCode.ToString());
+			return process.ExitCode.ToString();
 		}catch(Exception e){
 			report(e);
-			return new Table(0);
+			return null;
 		}
 	}
 	

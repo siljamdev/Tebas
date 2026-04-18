@@ -91,7 +91,7 @@ Before running, the user must confirm to run the process. The user can skip this
 ```
 export function tebasproject::runProcess(command, directory, arguments)
 ```
-Returns bool as table, takes as arguments: table as string, table as string, table. Run a process in the project path, printing its output. Returns its exit code as a [stdnum](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdNum.html) num. If any error occurred, an empty table will be returned
+Returns string as table, takes as arguments: table as string, table as string, table. Run a process in the project path, printing its output. Returns its exit code as a [stdnum](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdNum.html) num. If any error occurred, an empty table will be returned
 ```
 export function tebasproject::runProcessDetached(command, directory, arguments)
 ```
@@ -103,7 +103,7 @@ Returns table, takes as arguments: table as string, table as string, table. Run 
 ```
 export function tebastemplate::runProcessSilent(command, directory, arguments)
 ```
-Returns table, takes as arguments: table as string, table as string, table. Run a process in the project path, not printing its output. Returns its exit code as a [stdnum](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdNum.html) num. If any error occurred, an empty table will be returned
+Returns string as table, takes as arguments: table as string, table as string, table. Run a process in the project path, not printing its output. Returns its exit code as a [stdnum](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdNum.html) num. If any error occurred, an empty table will be returned
 ```
 export function tebasproject::open(target)
 ```
@@ -120,7 +120,7 @@ Returns bool as table, takes as arguments: table as string. Returns true if a fi
 ```
 export function tebasproject::fileRead(path)
 ```
-Returns table, takes as arguments: table as string. Reads whole text of a file in the project path
+Returns string as table, takes as arguments: table as string. Reads whole text of a file in the project path. Returns an empty table if any error occurred
 ```
 export function tebasproject::fileReadLines(path)
 ```
@@ -156,7 +156,7 @@ Returns bool as table, takes as arguments: table as string, table as string. Cop
 ```
 export function tebasproject::fileSize(path)
 ```
-Returns string as table, takes as arguments: table as string. Get the size in bytes as a [stdnum](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdNum.html) num of a file in the project path. Returns an empty string if any error occurred
+Returns string as table, takes as arguments: table as string. Get the size in bytes as a [stdnum](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdNum.html) num of a file in the project path. Returns an empty table if any error occurred
 ```
 export function tebasproject::folderExists(path)
 ```

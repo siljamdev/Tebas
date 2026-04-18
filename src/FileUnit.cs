@@ -141,20 +141,20 @@ class FileUnit{
 		return checkPath(path) ? File.Exists(getFinalPath(path)) : false;
 	}
 	
-	public Table fileRead(string path){
+	public string fileRead(string path){
 		if(!checkPath(path)){
-			return new Table(0);
+			return null;
 		}
 		
 		if(!File.Exists(getFinalPath(path))){
-			return new Table(0);
+			return null;
 		}
 		
 		try{
-			return new Table(File.ReadAllText(getFinalPath(path)));
+			return File.ReadAllText(getFinalPath(path));
 		}catch(Exception e){
 			report(e);
-			return new Table(0);
+			return null;
 		}
 	}
 	
@@ -323,18 +323,18 @@ class FileUnit{
 	
 	public string fileSize(string path){
 		if(!checkPath(path)){
-			return "";
+			return null;
 		}
 		
 		if(!File.Exists(getFinalPath(path))){
-			return "";
+			return null;
 		}
 		
 		try{
 			return new FileInfo(getFinalPath(path)).Length.ToString();
 		}catch(Exception e){
 			report(e);
-			return "";
+			return null;
 		}
 	}
 	

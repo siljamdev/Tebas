@@ -214,7 +214,7 @@ class Plugin{
 				try{
 					ResolvedImport r = TableScript.SourceAsImport("plugins/BUILD/globals/" + n, code, Tebas.pluginReport);
 					
-					t.Set("globals." + n, r.Optimize().ToCompactString());
+					t.Set("globals." + n, r.ToCompactString());
 					imports["globals." + n] = r;
 				}catch(TabScriptException x){
 					hadError = true;
@@ -239,7 +239,7 @@ class Plugin{
 				try{
 					ResolvedImport r = TableScript.SourceAsImport("plugins/BUILD/scripts/" + n, code, Tebas.pluginReport);
 					
-					t.Set("scripts." + n, r.Optimize().ToCompactString());
+					t.Set("scripts." + n, r.ToCompactString());
 					imports["scripts." + n] = r;
 				}catch(TabScriptException x){
 					hadError = true;
@@ -264,7 +264,7 @@ class Plugin{
 				try{
 					ResolvedImport r = TableScript.SourceAsImport("plugins/BUILD/utils/" + n, code, Tebas.pluginReport);
 					
-					t.Set("utils." + n, r.Optimize().ToCompactString());
+					t.Set("utils." + n, r.ToCompactString());
 					imports["utils." + n] = r;
 				}catch(TabScriptException x){
 					hadError = true;

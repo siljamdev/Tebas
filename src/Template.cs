@@ -230,7 +230,7 @@ class Template{
 				try{
 					ResolvedImport r = TableScript.SourceAsImport("templates/BUILD/globals/" + n, code, Tebas.templateReport);
 					
-					t.Set("globals." + n, r.Optimize().ToCompactString());
+					t.Set("globals." + n, r.ToCompactString());
 					imports["globals." + n] = r;
 				}catch(TabScriptException x){
 					hadError = true;
@@ -255,7 +255,7 @@ class Template{
 				try{
 					ResolvedImport r = TableScript.SourceAsImport("templates/BUILD/scripts/" + n, code, Tebas.templateReport);
 					
-					t.Set("scripts." + n, r.Optimize().ToCompactString());
+					t.Set("scripts." + n, r.ToCompactString());
 					imports["scripts." + n] = r;
 				}catch(TabScriptException x){
 					hadError = true;
@@ -269,7 +269,7 @@ class Template{
 			try{
 				ResolvedImport r = TableScript.SourceAsImport("templates/BUILD/properties", prop, Tebas.templateReport);
 				
-				t.Set("properties", r.Optimize().ToCompactString());
+				t.Set("properties", r.ToCompactString());
 				imports["properties"] = r;
 			}catch(TabScriptException x){
 				hadError = true;
@@ -292,7 +292,7 @@ class Template{
 				try{
 					ResolvedImport r = TableScript.SourceAsImport("templates/BUILD/utils/" + n, code, Tebas.templateReport);
 					
-					t.Set("utils." + n, r.Optimize().ToCompactString());
+					t.Set("utils." + n, r.ToCompactString());
 					imports["utils." + n] = r;
 				}catch(TabScriptException x){
 					hadError = true;
