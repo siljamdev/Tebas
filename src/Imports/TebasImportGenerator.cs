@@ -53,7 +53,7 @@ class TebasImportGenerator{
 	
 	(Delegate func, string description)[] instanceFunctions => new (Delegate, string)[]{
 		(print, "Print to Standard Output"),
-		(printColor, "Print to Standard Output with color(hexadecimal)"),
+		(printFormat, "Print to Standard Output with color(hexadecimal)"),
 		(error, "Print to Standard Error"),
 		(input, "Read from Standard Input"),
 	};
@@ -88,13 +88,13 @@ class TebasImportGenerator{
 		}
 	}
 	
-	void printColor(string t, string color){
-		CharFormat? f = Color3.TryParse(color, out Color3 c) ? new CharFormat(c) : null;
+	void printFormat(string t){
+		FormatString fs = new FormatString(t);
 		
 		if(showLabel){
-			Tebas.labelOutput(label, isPlugin ? Palette.plugin : Palette.template, t, f);
+			Tebas.labelOutput(label, isPlugin ? Palette.plugin : Palette.template, fs);
 		}else{
-			Tebas.output(t, f);
+			Tebas.output(fs);
 		}
 	}
 	

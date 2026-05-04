@@ -89,7 +89,7 @@ class ProcessExecuter{
 		
 		displayProcesshint();
 		
-		string n = command + (arguments != null ? (" " + string.Join(" ", arguments.contents)) : "");
+		string n = command + (arguments != null ? (" " + string.Join(" ", arguments.contents.Select(a => "\"" + a + "\""))) : "");
 		return Tebas.askConfirmation("Do you want to run '" + n + "'?");
 	}
 	
@@ -116,7 +116,7 @@ class ProcessExecuter{
 			foreach(string arg in arguments.contents){
 				processInfo.ArgumentList.Add(arg);
 			}
-	
+			
 			using Process process = new Process{StartInfo = processInfo};
 			
 			//Figure out actions

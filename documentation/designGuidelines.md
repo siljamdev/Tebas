@@ -23,6 +23,7 @@ If your template/plugin needs some data, like the path to an executable, try get
 |Shared resources key|Value|
 |---|---|
 |`author`|Author name|
+|`company`|Company name|
 |`paths.<name>`|Path to an executable. For example, `paths.git` or `paths.browser`|
 
 ## Help global
@@ -57,12 +58,15 @@ Properties to implement:
 ### [stats](https://github.com/siljamdev/Tebas-Registry/tree/main/plugins/stats) plugin
 Properties to implement:
 - `stats.codeLines`: Lines of code in the project as a [stdnum](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdNum.html) num. The template is responsible for counting them
+- `stats.timesBuilt`: Number of times the project was built, as a [stdnum](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdNum.html) num. The template is responsible for counting them
 
 Scripts to implement:
-- `stats`: Script that will be called when the plugin script `stats` is called
+- `stats`: Script that will be called when the plugin script `stats` is called. Takes as argument the number of lines of code of the project returned by `stats.codeLines` as a [stdnum](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdNum.html) num
 
 ### [unirun](https://github.com/siljamdev/Tebas-Registry/tree/main/plugins/unirun) plugin
 Scripts to implement:
 - `run [file]`: Script that runs the project/file
 - `debug [file]`: Script that debugs the project/file
 - `build [file]`: Script that builds the project/file
+
+Additionally, ff your template or plugin supports a runnable/debuggable/buildable file, add it using `set-runnable`, `set-debuggable` or `set-buildable` globals.  

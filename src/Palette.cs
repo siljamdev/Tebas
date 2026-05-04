@@ -7,7 +7,7 @@ static class Palette{
 	public static CharFormat? confirmation = new CharFormat(new Color3("#B1FF57"));
 	
 	public static CharFormat? plugin = new CharFormat(new Color3("#00AFFF"));
-	public static CharFormat? template = new CharFormat(new Color3("#00DFE1"));
+	public static CharFormat? template = new CharFormat(new Color3("#B542FD"));
 	public static CharFormat? process = new CharFormat(new Color3("#FFA811"));
 	
 	public static bool useColors = false;

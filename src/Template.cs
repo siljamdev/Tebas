@@ -193,7 +193,8 @@ class Template{
 			return false;
 		}
 		
-		AshFile t = new AshFile(Path.Combine(outPath, name + ".tbtem"));
+		AshFile t = new AshFile();
+		t.path = Path.Combine(outPath, name + ".tbtem");
 		
 		t.Set("name", name);
 		t.Set("version", BuildInfo.Version);
@@ -228,7 +229,7 @@ class Template{
 				string code = File.ReadAllText(s);
 				
 				try{
-					ResolvedImport r = TableScript.SourceAsImport("templates/BUILD/globals/" + n, code, Tebas.templateReport);
+					ResolvedImport r = TableScript.SourceAsImport("BUILD/template/" + name + "/globals/" + n, code, Tebas.templateReport);
 					
 					t.Set("globals." + n, r.ToCompactString());
 					imports["globals." + n] = r;
@@ -253,7 +254,7 @@ class Template{
 				string code = File.ReadAllText(s);
 				
 				try{
-					ResolvedImport r = TableScript.SourceAsImport("templates/BUILD/scripts/" + n, code, Tebas.templateReport);
+					ResolvedImport r = TableScript.SourceAsImport("BUILD/template/" + name + "/scripts/" + n, code, Tebas.templateReport);
 					
 					t.Set("scripts." + n, r.ToCompactString());
 					imports["scripts." + n] = r;
@@ -267,7 +268,7 @@ class Template{
 		//Properties
 		if(buildGetFile(path, "properties.tbs", out string prop)){
 			try{
-				ResolvedImport r = TableScript.SourceAsImport("templates/BUILD/properties", prop, Tebas.templateReport);
+				ResolvedImport r = TableScript.SourceAsImport("BUILD/template/" + name + "/properties", prop, Tebas.templateReport);
 				
 				t.Set("properties", r.ToCompactString());
 				imports["properties"] = r;
@@ -290,7 +291,7 @@ class Template{
 				string code = File.ReadAllText(s);
 				
 				try{
-					ResolvedImport r = TableScript.SourceAsImport("templates/BUILD/utils/" + n, code, Tebas.templateReport);
+					ResolvedImport r = TableScript.SourceAsImport("BUILD/template/" + name + "/utils/" + n, code, Tebas.templateReport);
 					
 					t.Set("utils." + n, r.ToCompactString());
 					imports["utils." + n] = r;

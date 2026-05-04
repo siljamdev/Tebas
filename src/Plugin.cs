@@ -177,7 +177,8 @@ class Plugin{
 			return false;
 		}
 		
-		AshFile t = new AshFile(Path.Combine(outPath, name + ".tbplg"));
+		AshFile t = new AshFile();
+		t.path = Path.Combine(outPath, name + ".tbplg");
 		
 		t.Set("name", name);
 		t.Set("version", BuildInfo.Version);
@@ -212,7 +213,7 @@ class Plugin{
 				string code = File.ReadAllText(s);
 				
 				try{
-					ResolvedImport r = TableScript.SourceAsImport("plugins/BUILD/globals/" + n, code, Tebas.pluginReport);
+					ResolvedImport r = TableScript.SourceAsImport("BUILD/plugin/" + name + "/globals/" + n, code, Tebas.pluginReport);
 					
 					t.Set("globals." + n, r.ToCompactString());
 					imports["globals." + n] = r;
@@ -237,7 +238,7 @@ class Plugin{
 				string code = File.ReadAllText(s);
 				
 				try{
-					ResolvedImport r = TableScript.SourceAsImport("plugins/BUILD/scripts/" + n, code, Tebas.pluginReport);
+					ResolvedImport r = TableScript.SourceAsImport("BUILD/plugin/" + name + "/scripts/" + n, code, Tebas.pluginReport);
 					
 					t.Set("scripts." + n, r.ToCompactString());
 					imports["scripts." + n] = r;
@@ -262,7 +263,7 @@ class Plugin{
 				string code = File.ReadAllText(s);
 				
 				try{
-					ResolvedImport r = TableScript.SourceAsImport("plugins/BUILD/utils/" + n, code, Tebas.pluginReport);
+					ResolvedImport r = TableScript.SourceAsImport("BUILD/plugin/" + name + "/utils/" + n, code, Tebas.pluginReport);
 					
 					t.Set("utils." + n, r.ToCompactString());
 					imports["utils." + n] = r;

@@ -16,7 +16,7 @@ static class Tebas{
 	
 	public static void initCore(){
 		string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData).Replace('\\', '/');
-		dep = new Dependencies(appDataPath + "/ashproject/tebasDEV", true, new string[]{"templates", "plugins"}, null);
+		dep = new Dependencies(appDataPath + "/ashproject/tebas", true, new string[]{"templates", "plugins"}, null);
 		
 		initConfig();
 		
@@ -367,6 +367,18 @@ static class Tebas{
 		}
 	}
 	
+	public static void output(FormatString fs){
+		if(quiet){
+			return;
+		}
+		
+		if(Palette.useColors){
+			Console.WriteLine(fs);
+		}else{
+			Console.WriteLine(fs.content);
+		}
+	}
+	
 	public static void outputAlways(string e, CharFormat? f = null){
 		if(Palette.useColors && f != null){
 			Console.WriteLine(new FormatString(e, f));
@@ -413,6 +425,20 @@ static class Tebas{
 			Console.WriteLine(new FormatString(("[" + label + "] ", lf), (t, f)));
 		}else{
 			Console.WriteLine("[" + label + "] " + t);
+		}
+	}
+	
+	public static void labelOutput(string label, CharFormat lf, FormatString fs){
+		if(quiet){
+			return;
+		}
+		
+		if(Palette.useColors){
+			FormatString g = new FormatString("[" + label + "] ", lf);
+			g.Append(fs);
+			Console.WriteLine(g);
+		}else{
+			Console.WriteLine("[" + label + "] " + fs.content);
 		}
 	}
 	

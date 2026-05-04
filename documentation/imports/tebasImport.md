@@ -10,9 +10,9 @@ export function tebas::print(t)
 ```
 Returns empty table, takes as arguments: table as string. Print to Standard Output
 ```
-export function tebas::printColor(t, color)
+export function tebas::printFormat(t)
 ```
-Returns empty table, takes as arguments: table as string, table as string. Print to Standard Output with color(hexadecimal)
+Returns empty table, takes as arguments: table as string. Print to Standard Output a [FormatString](https://github.com/siljamdev/AshLib/blob/main/documentation/formatstrings.md) with string formatting
 ```
 export function tebas::error(t)
 ```
