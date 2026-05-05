@@ -1,12 +1,11 @@
 # Tebas
 <img src="res/icon.png" width="200"/>
 
-Tebas is a project manager based on templates & plugins  
-**Tebas v1.0.0 is still in beta development, so expect breaking changes**  
+Tebas is a project manager based on custom templates & plugins  
 
 ## Usage
 Tebas is a command based utility to handle projects. Its strength is [user-made templates and plugins](https://github.com/siljamdev/Tebas-Registry), which provide the useful functionalities.  
-It adds a `.tebas` file into a folder, registering it as a project.
+It adds a `.tebas` file into a folder, registering it as a project.  
 
 The interface to use Tebas is the command line. For example:  
 `tebas template list` will output a list of installed templates.  
@@ -14,14 +13,14 @@ There is an extensive command line help menu, accessed with `tebas --help`.
 Additionally, the [numerical exit codes](./documentation/exitCodes.md) can give a lot of information about what went wrong.  
 
 ### Templates
-Each project has a template linked to it, that provides functionality in the form of scripts and globals.  
+Each project has a template linked to it, that provides functionality in the form of scripts to run in projects and globals that run at template-level.  
 Templates are user made. They are files with the `.tbtem` extension. You can double click them to install them.  
-Install templates directly from the [Official Tebas Registry](https://github.com/siljamdev/Tebas-Registry).
+Install templates directly from the [Official Tebas Registry](https://github.com/siljamdev/Tebas-Registry).  
 
 ### Plugins
-Plugins are global, and also provide functionality in the form of scripts and globals.  
+Plugins are global, and also provide functionality in the form of scripts to run in projects and globals that run at plugin-level.  
 They are user made. They are files with the `.tbplg` extension. You can double click them to install them.  
-Install plugins directly from the [Official Tebas Registry](https://github.com/siljamdev/Tebas-Registry).
+Install plugins directly from the [Official Tebas Registry](https://github.com/siljamdev/Tebas-Registry).  
 
 ## Installation
 You can install Tebas for Windows, Linux and MacOS with the portable executables from the [releases](https://github.com/siljamdev/Tebas/releases/latest).  
