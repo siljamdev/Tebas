@@ -32,6 +32,10 @@ export function tebas::projectExists(directory)
 ```
 Returns bool as table, takes as arguments: table as string. Check if project exists in a directory
 ```
+export function tebas::getProjectName(directory)
+```
+Returns string as table, takes as arguments: table as string. Get the name of the project in a path. Returns an empty string if no project exists in that directory
+```
 export function tebas::getProjectTemplateName(directory)
 ```
 Returns string as table, takes as arguments: table as string. Get the name of the template used in a project, based on its directory. Returns an empty string if no project exists in that directory

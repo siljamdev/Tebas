@@ -46,7 +46,7 @@ static class Tebas{
 		("registry.use", true, "Try to install from registry"),
 		("registry.url", "https://github.com/siljamdev/Tebas-Registry", "Url of the template and plugin registry"),
 		("noHints", false, "Never show hints"),
-		("useColors", true, "Use colored console output when possible"),
+		("useColors", true, "Use colored/formatted console output when possible"),
 	};
 	
 	//These do not appear in options
@@ -196,13 +196,21 @@ static class Tebas{
 		SharedHandler.cleanup();
 	}
 	
+	//Allows v1.0-beta, v1.0-beta-1, v1.0-beta.1
 	public static int compareVersion(string vs){ //-1: older, 0: same, 1: newer
 		string appVersion;
 		string[] avp = BuildInfo.Version.Split("-");
 		if(avp.Length == 3){
-			appVersion = avp[0] + ".0." + avp[2];
+			appVersion = avp[0] + "." + getPreCode(avp[1]) + "." + avp[2];
+		}else if(avp.Length == 2){
+			string[] d = avp[1].Split(".");
+			if(d.Length > 1){
+				appVersion = avp[0] + "." + getPreCode(d[0]) + "." + string.Join(".", d.Skip(1));
+			}else{
+				appVersion = avp[0] + "." + getPreCode(d[0]);
+			}
 		}else{
-			appVersion = avp[0] + ".1";
+			appVersion = avp[0] + "." + getPreCode("");
 		}
 		
 		if(appVersion.StartsWith("v")){ //Little correction
@@ -211,9 +219,16 @@ static class Tebas{
 		
 		string[] vp = vs.Split("-");
 		if(vp.Length == 3){
-			vs = vp[0] + ".0." + vp[2];
+			vs = vp[0] + "." + getPreCode(vp[1]) + "." + vp[2];
+		}else if(vp.Length == 2){
+			string[] d = vp[1].Split(".");
+			if(d.Length > 1){
+				vs = vp[0] + "." + getPreCode(d[0]) + "." + string.Join(".", d.Skip(1));
+			}else{
+				vs = vp[0] + "." + getPreCode(d[0]);
+			}
 		}else{
-			vs = vp[0] + ".1";
+			vs = vp[0] + "." + getPreCode("");
 		}
 		
 		if(vs.StartsWith("v")){ //Little correction
@@ -253,6 +268,15 @@ static class Tebas{
 			i++;
 		}
 		return 0;
+	}
+	
+	static int getPreCode(string pre){
+		return pre switch{
+			"alpha" => 0,
+			"beta" => 1,
+			"pre" => 2,
+			_ => 3
+		};
 	}
 	
 	static string fetchLatestVersion(){

@@ -16,6 +16,7 @@ class TebasImportGenerator{
 	static (Delegate func, string description)[] staticFunctions => new (Delegate, string)[]{
 		(getAllProjectsPaths, "Get the directory paths to all projects"),
 		(projectExists, "Check if project exists in a directory"),
+		(getProjectName, "Get the name of the project in a path. Returns an empty string if no project exists in that directory"),
 		(getProjectTemplateName, "Get the name of the template used in a project, based on its directory. Returns an empty string if no project exists in that directory"),
 		(getProjectProperty, "Get a property of a project, based on its directory. Returns an empty table if no project exists in that directory"),
 		(projectsCleanup, "Cleanup projects"),
@@ -127,6 +128,10 @@ class TebasImportGenerator{
 	
 	static bool projectExists(string directory){
 		return Project.exists(directory);
+	}
+	
+	static string getProjectName(string directory){
+		return Project.exists(directory) ? Path.GetFileName(directory) : "";
 	}
 	
 	static string getProjectTemplateName(string directory){

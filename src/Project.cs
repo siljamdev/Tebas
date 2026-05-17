@@ -43,6 +43,7 @@ class Project{
 	
 	//Null if it doesnt exist
 	public static Project get(string dirPath){
+		dirPath = Path.GetFullPath(dirPath);
 		Project c = cached.Find(p => p.path == dirPath);
 		if(c != null){
 			return c;

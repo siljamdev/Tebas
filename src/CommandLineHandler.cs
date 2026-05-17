@@ -92,6 +92,8 @@ static class CommandLineHandler{
 						return 21;
 					}
 					p.info();
+					Console.Write("Press any key to exit...");
+					Console.Read();
 					return 0;
 				});
 			}

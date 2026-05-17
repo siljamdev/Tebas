@@ -10,12 +10,15 @@ The remaining functions are:
 export function stdlib::join(self, separator){ EXTERN; } //Join all elements of a table with a seperator between them
 export function stdlib::split(self, separators){ EXTERN; } //Split all elements of a table by multiple separators
 export function stdlib::splitLines(self){ EXTERN; } //Split all elements of a table by all common line endings
+export function stdlib::contains(self, substring){ EXTERN; } //True if any element of a table contains a substring
 export function stdlib::replace(self, originals, replacements){ EXTERN; } //Replace a set of substrings by their replacement
 export function stdlib::indexOf(self, element){ EXTERN; } //Find the index of an element
 export function stdlib::upper(self){ EXTERN; } //Transform all elements to uppercase
 export function stdlib::lower(self){ EXTERN; } //Transform all elements to lowercase
 export function stdlib::trim(self){ EXTERN; } //Trim whitespace from all elements
 export function stdlib::removeQuotes(self){ EXTERN; } //Remove surrounding double quotes (") from all elements
+export function stdlib::startsWith(self, elements){ EXTERN; } //True if a table first elements are the passed ones
+export function stdlib::endsWith(self, elements){ EXTERN; } //True if a table last elements are the passed ones
 export function stdlib::deleteAll(self, toDel){ EXTERN; } //Delete all matching elements from a table
 export function stdlib::deleteAt(self, index){ EXTERN; } //Delete element at an index
 export function stdlib::deleteEmpty(self){ EXTERN; } //Delete all 0-length elements
@@ -32,8 +35,11 @@ Please check the [TableScript docs](https://siljamdev.github.io/TableScript/api/
 
 ## stdnum
 This library is exactly the same. Check its functions in the [TableScript docs](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdNum.html).  
-Some Tebas functions use stdnum nums as output, for multiple things such as error codes and sizes.  
+Some Tebas functions use stdnum nums as output, for numerical values such as error codes and sizes.  
 
 ## stdlist
 This library is exactly the same. Check its functions in the [TableScript docs](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdList.html).  
 Some Tebas functions use stdlist lists as output, for having several tables of output.  
+
+### stdregex
+This library is exactly the same. Check its functions in the [TableScript docs](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdRegex.html).  
