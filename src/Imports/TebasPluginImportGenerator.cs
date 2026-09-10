@@ -24,7 +24,7 @@ partial class TebasPluginImportGenerator{
 		plugin = t;
 		
 		px = new ProcessExecuter(getPath(), "plugin", true, hasPermission);
-		fu = new FileUnit(getPath(), "plugin", "p.tbplg", true, hasPermission);
+		fu = new FileUnit(getPath(), "plugin", "p.tbplg", true, null);  //Null is not an error here
 		
 		path = getPath();
 		name = getName();

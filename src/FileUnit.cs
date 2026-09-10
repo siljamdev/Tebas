@@ -29,6 +29,8 @@ partial class FileUnit{
 	readonly string basePath;
 	readonly string pathName;
 	
+	readonly bool askConfirmation; //SET TO TRUE WHEN its plugin/template files /internal) so no user acceptance is needed
+	
 	readonly string protectedFile; //Normalized
 	readonly bool hasProtectedFile;
 	
@@ -47,6 +49,7 @@ partial class FileUnit{
 			protectedFile = Path.GetFullPath(getFinalPath(prot));
 		}
 		hasPermission = hp;
+		askConfirmation = hasPermission != null;
 		
 		if(Tebas.config.GetValue<bool>("script.showLabel")){
 			report = x => Tebas.labelReport("FILE", isPlugin ? Palette.plugin : Palette.template, x.GetType() + ": " + x.Message);
@@ -76,7 +79,7 @@ partial class FileUnit{
 			return false;
 		}
 		
-		if(Tebas.config.GetValue<bool>("script.allowAllFileOperations") || (hasPermission != null && hasPermission("skipFileConfirmation"))){
+		if(!askConfirmation || Tebas.config.GetValue<bool>("script.allowAllFileOperations") || (hasPermission != null && hasPermission("skipFileConfirmation"))){
 			return true;
 		}
 		

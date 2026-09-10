@@ -24,7 +24,7 @@ partial class TebasTemplateImportGenerator{
 		template = t;
 		
 		px = new ProcessExecuter(getPath(), "template", false, hasPermission);
-		fu = new FileUnit(getPath(), "template", "t.tbtem", false, hasPermission);
+		fu = new FileUnit(getPath(), "template", "t.tbtem", false, null); //Null is not an error here
 		
 		path = getPath();
 		name = getName();
