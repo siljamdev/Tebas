@@ -1,42 +1,55 @@
 using System;
 using AshLib;
 using AshLib.Formatting;
-using TabScript;
+using TableScript;
+using TableScript.Generator;
 
-static class PathsImport{	
-	static (Delegate func, string description)[] staticFunctions => new (Delegate, string)[]{
-		(getExtension, "Get extension of a file path"),
-		(getFilename, "Get file name with extension of a file path"),
-		(getFilenameNoExtension, "Get file name without extension of a file path"),
-		(getDirectory, "Get parent directory of a path"),
-		(getSeparator, "Get default OS separator of paths"),
-	};
+[TableScriptLibrary("paths.cs")]
+static partial class PathsImport{	
 	
-	static ResolvedImport _compiled;
-	public static ResolvedImport AsImport {get{
-		if(_compiled == null){
-			_compiled = Library.BuildLibrary("paths", staticFunctions);
-		}
-		return _compiled;
-	}}
+	/// <summary>
+	/// Default OS separator of paths
+	/// </summary>
+	[TableScriptGlobal]
+	public static readonly string separator = Path.DirectorySeparatorChar.ToString();
 	
-	static string getExtension(string path){
+	/// <summary>
+	/// Get extension of a file path
+	/// </summary>
+	[TableScriptFunction]
+	public static string getExtension(string path){
 		return Path.GetExtension(path);
 	}
 	
-	static string getFilename(string path){
+	/// <summary>
+	/// Get file name with extension of a file path
+	/// </summary>
+	[TableScriptFunction]
+	public static string getFilename(string path){
 		return Path.GetFileName(path);
 	}
 	
-	static string getFilenameNoExtension(string path){
+	/// <summary>
+	/// Get file name without extension of a file path
+	/// </summary>
+	[TableScriptFunction]
+	public static string getFilenameNoExtension(string path){
 		return Path.GetFileNameWithoutExtension(path);
 	}
 	
-	static string getDirectory(string path){
+	/// <summary>
+	/// Get parent directory of a path
+	/// </summary>
+	[TableScriptFunction]
+	public static string getDirectory(string path){
 		return Path.GetDirectoryName(path);
 	}
 	
-	static string getSeparator(){
+	/// <summary>
+	/// Get default OS separator of paths
+	/// </summary>
+	[TableScriptFunction]
+	public static string getSeparator(){
 		return Path.DirectorySeparatorChar.ToString();
 	}
 }

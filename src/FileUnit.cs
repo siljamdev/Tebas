@@ -1,7 +1,9 @@
 using System;
-using TabScript;
+using TableScript;
+using TableScript.Generator;
 
-class FileUnit{
+[TableScriptLibrary("fileunit.cs")]
+partial class FileUnit{
 	#region static
 	static FileUnit _dummy = null;
 	public static FileUnit Dummy{get{
@@ -21,40 +23,21 @@ class FileUnit{
 	}
 	#endregion
 	
-	public (string name, Delegate func, string description)[] NamedFunctions => new (string, Delegate, string)[]{
-		("fileExists", fileExists, "Returns true if a file exists in the " + pathName + " path"),
-		("fileRead", fileRead, "Reads whole text of a file in the " + pathName + " path"),
-		("fileReadLines", fileReadLines, "Returns lines of text of a file in the " + pathName + " path"),
-		("fileWrite", fileWrite, "Writes whole content to a file in the " + pathName + " path. Returns true if the operation was successful"),
-		("fileWriteLines", fileWriteLines, "Writes whole lines to a file in the " + pathName + " path. Returns true if the operation was successful"),
-		("fileAppend", fileAppend, "Appends content to the end of a file in the " + pathName + " path. Returns true if the operation was successful"),
-		("fileAppendLines", fileAppendLines, "Appends lines to the end of a file in the " + pathName + " path. Returns true if the operation was successful"),
-		("fileDelete", fileDelete, "Deletes a file in the " + pathName + " path. Returns true if the operation was successful"),
-		("fileMove", fileMove, "Moves a file to a new location in the " + pathName + " path. Returns true if the operation was successful"),
-		("fileCopy", fileCopy, "Copies a file to another location in the " + pathName + " path. Returns true if the operation was successful"),
-		("fileSize", fileSize, "Get the size in bytes as a stdnum num of a file in the " + pathName + " path. Returns an empty string if any error occurred"),
-		
-		("folderExists", folderExists, "Returns true if a folder exists in the " + pathName + " path"),
-		("folderCreate", folderCreate, "Create a folder in the " + pathName + " path. Returns true if the operation was successful"),
-		("folderDelete", folderDelete, "Delete a folder in the " + pathName + " path. Returns true if the operation was successful"),
-		("folderMove", folderMove, "Move a folder to a new location in the " + pathName + " path. Returns true if the operation was successful"),
-		("folderListFiles", folderListFiles, "Get all file paths in the top directory of a folder in the " + pathName + " path. Returns a table with length -1 if any error occurred"),
-		("folderListChildFiles", folderListChildFiles, "Get all file paths in all directories of a folder in the " + pathName + " path. Returns a table with length -1 if any error occurred"),
-		("folderListFolders", folderListFolders, "Get all subfolder paths in a folder in the " + pathName + " path. Returns a table with length -1 if any error occurred"),
-	};
-	
-	public (Delegate func, string description)[] Functions => NamedFunctions.Select(t => (t.func, t.description)).ToArray();
-	
 	Predicate<string> hasPermission;
 	Action<Exception> report;
 	
 	readonly string basePath;
 	readonly string pathName;
 	
-	readonly bool askConfirmation;
-	
 	readonly string protectedFile; //Normalized
 	readonly bool hasProtectedFile;
+	
+	public FunctionStmt[] allFuncs => TableScriptFunctions.Select(s => {
+		if(s is FunctionExtStmt e){
+			return new FunctionExtStmt(e.identifier, e.pars, e.body, e.description?.Replace("PATHNAME", pathName), e.line);
+		}
+		return s;
+	}).ToArray();
 	
 	public FileUnit(string path, string name, string prot, bool isPlugin, Predicate<string> hp){
 		basePath = path;
@@ -64,7 +47,6 @@ class FileUnit{
 			protectedFile = Path.GetFullPath(getFinalPath(prot));
 		}
 		hasPermission = hp;
-		askConfirmation = hasPermission != null;
 		
 		if(Tebas.config.GetValue<bool>("script.showLabel")){
 			report = x => Tebas.labelReport("FILE", isPlugin ? Palette.plugin : Palette.template, x.GetType() + ": " + x.Message);
@@ -94,7 +76,7 @@ class FileUnit{
 			return false;
 		}
 		
-		if(!askConfirmation || Tebas.config.GetValue<bool>("script.allowAllFileOperations") || hasPermission("skipFileConfirmation")){
+		if(Tebas.config.GetValue<bool>("script.allowAllFileOperations") || (hasPermission != null && hasPermission("skipFileConfirmation"))){
 			return true;
 		}
 		
@@ -137,10 +119,18 @@ class FileUnit{
 		}
 	}
 	
+	/// <summary>
+	/// Returns true if a file exists in the PATHNAME path
+	/// </summary>
+	[TableScriptFunction]
 	public bool fileExists(string path){
 		return checkPath(path) ? File.Exists(getFinalPath(path)) : false;
 	}
 	
+	/// <summary>
+	/// Reads whole text of a file in the PATHNAME path
+	/// </summary>
+	[TableScriptFunction]
 	public string fileRead(string path){
 		if(!checkPath(path)){
 			return null;
@@ -158,6 +148,10 @@ class FileUnit{
 		}
 	}
 	
+	/// <summary>
+	/// Returns lines of text of a file in the PATHNAME path
+	/// </summary>
+	[TableScriptFunction]
 	public Table fileReadLines(string path){
 		if(!checkPath(path)){
 			return new Table(-1);
@@ -175,6 +169,10 @@ class FileUnit{
 		}
 	}
 	
+	/// <summary>
+	/// Writes whole content to a file in the PATHNAME path. Returns true if the operation was successful
+	/// </summary>
+	[TableScriptFunction]
 	public bool fileWrite(string path, string content){
 		if(!checkProtected(path)){
 			return false;
@@ -195,6 +193,10 @@ class FileUnit{
 		}
 	}
 	
+	/// <summary>
+	/// Writes whole lines to a file in the PATHNAME path. Returns true if the operation was successful. Each element of `content` represents a line
+	/// </summary>
+	[TableScriptFunction]
 	public bool fileWriteLines(string path, Table content){
 		if(!checkProtected(path)){
 			return false;
@@ -215,6 +217,10 @@ class FileUnit{
 		}
 	}
 	
+	/// <summary>
+	/// Appends content to the end of a file in the PATHNAME path. Returns true if the operation was successful
+	/// </summary>
+	[TableScriptFunction]
 	public bool fileAppend(string path, string content){
 		if(!checkProtected(path)){
 			return false;
@@ -235,6 +241,10 @@ class FileUnit{
 		}
 	}
 	
+	/// <summary>
+	/// Appends lines to the end of a file in the PATHNAME path. Returns true if the operation was successful. Each element of `content` represents a line
+	/// </summary>
+	[TableScriptFunction]
 	public bool fileAppendLines(string path, Table content){
 		if(!checkProtected(path)){
 			return false;
@@ -255,6 +265,10 @@ class FileUnit{
 		}
 	}
 	
+	/// <summary>
+	/// Deletes a file in the PATHNAME path. Returns true if the operation was successful
+	/// </summary>
+	[TableScriptFunction]
 	public bool fileDelete(string path){
 		if(!checkProtected(path)){
 			return false;
@@ -277,6 +291,10 @@ class FileUnit{
 		}
 	}
 	
+	/// <summary>
+	/// Moves a file to a new location in the PATHNAME path. Returns true if the operation was successful
+	/// </summary>
+	[TableScriptFunction]
 	public bool fileMove(string path, string newPath){
 		if(!checkProtected(path) || !checkPath(newPath)){
 			return false;
@@ -301,6 +319,10 @@ class FileUnit{
 		}
 	}
 	
+	/// <summary>
+	/// Copies a file to another location in the PATHNAME path. Returns true if the operation was successful
+	/// </summary>
+	[TableScriptFunction]
 	public bool fileCopy(string path, string copyPath){
 		if(!checkPath(path) || !checkPath(copyPath)){
 			return false;
@@ -321,6 +343,10 @@ class FileUnit{
 		}
 	}
 	
+	/// <summary>
+	/// Get the size in bytes as a stdnum num of a file in the PATHNAME path. Returns an empty string if any error occurred
+	/// </summary>
+	[TableScriptFunction]
 	public string fileSize(string path){
 		if(!checkPath(path)){
 			return null;
@@ -338,10 +364,18 @@ class FileUnit{
 		}
 	}
 	
+	/// <summary>
+	/// Returns true if a folder exists in the PATHNAME path
+	/// </summary>
+	[TableScriptFunction]
 	public bool folderExists(string path){
 		return checkPath(path) ? Directory.Exists(getFinalPath(path)) : false;
 	}
 	
+	/// <summary>
+	/// Create a folder in the PATHNAME path. Returns true if the operation was successful
+	/// </summary>
+	[TableScriptFunction]
 	public bool folderCreate(string path){
 		if(!checkPath(path)){
 			return false;
@@ -356,6 +390,10 @@ class FileUnit{
 		}
 	}
 	
+	/// <summary>
+	/// Delete a folder in the PATHNAME path. Returns true if the operation was successful
+	/// </summary>
+	[TableScriptFunction]
 	public bool folderDelete(string path){
 		if(!checkBase(path)){
 			return false;
@@ -378,6 +416,10 @@ class FileUnit{
 		}
 	}
 	
+	/// <summary>
+	/// Move a folder to a new location in the PATHNAME path. Returns true if the operation was successful
+	/// </summary>
+	[TableScriptFunction]
 	public bool folderMove(string path, string newPath){
 		if(!checkBase(path) || !checkPath(newPath)){
 			return false;
@@ -400,6 +442,10 @@ class FileUnit{
 		}
 	}
 	
+	/// <summary>
+	/// Get all file paths in the top directory of a folder in the PATHNAME path. Returns a table with length -1 if any error occurred. Pattern can use `*` and `?` wildcards.
+	/// </summary>
+	[TableScriptFunction]
 	public Table folderListFiles(string path, string pattern){
 		if(!checkPath(path)){
 			return new Table(-1);
@@ -418,6 +464,10 @@ class FileUnit{
 		}
 	}
 	
+	/// <summary>
+	/// Get all file paths in all directories of a folder in the PATHNAME path. Returns a table with length -1 if any error occurred. Pattern can use `*` and `?` wildcards.
+	/// </summary>
+	[TableScriptFunction]
 	public Table folderListChildFiles(string path, string pattern){
 		if(!checkPath(path)){
 			return new Table(-1);
@@ -436,6 +486,10 @@ class FileUnit{
 		}
 	}
 	
+	/// <summary>
+	/// Get all subfolder paths in a folder in the PATHNAME path. Returns a table with length -1 if any error occurred
+	/// </summary>
+	[TableScriptFunction]
 	public Table folderListFolders(string path){
 		if(!checkPath(path)){
 			return new Table(-1);

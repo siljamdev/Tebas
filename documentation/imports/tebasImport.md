@@ -2,130 +2,160 @@
 
 The `tebas` import is available in absolutely all scripts, globals, utils and properties.  
 It provides base functionality, and also an API to talk with the Tebas app.  
-The functions it provides are:  
+
+## Globals
+```
+export global version;
+```
+Tebas version
+
+
+## Functions
 
 ### Output & input functions
 ```
-export function tebas::print(t)
+export function tebas::print(t);
 ```
-Returns empty table, takes as arguments: table as string. Print to Standard Output
+Takes 1 argument: table t as string. Returns an empty table. Print to Standard Output
+
 ```
-export function tebas::printFormat(t)
+export function tebas::printFormat(t);
 ```
-Returns empty table, takes as arguments: table as string. Print to Standard Output a [FormatString](https://github.com/siljamdev/AshLib/blob/main/documentation/formatstrings.md) with string formatting
+Takes 1 argument: table t as string. Returns an empty table. Print to Standard Output with format (AshFile FormatString)
+
 ```
-export function tebas::error(t)
+export function tebas::error(t);
 ```
-Returns empty table, takes as arguments: table as string. Print to Standard Error
+Takes 1 argument: table t as string. Returns an empty table. Print to Standard Error
+
 ```
-export function tebas::input(prompt)
+export function tebas::input(prompt);
 ```
-Returns string as table, takes as arguments: table as string. Read from Standard Input
+Takes 1 argument: table prompt as string. Returns table as string. Read from Standard Input
 
 ### Project functions
 ```
-export function tebas::getAllProjectsPaths()
+export function tebas::getAllProjectsPaths();
 ```
-Returns table, takes no arguments. Get the directory paths to all projects (not the `.tebas` file)
+Takes 0 arguments. Returns table as table. Get the directory paths to all projects
+
 ```
-export function tebas::projectExists(directory)
+export function tebas::projectExists(directory);
 ```
-Returns bool as table, takes as arguments: table as string. Check if project exists in a directory
+Takes 1 argument: table directory as string. Returns table as bool. Check if project exists in a directory
+
 ```
-export function tebas::getProjectName(directory)
+export function tebas::getProjectName(directory);
 ```
-Returns string as table, takes as arguments: table as string. Get the name of the project in a path. Returns an empty string if no project exists in that directory
+Takes 1 argument: table directory as string. Returns table as string. Get the name of the project in a path. Returns an empty string if no project exists in that directory
+
 ```
-export function tebas::getProjectTemplateName(directory)
+export function tebas::getProjectTemplateName(directory);
 ```
-Returns string as table, takes as arguments: table as string. Get the name of the template used in a project, based on its directory. Returns an empty string if no project exists in that directory
+Takes 1 argument: table directory as string. Returns table as string. Get the name of the template used in a project, based on its directory. Returns an empty string if no project exists in that directory
+
 ```
-export function tebas::getProjectProperty(directory, key)
+export function tebas::getProjectProperty(directory, key);
 ```
-Returns table, takes as arguments: table as string, table as string. Get a property of a project, based on its directory. Returns an empty table if no project exists in that directory
+Takes 2 arguments: table directory as string table key as string. Returns table as table. Get a property of a project, based on its directory. Returns an empty table if no project exists in that directory
+
 ```
-export function tebas::projectsCleanup()
+export function tebas::projectsCleanup();
 ```
-Returns empty table, takes no arguments. Removes projects that dont exist from the internal list
+Takes 0 arguments. Returns an empty table. Cleanup projects
 
 ### Template functions
 ```
-export function tebas::getAllTemplateNames()
+export function tebas::getAllTemplateNames();
 ```
-Returns table, takes no arguments. Get the names of all installed templates
+Takes 0 arguments. Returns table as table. Get the names of all installed templates
+
 ```
-export function tebas::templateInstalled(name)
+export function tebas::templateInstalled(name);
 ```
-Returns bool as table, takes as arguments: table as string. Check if a template is installed
+Takes 1 argument: table name as string. Returns table as bool. Check if a template is installed
+
 ```
-export function tebas::templateRunGlobal(name, global, args)
+export function tebas::templateRunGlobal(name, global, args);
 ```
-Returns bool as table, takes as arguments: table as string, table as string, table. Attempt to run a global script of a template. Returns true if the operation was successful
+Takes 3 arguments: table name as string table global as string table args as table. Returns table as bool. Attempt to run a global script of a template. Returns true if the operation was successful
+
 ```
-export function tebas::templatesCleanup()
+export function tebas::templatesCleanup();
 ```
-Returns empty table, takes no arguments. Removes internal folders of templates that are not installed
+Takes 0 arguments. Returns an empty table. Cleanup templates
 
 ### Plugin functions
 ```
-export function tebas::getAllPluginNames()
+export function tebas::getAllPluginNames();
 ```
-Returns table, takes no arguments. Get the names of all installed plugins
+Takes 0 arguments. Returns table as table. Get the names of all installed plugins
+
 ```
-export function tebas::pluginInstalled(name)
+export function tebas::pluginInstalled(name);
 ```
-Returns bool as table, takes as arguments: table as string. Check if a plugin is installed
+Takes 1 argument: table name as string. Returns table as bool. Check if a plugin is installed
+
 ```
-export function tebas::pluginRunGlobal(name, global, args)
+export function tebas::pluginRunGlobal(name, global, args);
 ```
-Returns bool as table, takes as arguments: table as string, table as string, table. Attempt to run a global script of a plugin. Returns true if the operation was successful
+Takes 3 arguments: table name as string table global as string table args as table. Returns table as bool. Attempt to run a global script of a plugin. Returns true if the operation was successful
+
 ```
-export function tebas::pluginsCleanup()
+export function tebas::pluginsCleanup();
 ```
-Returns empty table, takes no arguments. Removes internal folders of plugins that are not installed
+Takes 0 arguments. Returns an empty table. Cleanup plugins
 
 ### Shared resources functions
 Shared resources are app-wise resources to avoid duplicate values and speed up installations. 
 Check the [design guidelines](../designGuidelines.md) for a list of standard values.  
 ```
-export function tebas::getShared(key)
+export function tebas::getShared(key);
 ```
-Returns string as table, takes as arguments: table as string. Get shared resource
+Takes 1 argument: table key as string. Returns table as string. Get shared resource
+
 ```
-export function tebas::setShared(key, value)
+export function tebas::setShared(key, value);
 ```
-Returns empty table, takes as arguments: table as string, table as string. Set shared resource
+Takes 2 arguments: table key as string table value as string. Returns an empty table. Set shared resource
+
 ```
-export function tebas::appendShared(key, value)
+export function tebas::appendShared(key, value);
 ```
-Returns empty table, takes as arguments: table as string, table as string. Append to a shared resource
+Takes 2 arguments: table key as string table value as string. Returns an empty table. Append to the end of a shared resource
+
 ```
-export function tebas::getAllSharedKeys()
+export function tebas::getAllSharedKeys();
 ```
-Returns table, takes no arguments. Get all keys with a value in shared resources
+Takes 0 arguments. Returns table as table. Get all keys with a value in shared resources
+
 ```
-export function tebas::sharedCleanup()
+export function tebas::sharedCleanup();
 ```
-Returns empty table, takes no arguments. Cleanup shared resources: cleans internal invalid or empty values
+Takes 0 arguments. Returns an empty table. Cleanup shared resources: cleans internal invalid or empty values
 
 ### Other functions
 ```
-export function tebas::getAllPermissionKeys()
+export function tebas::getAllPermissionKeys();
 ```
-Returns table, takes no arguments. Get all valid permission keys
+Takes 0 arguments. Returns table as table. Get all valid permission keys
+
 ```
-export function tebas::getAllConfigKeys()
+export function tebas::getAllConfigKeys();
 ```
-Returns table, takes no arguments. Get all valid config keys
+Takes 0 arguments. Returns table as table. Get all valid config keys
+
 ```
-export function tebas::getConfigValue(key)
+export function tebas::getConfigValue(key);
 ```
-Returns string as table, takes as arguments: table as string. Get value for a config key
+Takes 1 argument: table key as string. Returns table as string. Get value for a config key
+
 ```
-export function tebas::getVersion()
+export function tebas::getVersion();
 ```
-Returns string as table, takes no arguments. Get Tebas version
+Takes 0 arguments. Returns table as string. Get Tebas version
+
 ```
-export function tebas::cleanupAll()
+export function tebas::cleanupAll();
 ```
-Returns empty table, takes no arguments. Cleanup everything in Tebas. This function does the same as running `tebas cleanup`
+Takes 0 arguments. Returns an empty table. Cleanup everything in Tebas. This function does the same as running `tebas cleanup`

@@ -1,5 +1,5 @@
 using System;
-using TabScript;
+using TableScript;
 
 class TemplateDummyImportResolver : TebasDummyImportResolver{
 	Dictionary<string, ResolvedImport> dictionary;
@@ -18,7 +18,7 @@ class TemplateDummyImportResolver : TebasDummyImportResolver{
 	public override ResolvedImport Resolve(string import, string callingFilename){
 		switch(import){
 			case "tebastemplate":
-				return TebasTemplateImportGenerator.Dummy.Generate();
+				return TebasTemplateImportGenerator.Dummy.GenerateImport();
 			default:
 				if(import.StartsWith("globals.")){
 					ResolvedImport r = getFromDict(import);

@@ -27,7 +27,7 @@ Root
 Remember, the tree structure is a visual representation of a flat field list. The separator is '.'.
 
 ## Building from source
-When you do `tebas template build <directory>`, `directory` points to a folder containing source (\* marks a mandatory file):  
+When you do `tebas template build <directory>`, `directory` points to a folder containing source (prefix \* marks a mandatory file):  
 ```
 Root
 ├──*name.txt

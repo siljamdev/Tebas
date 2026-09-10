@@ -1,7 +1,7 @@
 using System.Text;
 using AshLib.Dates;
 using AshLib.AshFiles;
-using TabScript;
+using TableScript;
 
 class Template{
 	#region static
@@ -229,11 +229,11 @@ class Template{
 				string code = File.ReadAllText(s);
 				
 				try{
-					ResolvedImport r = TableScript.SourceAsImport("BUILD/template/" + name + "/globals/" + n, code, Tebas.templateReport);
+					ResolvedImport r = Script.SourceAsImport("BUILD/template/" + name + "/globals/" + n, code, Tebas.templateReport, Optimizations.EarlyDestructive);
 					
 					t.Set("globals." + n, r.ToCompactString());
 					imports["globals." + n] = r;
-				}catch(TabScriptException x){
+				}catch(TableScriptException x){
 					hadError = true;
 					continue;
 				}
@@ -254,11 +254,11 @@ class Template{
 				string code = File.ReadAllText(s);
 				
 				try{
-					ResolvedImport r = TableScript.SourceAsImport("BUILD/template/" + name + "/scripts/" + n, code, Tebas.templateReport);
+					ResolvedImport r = Script.SourceAsImport("BUILD/template/" + name + "/scripts/" + n, code, Tebas.templateReport, Optimizations.EarlyDestructive );
 					
 					t.Set("scripts." + n, r.ToCompactString());
 					imports["scripts." + n] = r;
-				}catch(TabScriptException x){
+				}catch(TableScriptException x){
 					hadError = true;
 					continue;
 				}
@@ -268,11 +268,11 @@ class Template{
 		//Properties
 		if(buildGetFile(path, "properties.tbs", out string prop)){
 			try{
-				ResolvedImport r = TableScript.SourceAsImport("BUILD/template/" + name + "/properties", prop, Tebas.templateReport);
+				ResolvedImport r = Script.SourceAsImport("BUILD/template/" + name + "/properties", prop, Tebas.templateReport, Optimizations.EarlyDestructive);
 				
 				t.Set("properties", r.ToCompactString());
 				imports["properties"] = r;
-			}catch(TabScriptException x){
+			}catch(TableScriptException x){
 				hadError = true;
 			}
 		}
@@ -291,11 +291,11 @@ class Template{
 				string code = File.ReadAllText(s);
 				
 				try{
-					ResolvedImport r = TableScript.SourceAsImport("BUILD/template/" + name + "/utils/" + n, code, Tebas.templateReport);
+					ResolvedImport r = Script.SourceAsImport("BUILD/template/" + name + "/utils/" + n, code, Tebas.templateReport, Optimizations.EarlyDestructive);
 					
 					t.Set("utils." + n, r.ToCompactString());
 					imports["utils." + n] = r;
-				}catch(TabScriptException x){
+				}catch(TableScriptException x){
 					hadError = true;
 					continue;
 				}
@@ -306,8 +306,8 @@ class Template{
 		TemplateDummyImportResolver gres = new(imports);
 		foreach(ResolvedImport r in imports.Where(kvp => kvp.Key.StartsWith("globals.")).Select(kvp => kvp.Value)){
 			try{
-				TableScript s = TableScript.FromImport(r, gres, Tebas.templateReport);
-			}catch(TabScriptException x){
+				Script s = Script.FromImport(r, gres, Tebas.templateReport);
+			}catch(TableScriptException x){
 				hadError = true;
 			}
 		}
@@ -316,8 +316,8 @@ class Template{
 		TemplateScriptDummyImportResolver sres = new(imports);
 		foreach(ResolvedImport r in imports.Where(kvp => kvp.Key.StartsWith("scripts.")).Select(kvp => kvp.Value)){
 			try{
-				TableScript s = TableScript.FromImport(r, sres, Tebas.templateReport);
-			}catch(TabScriptException x){
+				Script s = Script.FromImport(r, sres, Tebas.templateReport);
+			}catch(TableScriptException x){
 				hadError = true;
 			}
 		}
@@ -325,8 +325,8 @@ class Template{
 		//Properties
 		if(imports.TryGetValue("properties", out ResolvedImport r2)){
 			try{
-				TableScript s = TableScript.FromImport(r2, sres, Tebas.templateReport);
-			}catch(TabScriptException x){
+				Script s = Script.FromImport(r2, sres, Tebas.templateReport);
+			}catch(TableScriptException x){
 				hadError = true;
 			}
 		}
@@ -390,12 +390,12 @@ class Template{
 	public string path => directory + name;
 	public string filePath => directory + name + "/t.tbtem";
 	
-	Dictionary<string, TableScript> cachedGlobals = new();
+	Dictionary<string, Script> cachedGlobals = new();
 	Dictionary<string, ResolvedImport> cachedGlobalsImports = new();
 	Dictionary<string, ResolvedImport> cachedScriptsImports = new();
 	Dictionary<string, ResolvedImport> cachedUtilsImports = new();
 	
-	ResolvedImport cachedPropertiesScript = null;
+	ResolvedImport cachedPropertiesImport = null;
 	
 	AshFile file;
 	
@@ -480,7 +480,7 @@ class Template{
 			return false;
 		}
 		
-		if(cachedGlobals.TryGetValue(name, out TableScript c) && c != null){
+		if(cachedGlobals.TryGetValue(name, out Script c) && c != null){
 			c.Run(args);
 			
 			return true;
@@ -490,13 +490,13 @@ class Template{
 				if(r == null){
 					return false;
 				}
-				TableScript g = TableScript.FromImport(r, globalsImportResolver, Tebas.templateReport);
+				Script g = Script.FromImport(r, globalsImportResolver, Tebas.templateReport);
 				cachedGlobals[name] = g;
 				
 				g.Run(args);
 				
 				return true;
-			}catch(TabScriptException x){
+			}catch(TableScriptException x){
 				Tebas.templateReport(x);
 			}
 		}
@@ -508,11 +508,11 @@ class Template{
 			return c;
 		}else if(file.TryGetValue("scripts." + name, out string code)){
 			try{
-				ResolvedImport r = TableScript.SourceAsImport("templates/" + this.name + "/scripts/" + name, code, Tebas.templateReport);
+				ResolvedImport r = Script.SourceAsImport("templates/" + this.name + "/scripts/" + name, code, Tebas.templateReport);
 				cachedScriptsImports[name] = r;
 				
 				return r;
-			}catch(TabScriptException x){
+			}catch(TableScriptException x){
 				
 			}
 		}
@@ -524,11 +524,11 @@ class Template{
 			return c;
 		}else if(file.TryGetValue("globals." + name, out string code)){
 			try{
-				ResolvedImport r = TableScript.SourceAsImport("templates/" + this.name + "/globals/" + name, code, Tebas.templateReport);
+				ResolvedImport r = Script.SourceAsImport("templates/" + this.name + "/globals/" + name, code, Tebas.templateReport);
 				cachedGlobalsImports[name] = r;
 				
 				return r;
-			}catch(TabScriptException x){
+			}catch(TableScriptException x){
 				
 			}
 		}
@@ -540,11 +540,11 @@ class Template{
 			return c;
 		}else if(file.TryGetValue("utils." + name, out string code)){
 			try{
-				ResolvedImport r = TableScript.SourceAsImport("templates/" + this.name + "/utils/" + name, code, Tebas.templateReport);
+				ResolvedImport r = Script.SourceAsImport("templates/" + this.name + "/utils/" + name, code, Tebas.templateReport);
 				cachedUtilsImports[name] = r;
 				
 				return r;
-			}catch(TabScriptException x){
+			}catch(TableScriptException x){
 				
 			}
 		}
@@ -552,15 +552,15 @@ class Template{
 	}
 	
 	public ResolvedImport? getPropertiesAsImport(){
-		if(cachedPropertiesScript != null){
-			return cachedPropertiesScript;
+		if(cachedPropertiesImport != null){
+			return cachedPropertiesImport;
 		}else if(file.TryGetValue("properties", out string code)){
 			try{
-				ResolvedImport r = TableScript.SourceAsImport("templates/" + this.name + "/properties", code, Tebas.templateReport);
-				cachedPropertiesScript = r;
+				ResolvedImport r = Script.SourceAsImport("templates/" + this.name + "/properties", code, Tebas.templateReport);
+				cachedPropertiesImport = r;
 				
 				return r;
-			}catch(TabScriptException x){
+			}catch(TableScriptException x){
 				
 			}
 		}
@@ -596,6 +596,10 @@ class Template{
 		file.Save();
 	}
 	
+	public string[] getAllResourceKeys(){
+		return file.Keys.Where(k => k.StartsWith("resources.")).Select(k => k.Substring(10)).ToArray();
+	}
+	
 	public bool hasPermission(string key){
 		if(Tebas.validPermissions.Any(t => t.key == key)){
 			return file.GetValue<bool>("permissions." + key);
@@ -615,7 +619,7 @@ class Template{
 			return true;
 		}else{
 			Tebas.report("Unknown permission key");
-			Tebas.hint("Do 'tebas template permission' to see the full list");
+			Tebas.hint("Do 'tebas template permission list' to see the full list");
 		}
 		
 		return false;

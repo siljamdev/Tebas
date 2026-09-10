@@ -1,7 +1,7 @@
 using System.Text;
 using AshLib.Dates;
 using AshLib.AshFiles;
-using TabScript;
+using TableScript;
 
 class Plugin{
 	#region static
@@ -213,11 +213,11 @@ class Plugin{
 				string code = File.ReadAllText(s);
 				
 				try{
-					ResolvedImport r = TableScript.SourceAsImport("BUILD/plugin/" + name + "/globals/" + n, code, Tebas.pluginReport);
+					ResolvedImport r = Script.SourceAsImport("BUILD/plugin/" + name + "/globals/" + n, code, Tebas.pluginReport, Optimizations.EarlyDestructive);
 					
 					t.Set("globals." + n, r.ToCompactString());
 					imports["globals." + n] = r;
-				}catch(TabScriptException x){
+				}catch(TableScriptException x){
 					hadError = true;
 					continue;
 				}
@@ -238,11 +238,11 @@ class Plugin{
 				string code = File.ReadAllText(s);
 				
 				try{
-					ResolvedImport r = TableScript.SourceAsImport("BUILD/plugin/" + name + "/scripts/" + n, code, Tebas.pluginReport);
+					ResolvedImport r = Script.SourceAsImport("BUILD/plugin/" + name + "/scripts/" + n, code, Tebas.pluginReport, Optimizations.EarlyDestructive);
 					
 					t.Set("scripts." + n, r.ToCompactString());
 					imports["scripts." + n] = r;
-				}catch(TabScriptException x){
+				}catch(TableScriptException x){
 					hadError = true;
 					continue;
 				}
@@ -263,11 +263,11 @@ class Plugin{
 				string code = File.ReadAllText(s);
 				
 				try{
-					ResolvedImport r = TableScript.SourceAsImport("BUILD/plugin/" + name + "/utils/" + n, code, Tebas.pluginReport);
+					ResolvedImport r = Script.SourceAsImport("BUILD/plugin/" + name + "/utils/" + n, code, Tebas.pluginReport, Optimizations.EarlyDestructive);
 					
 					t.Set("utils." + n, r.ToCompactString());
 					imports["utils." + n] = r;
-				}catch(TabScriptException x){
+				}catch(TableScriptException x){
 					hadError = true;
 					continue;
 				}
@@ -278,8 +278,8 @@ class Plugin{
 		PluginDummyImportResolver gres = new(imports);
 		foreach(ResolvedImport r in imports.Where(kvp => kvp.Key.StartsWith("globals.")).Select(kvp => kvp.Value)){
 			try{
-				TableScript s = TableScript.FromImport(r, gres, Tebas.pluginReport);
-			}catch(TabScriptException x){
+				Script s = Script.FromImport(r, gres, Tebas.pluginReport);
+			}catch(TableScriptException x){
 				hadError = true;
 			}
 		}
@@ -288,8 +288,8 @@ class Plugin{
 		PluginScriptDummyImportResolver sres = new(imports);
 		foreach(ResolvedImport r in imports.Where(kvp => kvp.Key.StartsWith("scripts.")).Select(kvp => kvp.Value)){
 			try{
-				TableScript s = TableScript.FromImport(r, sres, Tebas.pluginReport);
-			}catch(TabScriptException x){
+				Script s = Script.FromImport(r, sres, Tebas.pluginReport);
+			}catch(TableScriptException x){
 				hadError = true;
 			}
 		}
@@ -347,7 +347,7 @@ class Plugin{
 	public string path => directory + name;
 	public string filePath => directory + name + "/p.tbplg";
 	
-	Dictionary<string, TableScript> cachedGlobals = new();
+	Dictionary<string, Script> cachedGlobals = new();
 	Dictionary<string, ResolvedImport> cachedGlobalsImports = new();
 	Dictionary<string, ResolvedImport> cachedScriptsImports = new();
 	Dictionary<string, ResolvedImport> cachedUtilsImports = new();
@@ -428,7 +428,7 @@ class Plugin{
 			return false;
 		}
 		
-		if(cachedGlobals.TryGetValue(name, out TableScript c) && c != null){
+		if(cachedGlobals.TryGetValue(name, out Script c) && c != null){
 			c.Run(args);
 			
 			return true;
@@ -438,13 +438,13 @@ class Plugin{
 				if(r == null){
 					return false;
 				}
-				TableScript g = TableScript.FromImport(r, globalsImportResolver, Tebas.pluginReport);
+				Script g = Script.FromImport(r, globalsImportResolver, Tebas.pluginReport);
 				cachedGlobals[name] = g;
 				
 				g.Run(args);
 				
 				return true;
-			}catch(TabScriptException x){
+			}catch(TableScriptException x){
 				Tebas.pluginReport(x);
 			}
 		}
@@ -456,11 +456,11 @@ class Plugin{
 			return c;
 		}else if(file.TryGetValue("scripts." + name, out string code)){
 			try{
-				ResolvedImport r = TableScript.SourceAsImport("plugins/" + this.name + "/scripts/" + name, code, Tebas.pluginReport);
+				ResolvedImport r = Script.SourceAsImport("plugins/" + this.name + "/scripts/" + name, code, Tebas.pluginReport);
 				cachedScriptsImports[name] = r;
 				
 				return r;
-			}catch(TabScriptException x){
+			}catch(TableScriptException x){
 				
 			}
 		}
@@ -472,11 +472,11 @@ class Plugin{
 			return c;
 		}else if(file.TryGetValue("globals." + name, out string code)){
 			try{
-				ResolvedImport r = TableScript.SourceAsImport("plugins/" + this.name + "/globals/" + name, code, Tebas.pluginReport);
+				ResolvedImport r = Script.SourceAsImport("plugins/" + this.name + "/globals/" + name, code, Tebas.pluginReport);
 				cachedGlobalsImports[name] = r;
 				
 				return r;
-			}catch(TabScriptException x){
+			}catch(TableScriptException x){
 				
 			}
 		}
@@ -488,11 +488,11 @@ class Plugin{
 			return c;
 		}else if(file.TryGetValue("utils." + name, out string code)){
 			try{
-				ResolvedImport r = TableScript.SourceAsImport("plugins/" + this.name + "/utils/" + name, code, Tebas.pluginReport);
+				ResolvedImport r = Script.SourceAsImport("plugins/" + this.name + "/utils/" + name, code, Tebas.pluginReport);
 				cachedUtilsImports[name] = r;
 				
 				return r;
-			}catch(TabScriptException x){
+			}catch(TableScriptException x){
 				
 			}
 		}
@@ -528,6 +528,10 @@ class Plugin{
 		file.Save();
 	}
 	
+	public string[] getAllResourceKeys(){
+		return file.Keys.Where(k => k.StartsWith("resources.")).Select(k => k.Substring(10)).ToArray();
+	}
+	
 	public bool hasPermission(string key){
 		if(Tebas.validPermissions.Any(t => t.key == key)){
 			return file.GetValue<bool>("permissions." + key);
@@ -543,7 +547,7 @@ class Plugin{
 			return true;
 		}else{
 			Tebas.report("Unknown permission key");
-			Tebas.hint("Do 'tebas plugin permission' to see the full list");
+			Tebas.hint("Do 'tebas plugin permission list' to see the full list");
 		}
 		
 		return false;

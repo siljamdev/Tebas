@@ -1,15 +1,17 @@
+using System.Text;
 using System.Text.Json;
 using System.Diagnostics;
 using AshLib;
 using AshLib.AshFiles;
 using AshLib.Folders;
 using AshLib.Formatting;
-using TabScript;
+using TableScript;
 
 static class Tebas{
 	public static bool quiet = false;
 	public static bool forced = false;
 	public static bool noHints = false;
+	public static bool noColors = false;
 	
 	public static Dependencies dep;
 	public static AshFile config;
@@ -403,6 +405,12 @@ static class Tebas{
 		}
 	}
 	
+	public static void outputNoLine(string e, CharFormat? f = null){
+		if(!quiet){
+			outputNoLineAlways(e, f);
+		}
+	}
+	
 	public static void outputAlways(string e, CharFormat? f = null){
 		if(Palette.useColors && f != null){
 			Console.WriteLine(new FormatString(e, f));
@@ -466,6 +474,14 @@ static class Tebas{
 		}
 	}
 	
+	public static void labelOutputNoLine(string label, CharFormat lf, string t, CharFormat? f = null){
+		if(quiet){
+			return;
+		}
+		
+		labelOutputNoLineAlways(label, lf, t, f);
+	}
+	
 	public static void labelOutputNoLineAlways(string label, CharFormat lf, string t, CharFormat? f = null){
 		if(Palette.useColors){
 			f ??= CharFormat.ResetAll;
@@ -491,11 +507,11 @@ static class Tebas{
 	//Scripts
 	
 	//Compilation
-	public static void templateReport(TabScriptException x){
+	public static void templateReport(TableScriptException x){
 		labelReport("COMPILATION", Palette.template, x.ToShortString());
 	}
 	
-	public static void pluginReport(TabScriptException x){
+	public static void pluginReport(TableScriptException x){
 		labelReport("COMPILATION", Palette.plugin, x.ToShortString());
 	}
 	
@@ -511,7 +527,7 @@ static class Tebas{
 	public static bool askConfirmation(string question){
 		while(true){
 			outputNoLineAlways(question + " [Y/N] ", Palette.confirmation);
-			string ans = Console.ReadLine().Trim().ToUpper();
+			string ans = (Console.ReadLine() ?? "").Trim().ToUpper(); //Notepad++ console crashed
 			
 			if(ans == "Y"){
 				return true;
@@ -526,8 +542,72 @@ static class Tebas{
 	//Hints
 	public static void hint(string t){
 		if(!noHints && !config.GetValue<bool>("noHints")){
-			output(t, Palette.warn);
+			output(t, Palette.hint);
 		}
 	}
 	#endregion
+	
+	#if DEBUG
+		static string validImportName(string fn){
+			try{
+				//This throws if the path is invalid
+				string filename = Path.GetFileNameWithoutExtension(fn);
+				
+				fn = string.IsNullOrEmpty(filename) ? fn : filename;
+			}catch{}
+			
+			StringBuilder sb = new();
+			
+			foreach(char c in fn){
+				if(char.IsLetterOrDigit(c)){
+					sb.Append(c);
+				}else{
+					sb.Append("_");
+				}
+			}
+			
+			return sb.ToString();
+		}
+		
+		static void printDocumentation(ResolvedImport ro){
+			bool globalsMessage = false;
+			bool funcsMessage = false;
+			
+			string imp = validImportName(ro.filename);
+			Console.WriteLine("# " + imp + " Import");
+			Console.WriteLine();
+			
+			foreach(string nam in ro.definedGlobals){
+				if(!globalsMessage)
+					Console.WriteLine("## Globals");
+				globalsMessage = true;
+				
+				Console.WriteLine("```");
+				Console.WriteLine("export global " + nam + ";");
+				Console.WriteLine("```");
+				Console.WriteLine("DESC HERE");
+				Console.WriteLine();
+			}
+			
+			
+			foreach(FunctionStmt f in ro.functions){
+				if(f is FunctionExtStmt fes){
+					if(!funcsMessage){
+						if(globalsMessage)
+							Console.WriteLine();
+						
+						Console.WriteLine("## Functions");
+						
+						funcsMessage = true;
+					}
+					
+					Console.WriteLine("```");
+					Console.WriteLine("export function " + imp + "::" + fes.identifier + "(" + string.Join(", ", fes.pars) + ");");
+					Console.WriteLine("```");
+					Console.WriteLine(fes.description.Replace("Takes 0 arguments:.", "Takes 0 arguments.").Replace("Takes 1 arguments", "Takes 1 argument").Replace("TableScript.Table", "table"));
+					Console.WriteLine();
+				}
+			}
+		}
+	#endif
 }

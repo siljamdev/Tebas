@@ -1,7 +1,7 @@
 using System.Text;
 using AshLib.Dates;
 using AshLib.AshFiles;
-using TabScript;
+using TableScript;
 
 class Project{
 	#region static
@@ -112,8 +112,8 @@ class Project{
 	public string templateName {get;}
 	public Template template {get;}
 	
-	Dictionary<string, TableScript> cachedScripts = new();
-	TableScript cachedProperties = null;
+	Dictionary<string, Script> cachedScripts = new();
+	Script cachedProperties = null;
 	
 	public TebasProjectImportGenerator importGenerator {get;}
 	TemplateScriptImportResolver scriptsImportResolver;
@@ -146,7 +146,7 @@ class Project{
 	
 	public bool checkTemplate(){
 		if(template == null){
-			Tebas.report("The template '" + templateName +"' is not installed", Palette.warn);
+			Tebas.report("The template '" + templateName +"' is not installed", Palette.hint);
 			return false;
 		}
 		return true;
@@ -173,7 +173,7 @@ class Project{
 			return false;
 		}
 		
-		if(cachedScripts.TryGetValue(name, out TableScript c) && c != null){
+		if(cachedScripts.TryGetValue(name, out Script c) && c != null){
 			c.Run(args);
 			
 			return true;
@@ -183,13 +183,13 @@ class Project{
 				if(r == null){
 					return false;
 				}
-				TableScript s = TableScript.FromImport(r, scriptsImportResolver, Tebas.templateReport);
+				Script s = Script.FromImport(r, scriptsImportResolver, Tebas.templateReport);
 				cachedScripts[name] = s;
 				
 				s.Run(args);
 				
 				return true;
-			}catch(TabScriptException x){
+			}catch(TableScriptException x){
 				Tebas.templateReport(x);
 			}
 		}
@@ -210,12 +210,12 @@ class Project{
 				if(r == null){
 					return new Table(0);
 				}
-				TableScript s = TableScript.FromImport(r, scriptsImportResolver, Tebas.templateReport);
+				Script s = Script.FromImport(r, scriptsImportResolver, Tebas.templateReport, Optimizations.ExternalCall);
 				s.Run(); //Needed to then use CallFunction
 				cachedProperties = s;
 				
 				return cachedProperties.CallFunction(null, "getProperty", new Table(key));
-			}catch(TabScriptException x){
+			}catch(TableScriptException x){
 				
 			}
 		}
@@ -244,12 +244,12 @@ class Project{
 			if(r == null){
 				return false;
 			}
-			TableScript s = TableScript.FromImport(r, new PluginScriptImportResolver(this, plugin), Tebas.pluginReport);
+			Script s = Script.FromImport(r, new PluginScriptImportResolver(this, plugin), Tebas.pluginReport);
 			
 			s.Run(args);
 			
 			return true;
-		}catch(TabScriptException x){
+		}catch(TableScriptException x){
 			Tebas.pluginReport(x);
 		}
 		return false;

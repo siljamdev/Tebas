@@ -1,5 +1,5 @@
 using System;
-using TabScript;
+using TableScript;
 
 class PluginScriptDummyImportResolver : PluginDummyImportResolver{
 	public PluginScriptDummyImportResolver(Dictionary<string, ResolvedImport> dict) : base(dict){

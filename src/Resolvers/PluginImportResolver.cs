@@ -1,5 +1,5 @@
 using System;
-using TabScript;
+using TableScript;
 
 class PluginImportResolver : TebasImportResolver{
 	protected Plugin plugin;
@@ -13,7 +13,7 @@ class PluginImportResolver : TebasImportResolver{
 	public override ResolvedImport Resolve(string import, string callingFilename){
 		switch(import){
 			case "tebasplugin":
-				return tpgen.Generate();
+				return tpgen.GenerateImport();
 			default:
 				if(import.StartsWith("globals.")){
 					string gn = import.Substring(8);

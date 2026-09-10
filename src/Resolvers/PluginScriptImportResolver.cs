@@ -1,5 +1,5 @@
 using System;
-using TabScript;
+using TableScript;
 
 class PluginScriptImportResolver : PluginImportResolver{
 	TebasProjectImportGenerator tpgen;
@@ -11,7 +11,7 @@ class PluginScriptImportResolver : PluginImportResolver{
 	public override ResolvedImport Resolve(string import, string callingFilename){
 		switch(import){
 			case "tebasproject":
-				return tpgen.Generate(true, plugin.hasPermission);
+				return tpgen.GenerateImport(true, plugin.hasPermission);
 			default:				
 				if(import.StartsWith("scripts.")){
 					string gn = import.Substring(8);

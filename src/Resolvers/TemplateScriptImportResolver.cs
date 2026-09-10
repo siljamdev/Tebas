@@ -1,5 +1,5 @@
 using System;
-using TabScript;
+using TableScript;
 
 class TemplateScriptImportResolver : TemplateImportResolver{
 	TebasProjectImportGenerator tpgen;
@@ -11,7 +11,7 @@ class TemplateScriptImportResolver : TemplateImportResolver{
 	public override ResolvedImport Resolve(string import, string callingFilename){
 		switch(import){
 			case "tebasproject":
-				return tpgen.Generate(false, template.hasPermission);
+				return tpgen.GenerateImport(false, template.hasPermission);
 			default:
 				if(import == "properties"){
 					ResolvedImport r = template.getPropertiesAsImport();

@@ -1,5 +1,5 @@
 using System;
-using TabScript;
+using TableScript;
 
 class TemplateScriptDummyImportResolver : TemplateDummyImportResolver{
 	public TemplateScriptDummyImportResolver(Dictionary<string, ResolvedImport> dict) : base(dict){

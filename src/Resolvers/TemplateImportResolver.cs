@@ -1,5 +1,5 @@
 using System;
-using TabScript;
+using TableScript;
 
 class TemplateImportResolver : TebasImportResolver{
 	protected Template template;
@@ -13,7 +13,7 @@ class TemplateImportResolver : TebasImportResolver{
 	public override ResolvedImport Resolve(string import, string callingFilename){
 		switch(import){
 			case "tebastemplate":
-				return ttgen.Generate();
+				return ttgen.GenerateImport();
 			default:
 				if(import.StartsWith("globals.")){
 					string gn = import.Substring(8);

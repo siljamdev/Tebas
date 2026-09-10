@@ -134,6 +134,15 @@ static class CommandLineHandler{
 					}
 				break;
 				
+				case "--no-color":
+				case "-nc":
+					if(Tebas.noColors){
+						Tebas.reportAlways("No color already specified");
+					}else{
+						Tebas.noColors = true;
+					}
+				break;
+				
 				case "--help":
 				case "-h":
 				case "--version":
@@ -248,7 +257,7 @@ static class CommandLineHandler{
 				}
 				return Template.install(t) ? 0 : 25;
 			}
-		}).setDescription("Install a template from a file or from registry");
+		}).setDescription("Install a template from a file or from registry(if enabled)");
 		
 		root.chain("template").chain("uninstall").setArgs("name").setAction(args => {
 			Template t = Template.get(args[0]);
@@ -342,7 +351,7 @@ static class CommandLineHandler{
 				}
 				return Plugin.install(t) ? 0 : 25;
 			}
-		}).setDescription("Install a plugin from a file or from registry");
+		}).setDescription("Install a plugin from a file or from registry(if enabled)");
 		
 		root.chain("plugin").chain("uninstall").setArgs("name").setAction(args => {
 			Plugin t = Plugin.get(args[0]);
@@ -503,6 +512,8 @@ static class CommandLineHandler{
 		Console.WriteLine("  --forced            Skip confirmations");
 		Console.WriteLine("  -nh");
 		Console.WriteLine("  --no-hints          Show no hints");
+		Console.WriteLine("  -nc");
+		Console.WriteLine("  --no-color          Unformatted output");
 		Console.WriteLine("  -v");
 		Console.WriteLine("  --version           Show current version and build info and exit");
 		Console.WriteLine("  -vs");
@@ -673,6 +684,9 @@ class CLINode{
 			}
 		}else{
 			report("Unknown command: '" + args[0] + "'. Use -h to see a list of commands");
+			if(children.Count > 0){
+				Tebas.hint("Perhaps you meant: " + string.Join(", ", children.Select(c => "'" + c.command + "'")));
+			}
 			return 2;
 		}
 	}

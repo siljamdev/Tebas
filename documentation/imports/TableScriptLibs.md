@@ -31,14 +31,14 @@ export function stdlib::getDate(){ EXTERN; } //Get date and hour in [yy, MM, dd,
 export function stdlib::sleep(ms){ EXTERN; } //Sleep x miliseconds
 ```
 
-Please check the [TableScript docs](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdLib.html) for extra information on these functions.  
+Please check the [TableScript docs](https://siljamdev.github.io/TableScript/api/TableScript.StandardLibraries.StdLib.html) for extra information on these functions.  
 
 ## stdnum
-This library is exactly the same. Check its functions in the [TableScript docs](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdNum.html).  
+This library is exactly the same. Check its functions in the [TableScript docs](https://siljamdev.github.io/TableScript/api/TableScript.StandardLibraries.StdNum.html).  
 Some Tebas functions use stdnum nums as output, for numerical values such as error codes and sizes.  
 
 ## stdlist
-This library is exactly the same. Check its functions in the [TableScript docs](https://siljamdev.github.io/TableScript/api/TabScript.StandardLibraries.StdList.html).  
+This library is exactly the same. Check its functions in the [TableScript docs](https://siljamdev.github.io/TableScript/api/TableScript.StandardLibraries.StdList.html).  
 Some Tebas functions use stdlist lists as output, for having several tables of output.  
 
 ### stdregex

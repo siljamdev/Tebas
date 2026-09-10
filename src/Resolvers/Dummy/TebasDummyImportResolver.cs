@@ -1,6 +1,6 @@
 using System;
-using TabScript;
-using TabScript.StandardLibraries;
+using TableScript;
+using TableScript.StandardLibraries;
 
 class TebasDummyImportResolver : StandardImportResolver{	
 	public override ResolvedImport Resolve(string import, string callingFilename){
@@ -8,13 +8,13 @@ class TebasDummyImportResolver : StandardImportResolver{
 			case "stdlib": //Custom stdlib
 				return TebasImportResolver.stdlibImport;
 			case "paths":
-				return PathsImport.AsImport;
+				return PathsImport.TableScriptImport;
 			case "tebas":
-				return TebasImportGenerator.Dummy.Generate();
+				return TebasImportGenerator.Dummy.TableScriptImport;
 			case "tebasproject":
 			case "tebastemplate":
 			case "tebasplugin":
-				base.OnReport(new TabScriptException(TabScriptErrorType.Resolver, callingFilename, -1, "Import '" + import + "' is not available right now because of the type of the script"));
+				base.OnReport(new TableScriptException(TableScriptErrorType.Resolver, callingFilename, -1, "Import '" + import + "' is not available right now because of the type of the script"));
 				return new ResolvedImport("tebas import resolver error", null, null, null);
 			default:
 				return base.Resolve(import, callingFilename); //Safely handle anything that wasnt recognized
