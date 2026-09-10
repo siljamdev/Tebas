@@ -4,7 +4,7 @@ using System.Diagnostics;
 using TableScript;
 using TableScript.Generator;
 using TableScript.StandardLibraries;
-using Porta.Pty;
+//using Porta.Pty;
 
 [TableScriptLibrary("processexecuter.cs")]
 partial class ProcessExecuter{
@@ -166,85 +166,85 @@ partial class ProcessExecuter{
 	/// <summary>
 	/// Run a process interactively in the PATHNAME path, printing its output. Returns its exit code as a stdnum num. If any error occurred, an empty table will be returned
 	/// </summary>
-	[TableScriptFunction]
-	public string runProcessInteractive(string command, string directory, Table arguments){
-		if(!processAllowed(command, directory, arguments)){
-			return null;
-		}
-		
-		directory = getFinalPath(directory);
-		
-		try{
-			string name = Path.GetFileNameWithoutExtension(command).ToUpper();
-			
-			PtyOptions options = new PtyOptions{
-				Cols = 120,
-				Rows = 30,
-				Cwd = directory,
-				App = command,
-				CommandLine = arguments.contents.ToArray()
-			};
-			
-			using IPtyConnection terminal = PtyProvider.SpawnAsync(options, CancellationToken.None).GetAwaiter().GetResult();
-			
-			//Figure out actions
-			Action<string> stdout;
-			if(Tebas.config.GetValue<bool>("process.showLabel")){
-				stdout = t => Tebas.labelOutputNoLine(name, Palette.process, t);
-			}else{
-				stdout = t => Tebas.outputNoLine(t);
-			}
-			
-			Task outputTask = Task.Run(() =>{
-				using StreamReader reader = new StreamReader(terminal.ReaderStream, Encoding.UTF8);
-				bool first = true;
-				
-				while (true){
-					int value = reader.Read();
-					if(value == -1)
-						break;
-			
-					char c = (char)value;
-					if (first){
-						first = false;
-			
-						stdout(c.ToString());
-					}else{
-						Tebas.outputNoLine(c.ToString());
-					}
-			
-					if(c == '\n')
-						first = true;
-				}
-			});
-			
-			CancellationTokenSource cts = new CancellationTokenSource();
-			Task inputTask = Task.Run(() =>{
-				Stream input = Console.OpenStandardInput();
-				byte[] buffer = new byte[4096];
-				while (!cts.Token.IsCancellationRequested){
-					int count = input.Read(buffer, 0, buffer.Length);
-					if (count == 0)
-						break;
-					terminal.WriterStream.Write(buffer, 0, count);
-				}
-			});
-		
-			// Wait for the process to exit
-			terminal.WaitForExit(-1);
-			int exitCode = terminal.ExitCode;
-			
-			cts.Cancel();
-			terminal.Dispose();
-			//outputTask.GetAwaiter().GetResult();
-			
-			Tebas.output(""); //Ensure spacing is correct
-			return exitCode.ToString();
-		}catch(Exception e){
-			report(e);
-			return null;
-		}
-	}
+	//[TableScriptFunction]
+	//public string runProcessInteractive(string command, string directory, Table arguments){
+	//	if(!processAllowed(command, directory, arguments)){
+	//		return null;
+	//	}
+	//	
+	//	directory = getFinalPath(directory);
+	//	
+	//	try{
+	//		string name = Path.GetFileNameWithoutExtension(command).ToUpper();
+	//		
+	//		PtyOptions options = new PtyOptions{
+	//			Cols = 120,
+	//			Rows = 30,
+	//			Cwd = directory,
+	//			App = command,
+	//			CommandLine = arguments.contents.ToArray()
+	//		};
+	//		
+	//		using IPtyConnection terminal = PtyProvider.SpawnAsync(options, CancellationToken.None).GetAwaiter().GetResult();
+	//		
+	//		//Figure out actions
+	//		Action<string> stdout;
+	//		if(Tebas.config.GetValue<bool>("process.showLabel")){
+	//			stdout = t => Tebas.labelOutputNoLine(name, Palette.process, t);
+	//		}else{
+	//			stdout = t => Tebas.outputNoLine(t);
+	//		}
+	//		
+	//		Task outputTask = Task.Run(() =>{
+	//			using StreamReader reader = new StreamReader(terminal.ReaderStream, Encoding.UTF8);
+	//			bool first = true;
+	//			
+	//			while (true){
+	//				int value = reader.Read();
+	//				if(value == -1)
+	//					break;
+	//		
+	//				char c = (char)value;
+	//				if (first){
+	//					first = false;
+	//		
+	//					stdout(c.ToString());
+	//				}else{
+	//					Tebas.outputNoLine(c.ToString());
+	//				}
+	//		
+	//				if(c == '\n')
+	//					first = true;
+	//			}
+	//		});
+	//		
+	//		CancellationTokenSource cts = new CancellationTokenSource();
+	//		Task inputTask = Task.Run(() =>{
+	//			Stream input = Console.OpenStandardInput();
+	//			byte[] buffer = new byte[4096];
+	//			while (!cts.Token.IsCancellationRequested){
+	//				int count = input.Read(buffer, 0, buffer.Length);
+	//				if (count == 0)
+	//					break;
+	//				terminal.WriterStream.Write(buffer, 0, count);
+	//			}
+	//		});
+	//	
+	//		// Wait for the process to exit
+	//		terminal.WaitForExit(-1);
+	//		int exitCode = terminal.ExitCode;
+	//		
+	//		cts.Cancel();
+	//		terminal.Dispose();
+	//		//outputTask.GetAwaiter().GetResult();
+	//		
+	//		Tebas.output(""); //Ensure spacing is correct
+	//		return exitCode.ToString();
+	//	}catch(Exception e){
+	//		report(e);
+	//		return null;
+	//	}
+	//}
 	
 	/// <summary>
 	/// Run a process detached in the PATHNAME path, not printing its output. Returns false if any error occurred

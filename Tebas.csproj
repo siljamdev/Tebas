@@ -22,17 +22,14 @@
 	
 	<PublishSingleFile>true</PublishSingleFile>
 	<SelfContained>true</SelfContained>
-	<PublishAot>true</PublishAot>
 	
 	<BuildDate>$([System.DateTime]::UtcNow.ToString("dd/MM/yyyy"))</BuildDate>
-	
-	<GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="AshLib" Version="3.5.2" />
 	<PackageReference Include="TableScript" Version="1.5.5" />
-	<PackageReference Include="Porta.Pty" Version="2.2.2" />
+	<!-- <PackageReference Include="Porta.Pty" Version="2.2.2" /> --> <!-- This library adds so much bullshit -->
 	
 	<Compile Remove="documentation/**" />
   </ItemGroup>
